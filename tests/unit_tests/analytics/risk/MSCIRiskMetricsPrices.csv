@@ -1,0 +1,1316 @@
+PortID,PortfolioShortName,PortfolioName,AsOfDate,SecurityName,HeldShares,Close
+1,TVAR,Test VaR,2019-06-24,Alphabet A/d,1,1116.7
+1,TVAR,Test VaR,2019-06-25,Alphabet A/d,1,1087.58
+1,TVAR,Test VaR,2019-06-26,Alphabet A/d,1,1080.32
+1,TVAR,Test VaR,2019-06-27,Alphabet A/d,1,1076.63
+1,TVAR,Test VaR,2019-06-28,Alphabet A/d,1,1082.8
+1,TVAR,Test VaR,2019-07-01,Alphabet A/d,1,1100
+1,TVAR,Test VaR,2019-07-02,Alphabet A/d,1,1112.6
+1,TVAR,Test VaR,2019-07-03,Alphabet A/d,1,1122.99
+1,TVAR,Test VaR,2019-07-04,Alphabet A/d,1,1122.99
+1,TVAR,Test VaR,2019-07-05,Alphabet A/d,1,1132.67
+1,TVAR,Test VaR,2019-07-08,Alphabet A/d,1,1116.79
+1,TVAR,Test VaR,2019-07-09,Alphabet A/d,1,1124.29
+1,TVAR,Test VaR,2019-07-10,Alphabet A/d,1,1140.91
+1,TVAR,Test VaR,2019-07-11,Alphabet A/d,1,1144.08
+1,TVAR,Test VaR,2019-07-12,Alphabet A/d,1,1145.34
+1,TVAR,Test VaR,2019-07-15,Alphabet A/d,1,1150.51
+1,TVAR,Test VaR,2019-07-16,Alphabet A/d,1,1153.46
+1,TVAR,Test VaR,2019-07-17,Alphabet A/d,1,1146.74
+1,TVAR,Test VaR,2019-07-18,Alphabet A/d,1,1147.24
+1,TVAR,Test VaR,2019-07-19,Alphabet A/d,1,1131.55
+1,TVAR,Test VaR,2019-07-22,Alphabet A/d,1,1139.21
+1,TVAR,Test VaR,2019-07-23,Alphabet A/d,1,1148.05
+1,TVAR,Test VaR,2019-07-24,Alphabet A/d,1,1139.73
+1,TVAR,Test VaR,2019-07-25,Alphabet A/d,1,1135.94
+1,TVAR,Test VaR,2019-07-26,Alphabet A/d,1,1245.22
+1,TVAR,Test VaR,2019-07-29,Alphabet A/d,1,1241.84
+1,TVAR,Test VaR,2019-07-30,Alphabet A/d,1,1228
+1,TVAR,Test VaR,2019-07-31,Alphabet A/d,1,1218.2
+1,TVAR,Test VaR,2019-08-01,Alphabet A/d,1,1211.78
+1,TVAR,Test VaR,2019-08-02,Alphabet A/d,1,1196.32
+1,TVAR,Test VaR,2019-08-05,Alphabet A/d,1,1154.75
+1,TVAR,Test VaR,2019-08-06,Alphabet A/d,1,1171.08
+1,TVAR,Test VaR,2019-08-07,Alphabet A/d,1,1175.91
+1,TVAR,Test VaR,2019-08-08,Alphabet A/d,1,1206.19
+1,TVAR,Test VaR,2019-08-09,Alphabet A/d,1,1188.9
+1,TVAR,Test VaR,2019-08-12,Alphabet A/d,1,1174.5
+1,TVAR,Test VaR,2019-08-13,Alphabet A/d,1,1196.73
+1,TVAR,Test VaR,2019-08-14,Alphabet A/d,1,1164.25
+1,TVAR,Test VaR,2019-08-15,Alphabet A/d,1,1169.32
+1,TVAR,Test VaR,2019-08-16,Alphabet A/d,1,1179.21
+1,TVAR,Test VaR,2019-08-19,Alphabet A/d,1,1200.44
+1,TVAR,Test VaR,2019-08-20,Alphabet A/d,1,1183.53
+1,TVAR,Test VaR,2019-08-21,Alphabet A/d,1,1191.58
+1,TVAR,Test VaR,2019-08-22,Alphabet A/d,1,1191.52
+1,TVAR,Test VaR,2019-08-23,Alphabet A/d,1,1153.58
+1,TVAR,Test VaR,2019-08-26,Alphabet A/d,1,1171.18
+1,TVAR,Test VaR,2019-08-27,Alphabet A/d,1,1170.82
+1,TVAR,Test VaR,2019-08-28,Alphabet A/d,1,1173.75
+1,TVAR,Test VaR,2019-08-29,Alphabet A/d,1,1194.24
+1,TVAR,Test VaR,2019-08-30,Alphabet A/d,1,1190.53
+1,TVAR,Test VaR,2019-09-02,Alphabet A/d,1,1190.53
+1,TVAR,Test VaR,2019-09-03,Alphabet A/d,1,1169.55
+1,TVAR,Test VaR,2019-09-04,Alphabet A/d,1,1182.27
+1,TVAR,Test VaR,2019-09-05,Alphabet A/d,1,1212.19
+1,TVAR,Test VaR,2019-09-06,Alphabet A/d,1,1206.32
+1,TVAR,Test VaR,2019-09-09,Alphabet A/d,1,1205.27
+1,TVAR,Test VaR,2019-09-10,Alphabet A/d,1,1205.7
+1,TVAR,Test VaR,2019-09-11,Alphabet A/d,1,1220
+1,TVAR,Test VaR,2019-09-12,Alphabet A/d,1,1234.97
+1,TVAR,Test VaR,2019-09-13,Alphabet A/d,1,1240.03
+1,TVAR,Test VaR,2019-09-16,Alphabet A/d,1,1231.63
+1,TVAR,Test VaR,2019-09-17,Alphabet A/d,1,1229.88
+1,TVAR,Test VaR,2019-09-18,Alphabet A/d,1,1232.65
+1,TVAR,Test VaR,2019-09-19,Alphabet A/d,1,1238.75
+1,TVAR,Test VaR,2019-09-20,Alphabet A/d,1,1229.84
+1,TVAR,Test VaR,2019-09-23,Alphabet A/d,1,1234.69
+1,TVAR,Test VaR,2019-09-24,Alphabet A/d,1,1218.33
+1,TVAR,Test VaR,2019-09-25,Alphabet A/d,1,1245.94
+1,TVAR,Test VaR,2019-09-26,Alphabet A/d,1,1242.29
+1,TVAR,Test VaR,2019-09-27,Alphabet A/d,1,1225.95
+1,TVAR,Test VaR,2019-09-30,Alphabet A/d,1,1221.14
+1,TVAR,Test VaR,2019-10-01,Alphabet A/d,1,1206
+1,TVAR,Test VaR,2019-10-02,Alphabet A/d,1,1177.92
+1,TVAR,Test VaR,2019-10-03,Alphabet A/d,1,1189.43
+1,TVAR,Test VaR,2019-10-04,Alphabet A/d,1,1210.96
+1,TVAR,Test VaR,2019-10-07,Alphabet A/d,1,1208.25
+1,TVAR,Test VaR,2019-10-08,Alphabet A/d,1,1190.13
+1,TVAR,Test VaR,2019-10-09,Alphabet A/d,1,1202.4
+1,TVAR,Test VaR,2019-10-10,Alphabet A/d,1,1209.47
+1,TVAR,Test VaR,2019-10-11,Alphabet A/d,1,1215.71
+1,TVAR,Test VaR,2019-10-14,Alphabet A/d,1,1217.77
+1,TVAR,Test VaR,2019-10-15,Alphabet A/d,1,1242.24
+1,TVAR,Test VaR,2019-10-16,Alphabet A/d,1,1243
+1,TVAR,Test VaR,2019-10-17,Alphabet A/d,1,1252.8
+1,TVAR,Test VaR,2019-10-18,Alphabet A/d,1,1244.41
+1,TVAR,Test VaR,2019-10-21,Alphabet A/d,1,1244.28
+1,TVAR,Test VaR,2019-10-22,Alphabet A/d,1,1241.2
+1,TVAR,Test VaR,2019-10-23,Alphabet A/d,1,1257.63
+1,TVAR,Test VaR,2019-10-24,Alphabet A/d,1,1259.11
+1,TVAR,Test VaR,2019-10-25,Alphabet A/d,1,1264.3
+1,TVAR,Test VaR,2019-10-28,Alphabet A/d,1,1288.98
+1,TVAR,Test VaR,2019-10-29,Alphabet A/d,1,1260.66
+1,TVAR,Test VaR,2019-10-30,Alphabet A/d,1,1260.7
+1,TVAR,Test VaR,2019-10-31,Alphabet A/d,1,1258.8
+1,TVAR,Test VaR,2019-11-01,Alphabet A/d,1,1272.25
+1,TVAR,Test VaR,2019-11-04,Alphabet A/d,1,1289.61
+1,TVAR,Test VaR,2019-11-05,Alphabet A/d,1,1291.44
+1,TVAR,Test VaR,2019-11-06,Alphabet A/d,1,1291.01
+1,TVAR,Test VaR,2019-11-07,Alphabet A/d,1,1306.94
+1,TVAR,Test VaR,2019-11-08,Alphabet A/d,1,1309
+1,TVAR,Test VaR,2019-11-11,Alphabet A/d,1,1298.28
+1,TVAR,Test VaR,2019-11-12,Alphabet A/d,1,1297.21
+1,TVAR,Test VaR,2019-11-13,Alphabet A/d,1,1296.18
+1,TVAR,Test VaR,2019-11-14,Alphabet A/d,1,1309.15
+1,TVAR,Test VaR,2019-11-15,Alphabet A/d,1,1333.54
+1,TVAR,Test VaR,2019-11-18,Alphabet A/d,1,1319.84
+1,TVAR,Test VaR,2019-11-19,Alphabet A/d,1,1312.59
+1,TVAR,Test VaR,2019-11-20,Alphabet A/d,1,1301.86
+1,TVAR,Test VaR,2019-11-21,Alphabet A/d,1,1300.14
+1,TVAR,Test VaR,2019-11-22,Alphabet A/d,1,1293.67
+1,TVAR,Test VaR,2019-11-25,Alphabet A/d,1,1305.64
+1,TVAR,Test VaR,2019-11-26,Alphabet A/d,1,1313
+1,TVAR,Test VaR,2019-11-27,Alphabet A/d,1,1312.13
+1,TVAR,Test VaR,2019-11-28,Alphabet A/d,1,1312.13
+1,TVAR,Test VaR,2019-11-29,Alphabet A/d,1,1304.09
+1,TVAR,Test VaR,2019-12-02,Alphabet A/d,1,1288.86
+1,TVAR,Test VaR,2019-12-03,Alphabet A/d,1,1294.74
+1,TVAR,Test VaR,2019-12-04,Alphabet A/d,1,1318.94
+1,TVAR,Test VaR,2019-12-05,Alphabet A/d,1,1326.96
+1,TVAR,Test VaR,2019-12-06,Alphabet A/d,1,1339.39
+1,TVAR,Test VaR,2019-12-09,Alphabet A/d,1,1342.99
+1,TVAR,Test VaR,2019-12-10,Alphabet A/d,1,1342.89
+1,TVAR,Test VaR,2019-12-11,Alphabet A/d,1,1344.25
+1,TVAR,Test VaR,2019-12-12,Alphabet A/d,1,1348.49
+1,TVAR,Test VaR,2019-12-13,Alphabet A/d,1,1346.87
+1,TVAR,Test VaR,2019-12-16,Alphabet A/d,1,1360.7
+1,TVAR,Test VaR,2019-12-17,Alphabet A/d,1,1354.89
+1,TVAR,Test VaR,2019-12-18,Alphabet A/d,1,1351.91
+1,TVAR,Test VaR,2019-12-19,Alphabet A/d,1,1356.44
+1,TVAR,Test VaR,2019-12-20,Alphabet A/d,1,1351.22
+1,TVAR,Test VaR,2019-12-23,Alphabet A/d,1,1350.63
+1,TVAR,Test VaR,2019-12-24,Alphabet A/d,1,1344.43
+1,TVAR,Test VaR,2019-12-25,Alphabet A/d,1,1344.43
+1,TVAR,Test VaR,2019-12-26,Alphabet A/d,1,1362.47
+1,TVAR,Test VaR,2019-12-27,Alphabet A/d,1,1354.64
+1,TVAR,Test VaR,2019-12-30,Alphabet A/d,1,1339.71
+1,TVAR,Test VaR,2019-12-31,Alphabet A/d,1,1339.39
+1,TVAR,Test VaR,2020-01-01,Alphabet A/d,1,1339.39
+1,TVAR,Test VaR,2020-01-02,Alphabet A/d,1,1368.68
+1,TVAR,Test VaR,2020-01-03,Alphabet A/d,1,1361.52
+1,TVAR,Test VaR,2020-01-06,Alphabet A/d,1,1397.81
+1,TVAR,Test VaR,2020-01-07,Alphabet A/d,1,1395.11
+1,TVAR,Test VaR,2020-01-08,Alphabet A/d,1,1405.04
+1,TVAR,Test VaR,2020-01-09,Alphabet A/d,1,1419.79
+1,TVAR,Test VaR,2020-01-10,Alphabet A/d,1,1428.96
+1,TVAR,Test VaR,2020-01-13,Alphabet A/d,1,1440.03
+1,TVAR,Test VaR,2020-01-14,Alphabet A/d,1,1430.59
+1,TVAR,Test VaR,2020-01-15,Alphabet A/d,1,1439.2
+1,TVAR,Test VaR,2020-01-16,Alphabet A/d,1,1450.16
+1,TVAR,Test VaR,2020-01-17,Alphabet A/d,1,1479.52
+1,TVAR,Test VaR,2020-01-20,Alphabet A/d,1,1479.52
+1,TVAR,Test VaR,2020-01-21,Alphabet A/d,1,1482.25
+1,TVAR,Test VaR,2020-01-22,Alphabet A/d,1,1483.87
+1,TVAR,Test VaR,2020-01-23,Alphabet A/d,1,1484.69
+1,TVAR,Test VaR,2020-01-24,Alphabet A/d,1,1466.17
+1,TVAR,Test VaR,2020-01-27,Alphabet A/d,1,1431.73
+1,TVAR,Test VaR,2020-01-28,Alphabet A/d,1,1450.5
+1,TVAR,Test VaR,2020-01-29,Alphabet A/d,1,1456.7
+1,TVAR,Test VaR,2020-01-30,Alphabet A/d,1,1454.25
+1,TVAR,Test VaR,2020-01-31,Alphabet A/d,1,1432.78
+1,TVAR,Test VaR,2020-02-03,Alphabet A/d,1,1482.6
+1,TVAR,Test VaR,2020-02-04,Alphabet A/d,1,1445.41
+1,TVAR,Test VaR,2020-02-05,Alphabet A/d,1,1446.05
+1,TVAR,Test VaR,2020-02-06,Alphabet A/d,1,1475.97
+1,TVAR,Test VaR,2020-02-07,Alphabet A/d,1,1479.11
+1,TVAR,Test VaR,2020-02-10,Alphabet A/d,1,1508.66
+1,TVAR,Test VaR,2020-02-11,Alphabet A/d,1,1510.06
+1,TVAR,Test VaR,2020-02-12,Alphabet A/d,1,1518.63
+1,TVAR,Test VaR,2020-02-13,Alphabet A/d,1,1513.39
+1,TVAR,Test VaR,2020-02-14,Alphabet A/d,1,1518.73
+1,TVAR,Test VaR,2020-02-17,Alphabet A/d,1,1518.73
+1,TVAR,Test VaR,2020-02-18,Alphabet A/d,1,1519.44
+1,TVAR,Test VaR,2020-02-19,Alphabet A/d,1,1524.87
+1,TVAR,Test VaR,2020-02-20,Alphabet A/d,1,1516.99
+1,TVAR,Test VaR,2020-02-21,Alphabet A/d,1,1483.46
+1,TVAR,Test VaR,2020-02-24,Alphabet A/d,1,1419.86
+1,TVAR,Test VaR,2020-02-25,Alphabet A/d,1,1386.32
+1,TVAR,Test VaR,2020-02-26,Alphabet A/d,1,1390.47
+1,TVAR,Test VaR,2020-02-27,Alphabet A/d,1,1314.95
+1,TVAR,Test VaR,2020-02-28,Alphabet A/d,1,1339.25
+1,TVAR,Test VaR,2020-03-02,Alphabet A/d,1,1386.32
+1,TVAR,Test VaR,2020-03-03,Alphabet A/d,1,1337.72
+1,TVAR,Test VaR,2020-03-04,Alphabet A/d,1,1381.6
+1,TVAR,Test VaR,2020-03-05,Alphabet A/d,1,1314.76
+1,TVAR,Test VaR,2020-03-06,Alphabet A/d,1,1295.74
+1,TVAR,Test VaR,2020-03-09,Alphabet A/d,1,1215.79
+1,TVAR,Test VaR,2020-03-10,Alphabet A/d,1,1275.17
+1,TVAR,Test VaR,2020-03-11,Alphabet A/d,1,1210.9
+1,TVAR,Test VaR,2020-03-12,Alphabet A/d,1,1111.55
+1,TVAR,Test VaR,2020-03-13,Alphabet A/d,1,1214.27
+1,TVAR,Test VaR,2020-03-16,Alphabet A/d,1,1073
+1,TVAR,Test VaR,2020-03-17,Alphabet A/d,1,1118.06
+1,TVAR,Test VaR,2020-03-18,Alphabet A/d,1,1091.19
+1,TVAR,Test VaR,2020-03-19,Alphabet A/d,1,1111.67
+1,TVAR,Test VaR,2020-03-20,Alphabet A/d,1,1068.21
+1,TVAR,Test VaR,2020-03-23,Alphabet A/d,1,1054.13
+1,TVAR,Test VaR,2020-03-24,Alphabet A/d,1,1130.01
+1,TVAR,Test VaR,2020-03-25,Alphabet A/d,1,1101.62
+1,TVAR,Test VaR,2020-03-26,Alphabet A/d,1,1162.92
+1,TVAR,Test VaR,2020-03-27,Alphabet A/d,1,1110.26
+1,TVAR,Test VaR,2020-03-30,Alphabet A/d,1,1146.31
+1,TVAR,Test VaR,2020-03-31,Alphabet A/d,1,1161.95
+1,TVAR,Test VaR,2020-04-01,Alphabet A/d,1,1102.1
+1,TVAR,Test VaR,2020-04-02,Alphabet A/d,1,1117.03
+1,TVAR,Test VaR,2020-04-03,Alphabet A/d,1,1092.7
+1,TVAR,Test VaR,2020-04-06,Alphabet A/d,1,1183.19
+1,TVAR,Test VaR,2020-04-07,Alphabet A/d,1,1182.56
+1,TVAR,Test VaR,2020-04-08,Alphabet A/d,1,1207
+1,TVAR,Test VaR,2020-04-09,Alphabet A/d,1,1206.57
+1,TVAR,Test VaR,2020-04-10,Alphabet A/d,1,1206.57
+1,TVAR,Test VaR,2020-04-13,Alphabet A/d,1,1210.41
+1,TVAR,Test VaR,2020-04-14,Alphabet A/d,1,1265.23
+1,TVAR,Test VaR,2020-04-15,Alphabet A/d,1,1257.3
+1,TVAR,Test VaR,2020-04-16,Alphabet A/d,1,1257.43
+1,TVAR,Test VaR,2020-04-17,Alphabet A/d,1,1279
+1,TVAR,Test VaR,2020-04-20,Alphabet A/d,1,1261.15
+1,TVAR,Test VaR,2020-04-21,Alphabet A/d,1,1212.16
+1,TVAR,Test VaR,2020-04-22,Alphabet A/d,1,1258.41
+1,TVAR,Test VaR,2020-04-23,Alphabet A/d,1,1271.17
+1,TVAR,Test VaR,2020-04-24,Alphabet A/d,1,1276.6
+1,TVAR,Test VaR,2020-04-27,Alphabet A/d,1,1270.86
+1,TVAR,Test VaR,2020-04-28,Alphabet A/d,1,1232.59
+1,TVAR,Test VaR,2020-04-29,Alphabet A/d,1,1342.18
+1,TVAR,Test VaR,2020-04-30,Alphabet A/d,1,1346.7
+1,TVAR,Test VaR,2020-05-01,Alphabet A/d,1,1317.32
+1,TVAR,Test VaR,2020-05-04,Alphabet A/d,1,1322.9
+1,TVAR,Test VaR,2020-05-05,Alphabet A/d,1,1349.02
+1,TVAR,Test VaR,2020-05-06,Alphabet A/d,1,1345.43
+1,TVAR,Test VaR,2020-05-07,Alphabet A/d,1,1369.28
+1,TVAR,Test VaR,2020-05-08,Alphabet A/d,1,1384.34
+1,TVAR,Test VaR,2020-05-11,Alphabet A/d,1,1403.59
+1,TVAR,Test VaR,2020-05-12,Alphabet A/d,1,1375.18
+1,TVAR,Test VaR,2020-05-13,Alphabet A/d,1,1348.33
+1,TVAR,Test VaR,2020-05-14,Alphabet A/d,1,1356.86
+1,TVAR,Test VaR,2020-05-15,Alphabet A/d,1,1373.06
+1,TVAR,Test VaR,2020-05-18,Alphabet A/d,1,1385.18
+1,TVAR,Test VaR,2020-05-19,Alphabet A/d,1,1374.4
+1,TVAR,Test VaR,2020-05-20,Alphabet A/d,1,1409.16
+1,TVAR,Test VaR,2020-05-21,Alphabet A/d,1,1406.75
+1,TVAR,Test VaR,2020-05-22,Alphabet A/d,1,1413.24
+1,TVAR,Test VaR,2020-05-25,Alphabet A/d,1,1413.24
+1,TVAR,Test VaR,2020-05-26,Alphabet A/d,1,1421.37
+1,TVAR,Test VaR,2020-05-27,Alphabet A/d,1,1420.28
+1,TVAR,Test VaR,2020-05-28,Alphabet A/d,1,1418.24
+1,TVAR,Test VaR,2020-05-29,Alphabet A/d,1,1433.52
+1,TVAR,Test VaR,2020-06-01,Alphabet A/d,1,1434.87
+1,TVAR,Test VaR,2020-06-02,Alphabet A/d,1,1442.31
+1,TVAR,Test VaR,2020-06-03,Alphabet A/d,1,1439.25
+1,TVAR,Test VaR,2020-06-04,Alphabet A/d,1,1414.3
+1,TVAR,Test VaR,2020-06-05,Alphabet A/d,1,1440.02
+1,TVAR,Test VaR,2020-06-08,Alphabet A/d,1,1448.04
+1,TVAR,Test VaR,2020-06-09,Alphabet A/d,1,1452.08
+1,TVAR,Test VaR,2020-06-10,Alphabet A/d,1,1464.7
+1,TVAR,Test VaR,2020-06-11,Alphabet A/d,1,1401.9
+1,TVAR,Test VaR,2020-06-12,Alphabet A/d,1,1412.92
+1,TVAR,Test VaR,2020-06-15,Alphabet A/d,1,1420.74
+1,TVAR,Test VaR,2020-06-16,Alphabet A/d,1,1446.47
+1,TVAR,Test VaR,2020-06-17,Alphabet A/d,1,1452.54
+1,TVAR,Test VaR,2020-06-18,Alphabet A/d,1,1434.12
+1,TVAR,Test VaR,2020-06-19,Alphabet A/d,1,1424.64
+1,TVAR,Test VaR,2020-06-22,Alphabet A/d,1,1450.66
+1,TVAR,Test VaR,2020-06-23,Alphabet A/d,1,1463.98
+1,TVAR,Test VaR,2020-06-24,Alphabet A/d,1,1432.7
+1,TVAR,Test VaR,2019-06-24,Amazon.com Inc,1,1913.9
+1,TVAR,Test VaR,2019-06-25,Amazon.com Inc,1,1878.27
+1,TVAR,Test VaR,2019-06-26,Amazon.com Inc,1,1897.83
+1,TVAR,Test VaR,2019-06-27,Amazon.com Inc,1,1904.28
+1,TVAR,Test VaR,2019-06-28,Amazon.com Inc,1,1893.63
+1,TVAR,Test VaR,2019-07-01,Amazon.com Inc,1,1922.19
+1,TVAR,Test VaR,2019-07-02,Amazon.com Inc,1,1934.31
+1,TVAR,Test VaR,2019-07-03,Amazon.com Inc,1,1939
+1,TVAR,Test VaR,2019-07-04,Amazon.com Inc,1,1939
+1,TVAR,Test VaR,2019-07-05,Amazon.com Inc,1,1942.91
+1,TVAR,Test VaR,2019-07-08,Amazon.com Inc,1,1952.32
+1,TVAR,Test VaR,2019-07-09,Amazon.com Inc,1,1988.3
+1,TVAR,Test VaR,2019-07-10,Amazon.com Inc,1,2017.41
+1,TVAR,Test VaR,2019-07-11,Amazon.com Inc,1,2001.07
+1,TVAR,Test VaR,2019-07-12,Amazon.com Inc,1,2011
+1,TVAR,Test VaR,2019-07-15,Amazon.com Inc,1,2020.99
+1,TVAR,Test VaR,2019-07-16,Amazon.com Inc,1,2009.9
+1,TVAR,Test VaR,2019-07-17,Amazon.com Inc,1,1992.03
+1,TVAR,Test VaR,2019-07-18,Amazon.com Inc,1,1977.9
+1,TVAR,Test VaR,2019-07-19,Amazon.com Inc,1,1964.52
+1,TVAR,Test VaR,2019-07-22,Amazon.com Inc,1,1985.63
+1,TVAR,Test VaR,2019-07-23,Amazon.com Inc,1,1994.49
+1,TVAR,Test VaR,2019-07-24,Amazon.com Inc,1,2000.81
+1,TVAR,Test VaR,2019-07-25,Amazon.com Inc,1,1973.82
+1,TVAR,Test VaR,2019-07-26,Amazon.com Inc,1,1943.05
+1,TVAR,Test VaR,2019-07-29,Amazon.com Inc,1,1912.45
+1,TVAR,Test VaR,2019-07-30,Amazon.com Inc,1,1898.53
+1,TVAR,Test VaR,2019-07-31,Amazon.com Inc,1,1866.78
+1,TVAR,Test VaR,2019-08-01,Amazon.com Inc,1,1855.32
+1,TVAR,Test VaR,2019-08-02,Amazon.com Inc,1,1823.24
+1,TVAR,Test VaR,2019-08-05,Amazon.com Inc,1,1765.13
+1,TVAR,Test VaR,2019-08-06,Amazon.com Inc,1,1787.83
+1,TVAR,Test VaR,2019-08-07,Amazon.com Inc,1,1793.4
+1,TVAR,Test VaR,2019-08-08,Amazon.com Inc,1,1832.89
+1,TVAR,Test VaR,2019-08-09,Amazon.com Inc,1,1807.58
+1,TVAR,Test VaR,2019-08-12,Amazon.com Inc,1,1784.92
+1,TVAR,Test VaR,2019-08-13,Amazon.com Inc,1,1824.34
+1,TVAR,Test VaR,2019-08-14,Amazon.com Inc,1,1762.96
+1,TVAR,Test VaR,2019-08-15,Amazon.com Inc,1,1776.12
+1,TVAR,Test VaR,2019-08-16,Amazon.com Inc,1,1792.57
+1,TVAR,Test VaR,2019-08-19,Amazon.com Inc,1,1816.12
+1,TVAR,Test VaR,2019-08-20,Amazon.com Inc,1,1801.38
+1,TVAR,Test VaR,2019-08-21,Amazon.com Inc,1,1823.54
+1,TVAR,Test VaR,2019-08-22,Amazon.com Inc,1,1805.6
+1,TVAR,Test VaR,2019-08-23,Amazon.com Inc,1,1749.62
+1,TVAR,Test VaR,2019-08-26,Amazon.com Inc,1,1768.87
+1,TVAR,Test VaR,2019-08-27,Amazon.com Inc,1,1761.83
+1,TVAR,Test VaR,2019-08-28,Amazon.com Inc,1,1764.25
+1,TVAR,Test VaR,2019-08-29,Amazon.com Inc,1,1786.4
+1,TVAR,Test VaR,2019-08-30,Amazon.com Inc,1,1776.29
+1,TVAR,Test VaR,2019-09-02,Amazon.com Inc,1,1776.29
+1,TVAR,Test VaR,2019-09-03,Amazon.com Inc,1,1789.84
+1,TVAR,Test VaR,2019-09-04,Amazon.com Inc,1,1800.62
+1,TVAR,Test VaR,2019-09-05,Amazon.com Inc,1,1840.72
+1,TVAR,Test VaR,2019-09-06,Amazon.com Inc,1,1833.51
+1,TVAR,Test VaR,2019-09-09,Amazon.com Inc,1,1831.35
+1,TVAR,Test VaR,2019-09-10,Amazon.com Inc,1,1820.55
+1,TVAR,Test VaR,2019-09-11,Amazon.com Inc,1,1822.99
+1,TVAR,Test VaR,2019-09-12,Amazon.com Inc,1,1843.55
+1,TVAR,Test VaR,2019-09-13,Amazon.com Inc,1,1839.34
+1,TVAR,Test VaR,2019-09-16,Amazon.com Inc,1,1807.84
+1,TVAR,Test VaR,2019-09-17,Amazon.com Inc,1,1822.55
+1,TVAR,Test VaR,2019-09-18,Amazon.com Inc,1,1817.46
+1,TVAR,Test VaR,2019-09-19,Amazon.com Inc,1,1821.5
+1,TVAR,Test VaR,2019-09-20,Amazon.com Inc,1,1794.16
+1,TVAR,Test VaR,2019-09-23,Amazon.com Inc,1,1785.3
+1,TVAR,Test VaR,2019-09-24,Amazon.com Inc,1,1741.61
+1,TVAR,Test VaR,2019-09-25,Amazon.com Inc,1,1768.33
+1,TVAR,Test VaR,2019-09-26,Amazon.com Inc,1,1739.84
+1,TVAR,Test VaR,2019-09-27,Amazon.com Inc,1,1725.45
+1,TVAR,Test VaR,2019-09-30,Amazon.com Inc,1,1735.91
+1,TVAR,Test VaR,2019-10-01,Amazon.com Inc,1,1735.65
+1,TVAR,Test VaR,2019-10-02,Amazon.com Inc,1,1713.23
+1,TVAR,Test VaR,2019-10-03,Amazon.com Inc,1,1724.42
+1,TVAR,Test VaR,2019-10-04,Amazon.com Inc,1,1739.65
+1,TVAR,Test VaR,2019-10-07,Amazon.com Inc,1,1732.66
+1,TVAR,Test VaR,2019-10-08,Amazon.com Inc,1,1705.51
+1,TVAR,Test VaR,2019-10-09,Amazon.com Inc,1,1721.99
+1,TVAR,Test VaR,2019-10-10,Amazon.com Inc,1,1720.26
+1,TVAR,Test VaR,2019-10-11,Amazon.com Inc,1,1731.92
+1,TVAR,Test VaR,2019-10-14,Amazon.com Inc,1,1736.43
+1,TVAR,Test VaR,2019-10-15,Amazon.com Inc,1,1767.38
+1,TVAR,Test VaR,2019-10-16,Amazon.com Inc,1,1777.43
+1,TVAR,Test VaR,2019-10-17,Amazon.com Inc,1,1787.48
+1,TVAR,Test VaR,2019-10-18,Amazon.com Inc,1,1757.51
+1,TVAR,Test VaR,2019-10-21,Amazon.com Inc,1,1785.66
+1,TVAR,Test VaR,2019-10-22,Amazon.com Inc,1,1765.73
+1,TVAR,Test VaR,2019-10-23,Amazon.com Inc,1,1762.17
+1,TVAR,Test VaR,2019-10-24,Amazon.com Inc,1,1780.78
+1,TVAR,Test VaR,2019-10-25,Amazon.com Inc,1,1761.33
+1,TVAR,Test VaR,2019-10-28,Amazon.com Inc,1,1777.08
+1,TVAR,Test VaR,2019-10-29,Amazon.com Inc,1,1762.71
+1,TVAR,Test VaR,2019-10-30,Amazon.com Inc,1,1779.99
+1,TVAR,Test VaR,2019-10-31,Amazon.com Inc,1,1776.66
+1,TVAR,Test VaR,2019-11-01,Amazon.com Inc,1,1791.44
+1,TVAR,Test VaR,2019-11-04,Amazon.com Inc,1,1804.66
+1,TVAR,Test VaR,2019-11-05,Amazon.com Inc,1,1801.71
+1,TVAR,Test VaR,2019-11-06,Amazon.com Inc,1,1795.77
+1,TVAR,Test VaR,2019-11-07,Amazon.com Inc,1,1788.2
+1,TVAR,Test VaR,2019-11-08,Amazon.com Inc,1,1785.88
+1,TVAR,Test VaR,2019-11-11,Amazon.com Inc,1,1771.65
+1,TVAR,Test VaR,2019-11-12,Amazon.com Inc,1,1778
+1,TVAR,Test VaR,2019-11-13,Amazon.com Inc,1,1753.11
+1,TVAR,Test VaR,2019-11-14,Amazon.com Inc,1,1754.6
+1,TVAR,Test VaR,2019-11-15,Amazon.com Inc,1,1739.49
+1,TVAR,Test VaR,2019-11-18,Amazon.com Inc,1,1752.53
+1,TVAR,Test VaR,2019-11-19,Amazon.com Inc,1,1752.79
+1,TVAR,Test VaR,2019-11-20,Amazon.com Inc,1,1745.53
+1,TVAR,Test VaR,2019-11-21,Amazon.com Inc,1,1734.71
+1,TVAR,Test VaR,2019-11-22,Amazon.com Inc,1,1745.72
+1,TVAR,Test VaR,2019-11-25,Amazon.com Inc,1,1773.84
+1,TVAR,Test VaR,2019-11-26,Amazon.com Inc,1,1796.94
+1,TVAR,Test VaR,2019-11-27,Amazon.com Inc,1,1818.51
+1,TVAR,Test VaR,2019-11-28,Amazon.com Inc,1,1818.51
+1,TVAR,Test VaR,2019-11-29,Amazon.com Inc,1,1800.8
+1,TVAR,Test VaR,2019-12-02,Amazon.com Inc,1,1781.6
+1,TVAR,Test VaR,2019-12-03,Amazon.com Inc,1,1769.96
+1,TVAR,Test VaR,2019-12-04,Amazon.com Inc,1,1760.69
+1,TVAR,Test VaR,2019-12-05,Amazon.com Inc,1,1740.48
+1,TVAR,Test VaR,2019-12-06,Amazon.com Inc,1,1751.6
+1,TVAR,Test VaR,2019-12-09,Amazon.com Inc,1,1749.51
+1,TVAR,Test VaR,2019-12-10,Amazon.com Inc,1,1739.21
+1,TVAR,Test VaR,2019-12-11,Amazon.com Inc,1,1748.72
+1,TVAR,Test VaR,2019-12-12,Amazon.com Inc,1,1760.33
+1,TVAR,Test VaR,2019-12-13,Amazon.com Inc,1,1760.94
+1,TVAR,Test VaR,2019-12-16,Amazon.com Inc,1,1769.21
+1,TVAR,Test VaR,2019-12-17,Amazon.com Inc,1,1790.66
+1,TVAR,Test VaR,2019-12-18,Amazon.com Inc,1,1784.03
+1,TVAR,Test VaR,2019-12-19,Amazon.com Inc,1,1792.28
+1,TVAR,Test VaR,2019-12-20,Amazon.com Inc,1,1786.5
+1,TVAR,Test VaR,2019-12-23,Amazon.com Inc,1,1793
+1,TVAR,Test VaR,2019-12-24,Amazon.com Inc,1,1789.21
+1,TVAR,Test VaR,2019-12-25,Amazon.com Inc,1,1789.21
+1,TVAR,Test VaR,2019-12-26,Amazon.com Inc,1,1868.77
+1,TVAR,Test VaR,2019-12-27,Amazon.com Inc,1,1869.8
+1,TVAR,Test VaR,2019-12-30,Amazon.com Inc,1,1846.89
+1,TVAR,Test VaR,2019-12-31,Amazon.com Inc,1,1847.84
+1,TVAR,Test VaR,2020-01-01,Amazon.com Inc,1,1847.84
+1,TVAR,Test VaR,2020-01-02,Amazon.com Inc,1,1898.01
+1,TVAR,Test VaR,2020-01-03,Amazon.com Inc,1,1874.97
+1,TVAR,Test VaR,2020-01-06,Amazon.com Inc,1,1902.88
+1,TVAR,Test VaR,2020-01-07,Amazon.com Inc,1,1906.86
+1,TVAR,Test VaR,2020-01-08,Amazon.com Inc,1,1891.97
+1,TVAR,Test VaR,2020-01-09,Amazon.com Inc,1,1901.05
+1,TVAR,Test VaR,2020-01-10,Amazon.com Inc,1,1883.16
+1,TVAR,Test VaR,2020-01-13,Amazon.com Inc,1,1891.3
+1,TVAR,Test VaR,2020-01-14,Amazon.com Inc,1,1869.44
+1,TVAR,Test VaR,2020-01-15,Amazon.com Inc,1,1862.02
+1,TVAR,Test VaR,2020-01-16,Amazon.com Inc,1,1877.94
+1,TVAR,Test VaR,2020-01-17,Amazon.com Inc,1,1864.72
+1,TVAR,Test VaR,2020-01-20,Amazon.com Inc,1,1864.72
+1,TVAR,Test VaR,2020-01-21,Amazon.com Inc,1,1892
+1,TVAR,Test VaR,2020-01-22,Amazon.com Inc,1,1887.46
+1,TVAR,Test VaR,2020-01-23,Amazon.com Inc,1,1884.58
+1,TVAR,Test VaR,2020-01-24,Amazon.com Inc,1,1861.64
+1,TVAR,Test VaR,2020-01-27,Amazon.com Inc,1,1828.34
+1,TVAR,Test VaR,2020-01-28,Amazon.com Inc,1,1853.25
+1,TVAR,Test VaR,2020-01-29,Amazon.com Inc,1,1858
+1,TVAR,Test VaR,2020-01-30,Amazon.com Inc,1,1870.68
+1,TVAR,Test VaR,2020-01-31,Amazon.com Inc,1,2008.72
+1,TVAR,Test VaR,2020-02-03,Amazon.com Inc,1,2004.2
+1,TVAR,Test VaR,2020-02-04,Amazon.com Inc,1,2049.67
+1,TVAR,Test VaR,2020-02-05,Amazon.com Inc,1,2039.87
+1,TVAR,Test VaR,2020-02-06,Amazon.com Inc,1,2050.23
+1,TVAR,Test VaR,2020-02-07,Amazon.com Inc,1,2079.28
+1,TVAR,Test VaR,2020-02-10,Amazon.com Inc,1,2133.91
+1,TVAR,Test VaR,2020-02-11,Amazon.com Inc,1,2150.8
+1,TVAR,Test VaR,2020-02-12,Amazon.com Inc,1,2160
+1,TVAR,Test VaR,2020-02-13,Amazon.com Inc,1,2149.87
+1,TVAR,Test VaR,2020-02-14,Amazon.com Inc,1,2134.87
+1,TVAR,Test VaR,2020-02-17,Amazon.com Inc,1,2134.87
+1,TVAR,Test VaR,2020-02-18,Amazon.com Inc,1,2155.67
+1,TVAR,Test VaR,2020-02-19,Amazon.com Inc,1,2170.22
+1,TVAR,Test VaR,2020-02-20,Amazon.com Inc,1,2153.1
+1,TVAR,Test VaR,2020-02-21,Amazon.com Inc,1,2095.97
+1,TVAR,Test VaR,2020-02-24,Amazon.com Inc,1,2009.29
+1,TVAR,Test VaR,2020-02-25,Amazon.com Inc,1,1972.74
+1,TVAR,Test VaR,2020-02-26,Amazon.com Inc,1,1979.59
+1,TVAR,Test VaR,2020-02-27,Amazon.com Inc,1,1884.3
+1,TVAR,Test VaR,2020-02-28,Amazon.com Inc,1,1883.75
+1,TVAR,Test VaR,2020-03-02,Amazon.com Inc,1,1953.95
+1,TVAR,Test VaR,2020-03-03,Amazon.com Inc,1,1908.99
+1,TVAR,Test VaR,2020-03-04,Amazon.com Inc,1,1975.83
+1,TVAR,Test VaR,2020-03-05,Amazon.com Inc,1,1924.03
+1,TVAR,Test VaR,2020-03-06,Amazon.com Inc,1,1901.09
+1,TVAR,Test VaR,2020-03-09,Amazon.com Inc,1,1800.61
+1,TVAR,Test VaR,2020-03-10,Amazon.com Inc,1,1891.82
+1,TVAR,Test VaR,2020-03-11,Amazon.com Inc,1,1820.86
+1,TVAR,Test VaR,2020-03-12,Amazon.com Inc,1,1676.61
+1,TVAR,Test VaR,2020-03-13,Amazon.com Inc,1,1785
+1,TVAR,Test VaR,2020-03-16,Amazon.com Inc,1,1689.15
+1,TVAR,Test VaR,2020-03-17,Amazon.com Inc,1,1807.84
+1,TVAR,Test VaR,2020-03-18,Amazon.com Inc,1,1830
+1,TVAR,Test VaR,2020-03-19,Amazon.com Inc,1,1880.93
+1,TVAR,Test VaR,2020-03-20,Amazon.com Inc,1,1846.09
+1,TVAR,Test VaR,2020-03-23,Amazon.com Inc,1,1902.83
+1,TVAR,Test VaR,2020-03-24,Amazon.com Inc,1,1940.1
+1,TVAR,Test VaR,2020-03-25,Amazon.com Inc,1,1885.84
+1,TVAR,Test VaR,2020-03-26,Amazon.com Inc,1,1955.49
+1,TVAR,Test VaR,2020-03-27,Amazon.com Inc,1,1900.1
+1,TVAR,Test VaR,2020-03-30,Amazon.com Inc,1,1963.95
+1,TVAR,Test VaR,2020-03-31,Amazon.com Inc,1,1949.72
+1,TVAR,Test VaR,2020-04-01,Amazon.com Inc,1,1907.7
+1,TVAR,Test VaR,2020-04-02,Amazon.com Inc,1,1918.83
+1,TVAR,Test VaR,2020-04-03,Amazon.com Inc,1,1906.59
+1,TVAR,Test VaR,2020-04-06,Amazon.com Inc,1,1997.59
+1,TVAR,Test VaR,2020-04-07,Amazon.com Inc,1,2011.6
+1,TVAR,Test VaR,2020-04-08,Amazon.com Inc,1,2043
+1,TVAR,Test VaR,2020-04-09,Amazon.com Inc,1,2042.76
+1,TVAR,Test VaR,2020-04-10,Amazon.com Inc,1,2042.76
+1,TVAR,Test VaR,2020-04-13,Amazon.com Inc,1,2168.87
+1,TVAR,Test VaR,2020-04-14,Amazon.com Inc,1,2283.32
+1,TVAR,Test VaR,2020-04-15,Amazon.com Inc,1,2307.68
+1,TVAR,Test VaR,2020-04-16,Amazon.com Inc,1,2408.19
+1,TVAR,Test VaR,2020-04-17,Amazon.com Inc,1,2375
+1,TVAR,Test VaR,2020-04-20,Amazon.com Inc,1,2393.61
+1,TVAR,Test VaR,2020-04-21,Amazon.com Inc,1,2328.12
+1,TVAR,Test VaR,2020-04-22,Amazon.com Inc,1,2363.49
+1,TVAR,Test VaR,2020-04-23,Amazon.com Inc,1,2399.45
+1,TVAR,Test VaR,2020-04-24,Amazon.com Inc,1,2410.22
+1,TVAR,Test VaR,2020-04-27,Amazon.com Inc,1,2376
+1,TVAR,Test VaR,2020-04-28,Amazon.com Inc,1,2314.08
+1,TVAR,Test VaR,2020-04-29,Amazon.com Inc,1,2372.71
+1,TVAR,Test VaR,2020-04-30,Amazon.com Inc,1,2474
+1,TVAR,Test VaR,2020-05-01,Amazon.com Inc,1,2286.04
+1,TVAR,Test VaR,2020-05-04,Amazon.com Inc,1,2315.99
+1,TVAR,Test VaR,2020-05-05,Amazon.com Inc,1,2317.8
+1,TVAR,Test VaR,2020-05-06,Amazon.com Inc,1,2351.26
+1,TVAR,Test VaR,2020-05-07,Amazon.com Inc,1,2367.61
+1,TVAR,Test VaR,2020-05-08,Amazon.com Inc,1,2379.61
+1,TVAR,Test VaR,2020-05-11,Amazon.com Inc,1,2409
+1,TVAR,Test VaR,2020-05-12,Amazon.com Inc,1,2356.95
+1,TVAR,Test VaR,2020-05-13,Amazon.com Inc,1,2367.92
+1,TVAR,Test VaR,2020-05-14,Amazon.com Inc,1,2388.85
+1,TVAR,Test VaR,2020-05-15,Amazon.com Inc,1,2409.78
+1,TVAR,Test VaR,2020-05-18,Amazon.com Inc,1,2426.26
+1,TVAR,Test VaR,2020-05-19,Amazon.com Inc,1,2449.33
+1,TVAR,Test VaR,2020-05-20,Amazon.com Inc,1,2497.94
+1,TVAR,Test VaR,2020-05-21,Amazon.com Inc,1,2446.74
+1,TVAR,Test VaR,2020-05-22,Amazon.com Inc,1,2436.88
+1,TVAR,Test VaR,2020-05-25,Amazon.com Inc,1,2436.88
+1,TVAR,Test VaR,2020-05-26,Amazon.com Inc,1,2421.86
+1,TVAR,Test VaR,2020-05-27,Amazon.com Inc,1,2410.39
+1,TVAR,Test VaR,2020-05-28,Amazon.com Inc,1,2401.1
+1,TVAR,Test VaR,2020-05-29,Amazon.com Inc,1,2442.37
+1,TVAR,Test VaR,2020-06-01,Amazon.com Inc,1,2471.04
+1,TVAR,Test VaR,2020-06-02,Amazon.com Inc,1,2472.41
+1,TVAR,Test VaR,2020-06-03,Amazon.com Inc,1,2478.4
+1,TVAR,Test VaR,2020-06-04,Amazon.com Inc,1,2460.6
+1,TVAR,Test VaR,2020-06-05,Amazon.com Inc,1,2483
+1,TVAR,Test VaR,2020-06-08,Amazon.com Inc,1,2524.06
+1,TVAR,Test VaR,2020-06-09,Amazon.com Inc,1,2600.86
+1,TVAR,Test VaR,2020-06-10,Amazon.com Inc,1,2647.45
+1,TVAR,Test VaR,2020-06-11,Amazon.com Inc,1,2557.96
+1,TVAR,Test VaR,2020-06-12,Amazon.com Inc,1,2545.02
+1,TVAR,Test VaR,2020-06-15,Amazon.com Inc,1,2572.68
+1,TVAR,Test VaR,2020-06-16,Amazon.com Inc,1,2615.27
+1,TVAR,Test VaR,2020-06-17,Amazon.com Inc,1,2640.98
+1,TVAR,Test VaR,2020-06-18,Amazon.com Inc,1,2653.98
+1,TVAR,Test VaR,2020-06-19,Amazon.com Inc,1,2675.01
+1,TVAR,Test VaR,2020-06-22,Amazon.com Inc,1,2713.82
+1,TVAR,Test VaR,2020-06-23,Amazon.com Inc,1,2764.41
+1,TVAR,Test VaR,2020-06-24,Amazon.com Inc,1,2734.4
+1,TVAR,Test VaR,2019-06-24,Apple Computer Inc,1,198.58
+1,TVAR,Test VaR,2019-06-25,Apple Computer Inc,1,195.57
+1,TVAR,Test VaR,2019-06-26,Apple Computer Inc,1,199.8
+1,TVAR,Test VaR,2019-06-27,Apple Computer Inc,1,199.74
+1,TVAR,Test VaR,2019-06-28,Apple Computer Inc,1,197.92
+1,TVAR,Test VaR,2019-07-01,Apple Computer Inc,1,201.55
+1,TVAR,Test VaR,2019-07-02,Apple Computer Inc,1,202.73
+1,TVAR,Test VaR,2019-07-03,Apple Computer Inc,1,204.41
+1,TVAR,Test VaR,2019-07-04,Apple Computer Inc,1,204.41
+1,TVAR,Test VaR,2019-07-05,Apple Computer Inc,1,204.23
+1,TVAR,Test VaR,2019-07-08,Apple Computer Inc,1,200.02
+1,TVAR,Test VaR,2019-07-09,Apple Computer Inc,1,201.24
+1,TVAR,Test VaR,2019-07-10,Apple Computer Inc,1,203.23
+1,TVAR,Test VaR,2019-07-11,Apple Computer Inc,1,201.75
+1,TVAR,Test VaR,2019-07-12,Apple Computer Inc,1,203.3
+1,TVAR,Test VaR,2019-07-15,Apple Computer Inc,1,205.21
+1,TVAR,Test VaR,2019-07-16,Apple Computer Inc,1,204.5
+1,TVAR,Test VaR,2019-07-17,Apple Computer Inc,1,203.35
+1,TVAR,Test VaR,2019-07-18,Apple Computer Inc,1,205.66
+1,TVAR,Test VaR,2019-07-19,Apple Computer Inc,1,202.59
+1,TVAR,Test VaR,2019-07-22,Apple Computer Inc,1,207.22
+1,TVAR,Test VaR,2019-07-23,Apple Computer Inc,1,208.84
+1,TVAR,Test VaR,2019-07-24,Apple Computer Inc,1,208.67
+1,TVAR,Test VaR,2019-07-25,Apple Computer Inc,1,207.02
+1,TVAR,Test VaR,2019-07-26,Apple Computer Inc,1,207.74
+1,TVAR,Test VaR,2019-07-29,Apple Computer Inc,1,209.68
+1,TVAR,Test VaR,2019-07-30,Apple Computer Inc,1,208.78
+1,TVAR,Test VaR,2019-07-31,Apple Computer Inc,1,213.04
+1,TVAR,Test VaR,2019-08-01,Apple Computer Inc,1,208.43
+1,TVAR,Test VaR,2019-08-02,Apple Computer Inc,1,204.02
+1,TVAR,Test VaR,2019-08-05,Apple Computer Inc,1,193.34
+1,TVAR,Test VaR,2019-08-06,Apple Computer Inc,1,197
+1,TVAR,Test VaR,2019-08-07,Apple Computer Inc,1,199.04
+1,TVAR,Test VaR,2019-08-08,Apple Computer Inc,1,203.43
+1,TVAR,Test VaR,2019-08-09,Apple Computer Inc,1,200.99
+1,TVAR,Test VaR,2019-08-12,Apple Computer Inc,1,200.48
+1,TVAR,Test VaR,2019-08-13,Apple Computer Inc,1,208.97
+1,TVAR,Test VaR,2019-08-14,Apple Computer Inc,1,202.75
+1,TVAR,Test VaR,2019-08-15,Apple Computer Inc,1,201.74
+1,TVAR,Test VaR,2019-08-16,Apple Computer Inc,1,206.5
+1,TVAR,Test VaR,2019-08-19,Apple Computer Inc,1,210.35
+1,TVAR,Test VaR,2019-08-20,Apple Computer Inc,1,210.36
+1,TVAR,Test VaR,2019-08-21,Apple Computer Inc,1,212.64
+1,TVAR,Test VaR,2019-08-22,Apple Computer Inc,1,212.46
+1,TVAR,Test VaR,2019-08-23,Apple Computer Inc,1,202.64
+1,TVAR,Test VaR,2019-08-26,Apple Computer Inc,1,206.49
+1,TVAR,Test VaR,2019-08-27,Apple Computer Inc,1,204.16
+1,TVAR,Test VaR,2019-08-28,Apple Computer Inc,1,205.53
+1,TVAR,Test VaR,2019-08-29,Apple Computer Inc,1,209.01
+1,TVAR,Test VaR,2019-08-30,Apple Computer Inc,1,208.74
+1,TVAR,Test VaR,2019-09-02,Apple Computer Inc,1,208.74
+1,TVAR,Test VaR,2019-09-03,Apple Computer Inc,1,205.7
+1,TVAR,Test VaR,2019-09-04,Apple Computer Inc,1,209.19
+1,TVAR,Test VaR,2019-09-05,Apple Computer Inc,1,213.28
+1,TVAR,Test VaR,2019-09-06,Apple Computer Inc,1,213.26
+1,TVAR,Test VaR,2019-09-09,Apple Computer Inc,1,214.17
+1,TVAR,Test VaR,2019-09-10,Apple Computer Inc,1,216.7
+1,TVAR,Test VaR,2019-09-11,Apple Computer Inc,1,223.59
+1,TVAR,Test VaR,2019-09-12,Apple Computer Inc,1,223.09
+1,TVAR,Test VaR,2019-09-13,Apple Computer Inc,1,218.75
+1,TVAR,Test VaR,2019-09-16,Apple Computer Inc,1,219.9
+1,TVAR,Test VaR,2019-09-17,Apple Computer Inc,1,220.7
+1,TVAR,Test VaR,2019-09-18,Apple Computer Inc,1,222.77
+1,TVAR,Test VaR,2019-09-19,Apple Computer Inc,1,220.96
+1,TVAR,Test VaR,2019-09-20,Apple Computer Inc,1,217.73
+1,TVAR,Test VaR,2019-09-23,Apple Computer Inc,1,218.72
+1,TVAR,Test VaR,2019-09-24,Apple Computer Inc,1,217.68
+1,TVAR,Test VaR,2019-09-25,Apple Computer Inc,1,221.03
+1,TVAR,Test VaR,2019-09-26,Apple Computer Inc,1,219.89
+1,TVAR,Test VaR,2019-09-27,Apple Computer Inc,1,218.82
+1,TVAR,Test VaR,2019-09-30,Apple Computer Inc,1,223.97
+1,TVAR,Test VaR,2019-10-01,Apple Computer Inc,1,224.59
+1,TVAR,Test VaR,2019-10-02,Apple Computer Inc,1,218.96
+1,TVAR,Test VaR,2019-10-03,Apple Computer Inc,1,220.82
+1,TVAR,Test VaR,2019-10-04,Apple Computer Inc,1,227.01
+1,TVAR,Test VaR,2019-10-07,Apple Computer Inc,1,227.06
+1,TVAR,Test VaR,2019-10-08,Apple Computer Inc,1,224.4
+1,TVAR,Test VaR,2019-10-09,Apple Computer Inc,1,227.03
+1,TVAR,Test VaR,2019-10-10,Apple Computer Inc,1,230.09
+1,TVAR,Test VaR,2019-10-11,Apple Computer Inc,1,236.21
+1,TVAR,Test VaR,2019-10-14,Apple Computer Inc,1,235.87
+1,TVAR,Test VaR,2019-10-15,Apple Computer Inc,1,235.32
+1,TVAR,Test VaR,2019-10-16,Apple Computer Inc,1,234.37
+1,TVAR,Test VaR,2019-10-17,Apple Computer Inc,1,235.28
+1,TVAR,Test VaR,2019-10-18,Apple Computer Inc,1,236.41
+1,TVAR,Test VaR,2019-10-21,Apple Computer Inc,1,240.51
+1,TVAR,Test VaR,2019-10-22,Apple Computer Inc,1,239.96
+1,TVAR,Test VaR,2019-10-23,Apple Computer Inc,1,243.18
+1,TVAR,Test VaR,2019-10-24,Apple Computer Inc,1,243.58
+1,TVAR,Test VaR,2019-10-25,Apple Computer Inc,1,246.58
+1,TVAR,Test VaR,2019-10-28,Apple Computer Inc,1,249.05
+1,TVAR,Test VaR,2019-10-29,Apple Computer Inc,1,243.29
+1,TVAR,Test VaR,2019-10-30,Apple Computer Inc,1,243.26
+1,TVAR,Test VaR,2019-10-31,Apple Computer Inc,1,248.76
+1,TVAR,Test VaR,2019-11-01,Apple Computer Inc,1,255.82
+1,TVAR,Test VaR,2019-11-04,Apple Computer Inc,1,257.5
+1,TVAR,Test VaR,2019-11-05,Apple Computer Inc,1,257.13
+1,TVAR,Test VaR,2019-11-06,Apple Computer Inc,1,257.24
+1,TVAR,Test VaR,2019-11-07,Apple Computer Inc,1,259.43
+1,TVAR,Test VaR,2019-11-08,Apple Computer Inc,1,260.14
+1,TVAR,Test VaR,2019-11-11,Apple Computer Inc,1,262.2
+1,TVAR,Test VaR,2019-11-12,Apple Computer Inc,1,261.96
+1,TVAR,Test VaR,2019-11-13,Apple Computer Inc,1,264.47
+1,TVAR,Test VaR,2019-11-14,Apple Computer Inc,1,262.64
+1,TVAR,Test VaR,2019-11-15,Apple Computer Inc,1,265.76
+1,TVAR,Test VaR,2019-11-18,Apple Computer Inc,1,267.1
+1,TVAR,Test VaR,2019-11-19,Apple Computer Inc,1,266.29
+1,TVAR,Test VaR,2019-11-20,Apple Computer Inc,1,263.19
+1,TVAR,Test VaR,2019-11-21,Apple Computer Inc,1,262.01
+1,TVAR,Test VaR,2019-11-22,Apple Computer Inc,1,261.78
+1,TVAR,Test VaR,2019-11-25,Apple Computer Inc,1,266.37
+1,TVAR,Test VaR,2019-11-26,Apple Computer Inc,1,264.29
+1,TVAR,Test VaR,2019-11-27,Apple Computer Inc,1,267.84
+1,TVAR,Test VaR,2019-11-28,Apple Computer Inc,1,267.84
+1,TVAR,Test VaR,2019-11-29,Apple Computer Inc,1,267.25
+1,TVAR,Test VaR,2019-12-02,Apple Computer Inc,1,264.16
+1,TVAR,Test VaR,2019-12-03,Apple Computer Inc,1,259.45
+1,TVAR,Test VaR,2019-12-04,Apple Computer Inc,1,261.74
+1,TVAR,Test VaR,2019-12-05,Apple Computer Inc,1,265.58
+1,TVAR,Test VaR,2019-12-06,Apple Computer Inc,1,270.71
+1,TVAR,Test VaR,2019-12-09,Apple Computer Inc,1,266.92
+1,TVAR,Test VaR,2019-12-10,Apple Computer Inc,1,268.48
+1,TVAR,Test VaR,2019-12-11,Apple Computer Inc,1,270.77
+1,TVAR,Test VaR,2019-12-12,Apple Computer Inc,1,271.46
+1,TVAR,Test VaR,2019-12-13,Apple Computer Inc,1,275.15
+1,TVAR,Test VaR,2019-12-16,Apple Computer Inc,1,279.86
+1,TVAR,Test VaR,2019-12-17,Apple Computer Inc,1,280.41
+1,TVAR,Test VaR,2019-12-18,Apple Computer Inc,1,279.74
+1,TVAR,Test VaR,2019-12-19,Apple Computer Inc,1,280.02
+1,TVAR,Test VaR,2019-12-20,Apple Computer Inc,1,279.44
+1,TVAR,Test VaR,2019-12-23,Apple Computer Inc,1,284
+1,TVAR,Test VaR,2019-12-24,Apple Computer Inc,1,284.27
+1,TVAR,Test VaR,2019-12-25,Apple Computer Inc,1,284.27
+1,TVAR,Test VaR,2019-12-26,Apple Computer Inc,1,289.91
+1,TVAR,Test VaR,2019-12-27,Apple Computer Inc,1,289.8
+1,TVAR,Test VaR,2019-12-30,Apple Computer Inc,1,291.52
+1,TVAR,Test VaR,2019-12-31,Apple Computer Inc,1,293.65
+1,TVAR,Test VaR,2020-01-01,Apple Computer Inc,1,293.65
+1,TVAR,Test VaR,2020-01-02,Apple Computer Inc,1,300.35
+1,TVAR,Test VaR,2020-01-03,Apple Computer Inc,1,297.43
+1,TVAR,Test VaR,2020-01-06,Apple Computer Inc,1,299.8
+1,TVAR,Test VaR,2020-01-07,Apple Computer Inc,1,298.39
+1,TVAR,Test VaR,2020-01-08,Apple Computer Inc,1,303.19
+1,TVAR,Test VaR,2020-01-09,Apple Computer Inc,1,309.63
+1,TVAR,Test VaR,2020-01-10,Apple Computer Inc,1,310.33
+1,TVAR,Test VaR,2020-01-13,Apple Computer Inc,1,316.96
+1,TVAR,Test VaR,2020-01-14,Apple Computer Inc,1,312.68
+1,TVAR,Test VaR,2020-01-15,Apple Computer Inc,1,311.34
+1,TVAR,Test VaR,2020-01-16,Apple Computer Inc,1,315.24
+1,TVAR,Test VaR,2020-01-17,Apple Computer Inc,1,318.73
+1,TVAR,Test VaR,2020-01-20,Apple Computer Inc,1,318.73
+1,TVAR,Test VaR,2020-01-21,Apple Computer Inc,1,316.57
+1,TVAR,Test VaR,2020-01-22,Apple Computer Inc,1,317.7
+1,TVAR,Test VaR,2020-01-23,Apple Computer Inc,1,319.23
+1,TVAR,Test VaR,2020-01-24,Apple Computer Inc,1,318.31
+1,TVAR,Test VaR,2020-01-27,Apple Computer Inc,1,308.95
+1,TVAR,Test VaR,2020-01-28,Apple Computer Inc,1,317.69
+1,TVAR,Test VaR,2020-01-29,Apple Computer Inc,1,324.34
+1,TVAR,Test VaR,2020-01-30,Apple Computer Inc,1,323.87
+1,TVAR,Test VaR,2020-01-31,Apple Computer Inc,1,309.51
+1,TVAR,Test VaR,2020-02-03,Apple Computer Inc,1,308.66
+1,TVAR,Test VaR,2020-02-04,Apple Computer Inc,1,318.85
+1,TVAR,Test VaR,2020-02-05,Apple Computer Inc,1,321.45
+1,TVAR,Test VaR,2020-02-06,Apple Computer Inc,1,325.21
+1,TVAR,Test VaR,2020-02-07,Apple Computer Inc,1,320.03
+1,TVAR,Test VaR,2020-02-10,Apple Computer Inc,1,321.55
+1,TVAR,Test VaR,2020-02-11,Apple Computer Inc,1,319.61
+1,TVAR,Test VaR,2020-02-12,Apple Computer Inc,1,327.2
+1,TVAR,Test VaR,2020-02-13,Apple Computer Inc,1,324.87
+1,TVAR,Test VaR,2020-02-14,Apple Computer Inc,1,324.95
+1,TVAR,Test VaR,2020-02-17,Apple Computer Inc,1,324.95
+1,TVAR,Test VaR,2020-02-18,Apple Computer Inc,1,319
+1,TVAR,Test VaR,2020-02-19,Apple Computer Inc,1,323.62
+1,TVAR,Test VaR,2020-02-20,Apple Computer Inc,1,320.3
+1,TVAR,Test VaR,2020-02-21,Apple Computer Inc,1,313.05
+1,TVAR,Test VaR,2020-02-24,Apple Computer Inc,1,298.18
+1,TVAR,Test VaR,2020-02-25,Apple Computer Inc,1,288.08
+1,TVAR,Test VaR,2020-02-26,Apple Computer Inc,1,292.65
+1,TVAR,Test VaR,2020-02-27,Apple Computer Inc,1,273.52
+1,TVAR,Test VaR,2020-02-28,Apple Computer Inc,1,273.36
+1,TVAR,Test VaR,2020-03-02,Apple Computer Inc,1,298.81
+1,TVAR,Test VaR,2020-03-03,Apple Computer Inc,1,289.32
+1,TVAR,Test VaR,2020-03-04,Apple Computer Inc,1,302.74
+1,TVAR,Test VaR,2020-03-05,Apple Computer Inc,1,292.92
+1,TVAR,Test VaR,2020-03-06,Apple Computer Inc,1,289.03
+1,TVAR,Test VaR,2020-03-09,Apple Computer Inc,1,266.17
+1,TVAR,Test VaR,2020-03-10,Apple Computer Inc,1,285.34
+1,TVAR,Test VaR,2020-03-11,Apple Computer Inc,1,275.43
+1,TVAR,Test VaR,2020-03-12,Apple Computer Inc,1,248.23
+1,TVAR,Test VaR,2020-03-13,Apple Computer Inc,1,277.97
+1,TVAR,Test VaR,2020-03-16,Apple Computer Inc,1,242.21
+1,TVAR,Test VaR,2020-03-17,Apple Computer Inc,1,252.86
+1,TVAR,Test VaR,2020-03-18,Apple Computer Inc,1,246.67
+1,TVAR,Test VaR,2020-03-19,Apple Computer Inc,1,244.78
+1,TVAR,Test VaR,2020-03-20,Apple Computer Inc,1,229.24
+1,TVAR,Test VaR,2020-03-23,Apple Computer Inc,1,224.37
+1,TVAR,Test VaR,2020-03-24,Apple Computer Inc,1,246.88
+1,TVAR,Test VaR,2020-03-25,Apple Computer Inc,1,245.52
+1,TVAR,Test VaR,2020-03-26,Apple Computer Inc,1,258.44
+1,TVAR,Test VaR,2020-03-27,Apple Computer Inc,1,247.74
+1,TVAR,Test VaR,2020-03-30,Apple Computer Inc,1,254.81
+1,TVAR,Test VaR,2020-03-31,Apple Computer Inc,1,254.29
+1,TVAR,Test VaR,2020-04-01,Apple Computer Inc,1,240.91
+1,TVAR,Test VaR,2020-04-02,Apple Computer Inc,1,244.93
+1,TVAR,Test VaR,2020-04-03,Apple Computer Inc,1,241.41
+1,TVAR,Test VaR,2020-04-06,Apple Computer Inc,1,262.47
+1,TVAR,Test VaR,2020-04-07,Apple Computer Inc,1,259.43
+1,TVAR,Test VaR,2020-04-08,Apple Computer Inc,1,266.07
+1,TVAR,Test VaR,2020-04-09,Apple Computer Inc,1,267.99
+1,TVAR,Test VaR,2020-04-10,Apple Computer Inc,1,267.99
+1,TVAR,Test VaR,2020-04-13,Apple Computer Inc,1,273.25
+1,TVAR,Test VaR,2020-04-14,Apple Computer Inc,1,287.05
+1,TVAR,Test VaR,2020-04-15,Apple Computer Inc,1,284.43
+1,TVAR,Test VaR,2020-04-16,Apple Computer Inc,1,286.69
+1,TVAR,Test VaR,2020-04-17,Apple Computer Inc,1,282.8
+1,TVAR,Test VaR,2020-04-20,Apple Computer Inc,1,276.93
+1,TVAR,Test VaR,2020-04-21,Apple Computer Inc,1,268.37
+1,TVAR,Test VaR,2020-04-22,Apple Computer Inc,1,276.1
+1,TVAR,Test VaR,2020-04-23,Apple Computer Inc,1,275.03
+1,TVAR,Test VaR,2020-04-24,Apple Computer Inc,1,282.97
+1,TVAR,Test VaR,2020-04-27,Apple Computer Inc,1,283.17
+1,TVAR,Test VaR,2020-04-28,Apple Computer Inc,1,278.58
+1,TVAR,Test VaR,2020-04-29,Apple Computer Inc,1,287.73
+1,TVAR,Test VaR,2020-04-30,Apple Computer Inc,1,293.8
+1,TVAR,Test VaR,2020-05-01,Apple Computer Inc,1,289.07
+1,TVAR,Test VaR,2020-05-04,Apple Computer Inc,1,293.16
+1,TVAR,Test VaR,2020-05-05,Apple Computer Inc,1,297.56
+1,TVAR,Test VaR,2020-05-06,Apple Computer Inc,1,300.63
+1,TVAR,Test VaR,2020-05-07,Apple Computer Inc,1,303.74
+1,TVAR,Test VaR,2020-05-08,Apple Computer Inc,1,310.13
+1,TVAR,Test VaR,2020-05-11,Apple Computer Inc,1,315.01
+1,TVAR,Test VaR,2020-05-12,Apple Computer Inc,1,311.41
+1,TVAR,Test VaR,2020-05-13,Apple Computer Inc,1,307.65
+1,TVAR,Test VaR,2020-05-14,Apple Computer Inc,1,309.54
+1,TVAR,Test VaR,2020-05-15,Apple Computer Inc,1,307.71
+1,TVAR,Test VaR,2020-05-18,Apple Computer Inc,1,314.96
+1,TVAR,Test VaR,2020-05-19,Apple Computer Inc,1,313.14
+1,TVAR,Test VaR,2020-05-20,Apple Computer Inc,1,319.23
+1,TVAR,Test VaR,2020-05-21,Apple Computer Inc,1,316.85
+1,TVAR,Test VaR,2020-05-22,Apple Computer Inc,1,318.89
+1,TVAR,Test VaR,2020-05-25,Apple Computer Inc,1,318.89
+1,TVAR,Test VaR,2020-05-26,Apple Computer Inc,1,316.73
+1,TVAR,Test VaR,2020-05-27,Apple Computer Inc,1,318.11
+1,TVAR,Test VaR,2020-05-28,Apple Computer Inc,1,318.25
+1,TVAR,Test VaR,2020-05-29,Apple Computer Inc,1,317.94
+1,TVAR,Test VaR,2020-06-01,Apple Computer Inc,1,321.85
+1,TVAR,Test VaR,2020-06-02,Apple Computer Inc,1,323.34
+1,TVAR,Test VaR,2020-06-03,Apple Computer Inc,1,325.12
+1,TVAR,Test VaR,2020-06-04,Apple Computer Inc,1,322.32
+1,TVAR,Test VaR,2020-06-05,Apple Computer Inc,1,331.5
+1,TVAR,Test VaR,2020-06-08,Apple Computer Inc,1,333.46
+1,TVAR,Test VaR,2020-06-09,Apple Computer Inc,1,343.99
+1,TVAR,Test VaR,2020-06-10,Apple Computer Inc,1,352.84
+1,TVAR,Test VaR,2020-06-11,Apple Computer Inc,1,335.9
+1,TVAR,Test VaR,2020-06-12,Apple Computer Inc,1,338.8
+1,TVAR,Test VaR,2020-06-15,Apple Computer Inc,1,342.99
+1,TVAR,Test VaR,2020-06-16,Apple Computer Inc,1,352.08
+1,TVAR,Test VaR,2020-06-17,Apple Computer Inc,1,351.59
+1,TVAR,Test VaR,2020-06-18,Apple Computer Inc,1,351.73
+1,TVAR,Test VaR,2020-06-19,Apple Computer Inc,1,349.72
+1,TVAR,Test VaR,2020-06-22,Apple Computer Inc,1,358.87
+1,TVAR,Test VaR,2020-06-23,Apple Computer Inc,1,366.53
+1,TVAR,Test VaR,2020-06-24,Apple Computer Inc,1,360.06
+1,TVAR,Test VaR,2019-06-24,Facebook Inc/d,1,192.6
+1,TVAR,Test VaR,2019-06-25,Facebook Inc/d,1,188.84
+1,TVAR,Test VaR,2019-06-26,Facebook Inc/d,1,187.66
+1,TVAR,Test VaR,2019-06-27,Facebook Inc/d,1,189.5
+1,TVAR,Test VaR,2019-06-28,Facebook Inc/d,1,193
+1,TVAR,Test VaR,2019-07-01,Facebook Inc/d,1,193
+1,TVAR,Test VaR,2019-07-02,Facebook Inc/d,1,195
+1,TVAR,Test VaR,2019-07-03,Facebook Inc/d,1,197.2
+1,TVAR,Test VaR,2019-07-04,Facebook Inc/d,1,197.2
+1,TVAR,Test VaR,2019-07-05,Facebook Inc/d,1,196.4
+1,TVAR,Test VaR,2019-07-08,Facebook Inc/d,1,195.76
+1,TVAR,Test VaR,2019-07-09,Facebook Inc/d,1,199.21
+1,TVAR,Test VaR,2019-07-10,Facebook Inc/d,1,202.73
+1,TVAR,Test VaR,2019-07-11,Facebook Inc/d,1,201.23
+1,TVAR,Test VaR,2019-07-12,Facebook Inc/d,1,204.87
+1,TVAR,Test VaR,2019-07-15,Facebook Inc/d,1,203.91
+1,TVAR,Test VaR,2019-07-16,Facebook Inc/d,1,203.84
+1,TVAR,Test VaR,2019-07-17,Facebook Inc/d,1,201.8
+1,TVAR,Test VaR,2019-07-18,Facebook Inc/d,1,200.78
+1,TVAR,Test VaR,2019-07-19,Facebook Inc/d,1,198.36
+1,TVAR,Test VaR,2019-07-22,Facebook Inc/d,1,202.32
+1,TVAR,Test VaR,2019-07-23,Facebook Inc/d,1,202.36
+1,TVAR,Test VaR,2019-07-24,Facebook Inc/d,1,204.66
+1,TVAR,Test VaR,2019-07-25,Facebook Inc/d,1,200.71
+1,TVAR,Test VaR,2019-07-26,Facebook Inc/d,1,199.75
+1,TVAR,Test VaR,2019-07-29,Facebook Inc/d,1,195.94
+1,TVAR,Test VaR,2019-07-30,Facebook Inc/d,1,197.04
+1,TVAR,Test VaR,2019-07-31,Facebook Inc/d,1,194.23
+1,TVAR,Test VaR,2019-08-01,Facebook Inc/d,1,192.73
+1,TVAR,Test VaR,2019-08-02,Facebook Inc/d,1,189.02
+1,TVAR,Test VaR,2019-08-05,Facebook Inc/d,1,181.73
+1,TVAR,Test VaR,2019-08-06,Facebook Inc/d,1,184.51
+1,TVAR,Test VaR,2019-08-07,Facebook Inc/d,1,185.15
+1,TVAR,Test VaR,2019-08-08,Facebook Inc/d,1,190.16
+1,TVAR,Test VaR,2019-08-09,Facebook Inc/d,1,187.85
+1,TVAR,Test VaR,2019-08-12,Facebook Inc/d,1,185.37
+1,TVAR,Test VaR,2019-08-13,Facebook Inc/d,1,188.45
+1,TVAR,Test VaR,2019-08-14,Facebook Inc/d,1,179.71
+1,TVAR,Test VaR,2019-08-15,Facebook Inc/d,1,182.59
+1,TVAR,Test VaR,2019-08-16,Facebook Inc/d,1,183.7
+1,TVAR,Test VaR,2019-08-19,Facebook Inc/d,1,186.17
+1,TVAR,Test VaR,2019-08-20,Facebook Inc/d,1,183.81
+1,TVAR,Test VaR,2019-08-21,Facebook Inc/d,1,183.55
+1,TVAR,Test VaR,2019-08-22,Facebook Inc/d,1,182.04
+1,TVAR,Test VaR,2019-08-23,Facebook Inc/d,1,177.75
+1,TVAR,Test VaR,2019-08-26,Facebook Inc/d,1,180.36
+1,TVAR,Test VaR,2019-08-27,Facebook Inc/d,1,181.3
+1,TVAR,Test VaR,2019-08-28,Facebook Inc/d,1,181.76
+1,TVAR,Test VaR,2019-08-29,Facebook Inc/d,1,185.57
+1,TVAR,Test VaR,2019-08-30,Facebook Inc/d,1,185.67
+1,TVAR,Test VaR,2019-09-02,Facebook Inc/d,1,185.67
+1,TVAR,Test VaR,2019-09-03,Facebook Inc/d,1,182.39
+1,TVAR,Test VaR,2019-09-04,Facebook Inc/d,1,187.14
+1,TVAR,Test VaR,2019-09-05,Facebook Inc/d,1,190.9
+1,TVAR,Test VaR,2019-09-06,Facebook Inc/d,1,187.49
+1,TVAR,Test VaR,2019-09-09,Facebook Inc/d,1,188.76
+1,TVAR,Test VaR,2019-09-10,Facebook Inc/d,1,186.17
+1,TVAR,Test VaR,2019-09-11,Facebook Inc/d,1,188.49
+1,TVAR,Test VaR,2019-09-12,Facebook Inc/d,1,187.47
+1,TVAR,Test VaR,2019-09-13,Facebook Inc/d,1,187.19
+1,TVAR,Test VaR,2019-09-16,Facebook Inc/d,1,186.22
+1,TVAR,Test VaR,2019-09-17,Facebook Inc/d,1,188.08
+1,TVAR,Test VaR,2019-09-18,Facebook Inc/d,1,188.14
+1,TVAR,Test VaR,2019-09-19,Facebook Inc/d,1,190.14
+1,TVAR,Test VaR,2019-09-20,Facebook Inc/d,1,189.93
+1,TVAR,Test VaR,2019-09-23,Facebook Inc/d,1,186.82
+1,TVAR,Test VaR,2019-09-24,Facebook Inc/d,1,181.28
+1,TVAR,Test VaR,2019-09-25,Facebook Inc/d,1,182.8
+1,TVAR,Test VaR,2019-09-26,Facebook Inc/d,1,180.11
+1,TVAR,Test VaR,2019-09-27,Facebook Inc/d,1,177.1
+1,TVAR,Test VaR,2019-09-30,Facebook Inc/d,1,178.08
+1,TVAR,Test VaR,2019-10-01,Facebook Inc/d,1,175.81
+1,TVAR,Test VaR,2019-10-02,Facebook Inc/d,1,174.6
+1,TVAR,Test VaR,2019-10-03,Facebook Inc/d,1,179.38
+1,TVAR,Test VaR,2019-10-04,Facebook Inc/d,1,180.45
+1,TVAR,Test VaR,2019-10-07,Facebook Inc/d,1,179.68
+1,TVAR,Test VaR,2019-10-08,Facebook Inc/d,1,177.75
+1,TVAR,Test VaR,2019-10-09,Facebook Inc/d,1,179.85
+1,TVAR,Test VaR,2019-10-10,Facebook Inc/d,1,180.03
+1,TVAR,Test VaR,2019-10-11,Facebook Inc/d,1,184.19
+1,TVAR,Test VaR,2019-10-14,Facebook Inc/d,1,183.28
+1,TVAR,Test VaR,2019-10-15,Facebook Inc/d,1,188.89
+1,TVAR,Test VaR,2019-10-16,Facebook Inc/d,1,189.55
+1,TVAR,Test VaR,2019-10-17,Facebook Inc/d,1,190.39
+1,TVAR,Test VaR,2019-10-18,Facebook Inc/d,1,185.85
+1,TVAR,Test VaR,2019-10-21,Facebook Inc/d,1,189.76
+1,TVAR,Test VaR,2019-10-22,Facebook Inc/d,1,182.34
+1,TVAR,Test VaR,2019-10-23,Facebook Inc/d,1,186.15
+1,TVAR,Test VaR,2019-10-24,Facebook Inc/d,1,186.38
+1,TVAR,Test VaR,2019-10-25,Facebook Inc/d,1,187.89
+1,TVAR,Test VaR,2019-10-28,Facebook Inc/d,1,189.4
+1,TVAR,Test VaR,2019-10-29,Facebook Inc/d,1,189.31
+1,TVAR,Test VaR,2019-10-30,Facebook Inc/d,1,188.25
+1,TVAR,Test VaR,2019-10-31,Facebook Inc/d,1,191.65
+1,TVAR,Test VaR,2019-11-01,Facebook Inc/d,1,193.62
+1,TVAR,Test VaR,2019-11-04,Facebook Inc/d,1,194.72
+1,TVAR,Test VaR,2019-11-05,Facebook Inc/d,1,194.32
+1,TVAR,Test VaR,2019-11-06,Facebook Inc/d,1,191.55
+1,TVAR,Test VaR,2019-11-07,Facebook Inc/d,1,190.42
+1,TVAR,Test VaR,2019-11-08,Facebook Inc/d,1,190.84
+1,TVAR,Test VaR,2019-11-11,Facebook Inc/d,1,189.61
+1,TVAR,Test VaR,2019-11-12,Facebook Inc/d,1,194.47
+1,TVAR,Test VaR,2019-11-13,Facebook Inc/d,1,193.19
+1,TVAR,Test VaR,2019-11-14,Facebook Inc/d,1,193.15
+1,TVAR,Test VaR,2019-11-15,Facebook Inc/d,1,195.1
+1,TVAR,Test VaR,2019-11-18,Facebook Inc/d,1,197.4
+1,TVAR,Test VaR,2019-11-19,Facebook Inc/d,1,199.32
+1,TVAR,Test VaR,2019-11-20,Facebook Inc/d,1,197.51
+1,TVAR,Test VaR,2019-11-21,Facebook Inc/d,1,197.93
+1,TVAR,Test VaR,2019-11-22,Facebook Inc/d,1,198.82
+1,TVAR,Test VaR,2019-11-25,Facebook Inc/d,1,199.79
+1,TVAR,Test VaR,2019-11-26,Facebook Inc/d,1,198.97
+1,TVAR,Test VaR,2019-11-27,Facebook Inc/d,1,202
+1,TVAR,Test VaR,2019-11-28,Facebook Inc/d,1,202
+1,TVAR,Test VaR,2019-11-29,Facebook Inc/d,1,201.64
+1,TVAR,Test VaR,2019-12-02,Facebook Inc/d,1,199.7
+1,TVAR,Test VaR,2019-12-03,Facebook Inc/d,1,198.82
+1,TVAR,Test VaR,2019-12-04,Facebook Inc/d,1,198.71
+1,TVAR,Test VaR,2019-12-05,Facebook Inc/d,1,199.36
+1,TVAR,Test VaR,2019-12-06,Facebook Inc/d,1,201.05
+1,TVAR,Test VaR,2019-12-09,Facebook Inc/d,1,201.34
+1,TVAR,Test VaR,2019-12-10,Facebook Inc/d,1,200.87
+1,TVAR,Test VaR,2019-12-11,Facebook Inc/d,1,202.26
+1,TVAR,Test VaR,2019-12-12,Facebook Inc/d,1,196.75
+1,TVAR,Test VaR,2019-12-13,Facebook Inc/d,1,194.11
+1,TVAR,Test VaR,2019-12-16,Facebook Inc/d,1,197.92
+1,TVAR,Test VaR,2019-12-17,Facebook Inc/d,1,198.39
+1,TVAR,Test VaR,2019-12-18,Facebook Inc/d,1,202.5
+1,TVAR,Test VaR,2019-12-19,Facebook Inc/d,1,206.06
+1,TVAR,Test VaR,2019-12-20,Facebook Inc/d,1,206.3
+1,TVAR,Test VaR,2019-12-23,Facebook Inc/d,1,206.18
+1,TVAR,Test VaR,2019-12-24,Facebook Inc/d,1,205.12
+1,TVAR,Test VaR,2019-12-25,Facebook Inc/d,1,205.12
+1,TVAR,Test VaR,2019-12-26,Facebook Inc/d,1,207.79
+1,TVAR,Test VaR,2019-12-27,Facebook Inc/d,1,208.1
+1,TVAR,Test VaR,2019-12-30,Facebook Inc/d,1,204.41
+1,TVAR,Test VaR,2019-12-31,Facebook Inc/d,1,205.25
+1,TVAR,Test VaR,2020-01-01,Facebook Inc/d,1,205.25
+1,TVAR,Test VaR,2020-01-02,Facebook Inc/d,1,209.78
+1,TVAR,Test VaR,2020-01-03,Facebook Inc/d,1,208.67
+1,TVAR,Test VaR,2020-01-06,Facebook Inc/d,1,212.6
+1,TVAR,Test VaR,2020-01-07,Facebook Inc/d,1,213.06
+1,TVAR,Test VaR,2020-01-08,Facebook Inc/d,1,215.22
+1,TVAR,Test VaR,2020-01-09,Facebook Inc/d,1,218.3
+1,TVAR,Test VaR,2020-01-10,Facebook Inc/d,1,218.06
+1,TVAR,Test VaR,2020-01-13,Facebook Inc/d,1,221.91
+1,TVAR,Test VaR,2020-01-14,Facebook Inc/d,1,219.06
+1,TVAR,Test VaR,2020-01-15,Facebook Inc/d,1,221.15
+1,TVAR,Test VaR,2020-01-16,Facebook Inc/d,1,221.77
+1,TVAR,Test VaR,2020-01-17,Facebook Inc/d,1,222.14
+1,TVAR,Test VaR,2020-01-20,Facebook Inc/d,1,222.14
+1,TVAR,Test VaR,2020-01-21,Facebook Inc/d,1,221.44
+1,TVAR,Test VaR,2020-01-22,Facebook Inc/d,1,221.32
+1,TVAR,Test VaR,2020-01-23,Facebook Inc/d,1,219.76
+1,TVAR,Test VaR,2020-01-24,Facebook Inc/d,1,217.94
+1,TVAR,Test VaR,2020-01-27,Facebook Inc/d,1,214.87
+1,TVAR,Test VaR,2020-01-28,Facebook Inc/d,1,217.79
+1,TVAR,Test VaR,2020-01-29,Facebook Inc/d,1,223.23
+1,TVAR,Test VaR,2020-01-30,Facebook Inc/d,1,209.53
+1,TVAR,Test VaR,2020-01-31,Facebook Inc/d,1,201.91
+1,TVAR,Test VaR,2020-02-03,Facebook Inc/d,1,204.19
+1,TVAR,Test VaR,2020-02-04,Facebook Inc/d,1,209.83
+1,TVAR,Test VaR,2020-02-05,Facebook Inc/d,1,210.11
+1,TVAR,Test VaR,2020-02-06,Facebook Inc/d,1,210.85
+1,TVAR,Test VaR,2020-02-07,Facebook Inc/d,1,212.33
+1,TVAR,Test VaR,2020-02-10,Facebook Inc/d,1,213.06
+1,TVAR,Test VaR,2020-02-11,Facebook Inc/d,1,207.19
+1,TVAR,Test VaR,2020-02-12,Facebook Inc/d,1,210.76
+1,TVAR,Test VaR,2020-02-13,Facebook Inc/d,1,213.14
+1,TVAR,Test VaR,2020-02-14,Facebook Inc/d,1,214.18
+1,TVAR,Test VaR,2020-02-17,Facebook Inc/d,1,214.18
+1,TVAR,Test VaR,2020-02-18,Facebook Inc/d,1,217.8
+1,TVAR,Test VaR,2020-02-19,Facebook Inc/d,1,217.49
+1,TVAR,Test VaR,2020-02-20,Facebook Inc/d,1,214.58
+1,TVAR,Test VaR,2020-02-21,Facebook Inc/d,1,210.18
+1,TVAR,Test VaR,2020-02-24,Facebook Inc/d,1,200.72
+1,TVAR,Test VaR,2020-02-25,Facebook Inc/d,1,196.77
+1,TVAR,Test VaR,2020-02-26,Facebook Inc/d,1,197.2
+1,TVAR,Test VaR,2020-02-27,Facebook Inc/d,1,189.75
+1,TVAR,Test VaR,2020-02-28,Facebook Inc/d,1,192.47
+1,TVAR,Test VaR,2020-03-02,Facebook Inc/d,1,196.44
+1,TVAR,Test VaR,2020-03-03,Facebook Inc/d,1,185.89
+1,TVAR,Test VaR,2020-03-04,Facebook Inc/d,1,191.76
+1,TVAR,Test VaR,2020-03-05,Facebook Inc/d,1,185.17
+1,TVAR,Test VaR,2020-03-06,Facebook Inc/d,1,181.09
+1,TVAR,Test VaR,2020-03-09,Facebook Inc/d,1,169.5
+1,TVAR,Test VaR,2020-03-10,Facebook Inc/d,1,178.19
+1,TVAR,Test VaR,2020-03-11,Facebook Inc/d,1,170.24
+1,TVAR,Test VaR,2020-03-12,Facebook Inc/d,1,154.47
+1,TVAR,Test VaR,2020-03-13,Facebook Inc/d,1,170.28
+1,TVAR,Test VaR,2020-03-16,Facebook Inc/d,1,146.01
+1,TVAR,Test VaR,2020-03-17,Facebook Inc/d,1,149.42
+1,TVAR,Test VaR,2020-03-18,Facebook Inc/d,1,146.96
+1,TVAR,Test VaR,2020-03-19,Facebook Inc/d,1,153.13
+1,TVAR,Test VaR,2020-03-20,Facebook Inc/d,1,149.73
+1,TVAR,Test VaR,2020-03-23,Facebook Inc/d,1,148.1
+1,TVAR,Test VaR,2020-03-24,Facebook Inc/d,1,160.98
+1,TVAR,Test VaR,2020-03-25,Facebook Inc/d,1,156.21
+1,TVAR,Test VaR,2020-03-26,Facebook Inc/d,1,163.34
+1,TVAR,Test VaR,2020-03-27,Facebook Inc/d,1,156.79
+1,TVAR,Test VaR,2020-03-30,Facebook Inc/d,1,165.95
+1,TVAR,Test VaR,2020-03-31,Facebook Inc/d,1,166.8
+1,TVAR,Test VaR,2020-04-01,Facebook Inc/d,1,159.6
+1,TVAR,Test VaR,2020-04-02,Facebook Inc/d,1,158.19
+1,TVAR,Test VaR,2020-04-03,Facebook Inc/d,1,154.18
+1,TVAR,Test VaR,2020-04-06,Facebook Inc/d,1,165.55
+1,TVAR,Test VaR,2020-04-07,Facebook Inc/d,1,168.83
+1,TVAR,Test VaR,2020-04-08,Facebook Inc/d,1,174.28
+1,TVAR,Test VaR,2020-04-09,Facebook Inc/d,1,175.19
+1,TVAR,Test VaR,2020-04-10,Facebook Inc/d,1,175.19
+1,TVAR,Test VaR,2020-04-13,Facebook Inc/d,1,174.79
+1,TVAR,Test VaR,2020-04-14,Facebook Inc/d,1,178.17
+1,TVAR,Test VaR,2020-04-15,Facebook Inc/d,1,176.97
+1,TVAR,Test VaR,2020-04-16,Facebook Inc/d,1,176.25
+1,TVAR,Test VaR,2020-04-17,Facebook Inc/d,1,179.24
+1,TVAR,Test VaR,2020-04-20,Facebook Inc/d,1,178.24
+1,TVAR,Test VaR,2020-04-21,Facebook Inc/d,1,170.8
+1,TVAR,Test VaR,2020-04-22,Facebook Inc/d,1,182.28
+1,TVAR,Test VaR,2020-04-23,Facebook Inc/d,1,185.13
+1,TVAR,Test VaR,2020-04-24,Facebook Inc/d,1,190.07
+1,TVAR,Test VaR,2020-04-27,Facebook Inc/d,1,187.5
+1,TVAR,Test VaR,2020-04-28,Facebook Inc/d,1,182.91
+1,TVAR,Test VaR,2020-04-29,Facebook Inc/d,1,194.19
+1,TVAR,Test VaR,2020-04-30,Facebook Inc/d,1,204.71
+1,TVAR,Test VaR,2020-05-01,Facebook Inc/d,1,202.27
+1,TVAR,Test VaR,2020-05-04,Facebook Inc/d,1,205.26
+1,TVAR,Test VaR,2020-05-05,Facebook Inc/d,1,207.07
+1,TVAR,Test VaR,2020-05-06,Facebook Inc/d,1,208.47
+1,TVAR,Test VaR,2020-05-07,Facebook Inc/d,1,211.26
+1,TVAR,Test VaR,2020-05-08,Facebook Inc/d,1,212.35
+1,TVAR,Test VaR,2020-05-11,Facebook Inc/d,1,213.18
+1,TVAR,Test VaR,2020-05-12,Facebook Inc/d,1,210.1
+1,TVAR,Test VaR,2020-05-13,Facebook Inc/d,1,205.1
+1,TVAR,Test VaR,2020-05-14,Facebook Inc/d,1,206.81
+1,TVAR,Test VaR,2020-05-15,Facebook Inc/d,1,210.88
+1,TVAR,Test VaR,2020-05-18,Facebook Inc/d,1,213.19
+1,TVAR,Test VaR,2020-05-19,Facebook Inc/d,1,216.88
+1,TVAR,Test VaR,2020-05-20,Facebook Inc/d,1,229.97
+1,TVAR,Test VaR,2020-05-21,Facebook Inc/d,1,231.39
+1,TVAR,Test VaR,2020-05-22,Facebook Inc/d,1,234.91
+1,TVAR,Test VaR,2020-05-25,Facebook Inc/d,1,234.91
+1,TVAR,Test VaR,2020-05-26,Facebook Inc/d,1,232.2
+1,TVAR,Test VaR,2020-05-27,Facebook Inc/d,1,229.14
+1,TVAR,Test VaR,2020-05-28,Facebook Inc/d,1,225.46
+1,TVAR,Test VaR,2020-05-29,Facebook Inc/d,1,225.09
+1,TVAR,Test VaR,2020-06-01,Facebook Inc/d,1,231.91
+1,TVAR,Test VaR,2020-06-02,Facebook Inc/d,1,232.72
+1,TVAR,Test VaR,2020-06-03,Facebook Inc/d,1,230.16
+1,TVAR,Test VaR,2020-06-04,Facebook Inc/d,1,226.29
+1,TVAR,Test VaR,2020-06-05,Facebook Inc/d,1,230.77
+1,TVAR,Test VaR,2020-06-08,Facebook Inc/d,1,231.4
+1,TVAR,Test VaR,2020-06-09,Facebook Inc/d,1,238.67
+1,TVAR,Test VaR,2020-06-10,Facebook Inc/d,1,236.73
+1,TVAR,Test VaR,2020-06-11,Facebook Inc/d,1,224.43
+1,TVAR,Test VaR,2020-06-12,Facebook Inc/d,1,228.58
+1,TVAR,Test VaR,2020-06-15,Facebook Inc/d,1,232.5
+1,TVAR,Test VaR,2020-06-16,Facebook Inc/d,1,235.65
+1,TVAR,Test VaR,2020-06-17,Facebook Inc/d,1,235.53
+1,TVAR,Test VaR,2020-06-18,Facebook Inc/d,1,235.94
+1,TVAR,Test VaR,2020-06-19,Facebook Inc/d,1,238.79
+1,TVAR,Test VaR,2020-06-22,Facebook Inc/d,1,239.22
+1,TVAR,Test VaR,2020-06-23,Facebook Inc/d,1,242.24
+1,TVAR,Test VaR,2020-06-24,Facebook Inc/d,1,234.02
+1,TVAR,Test VaR,2019-06-24,Microsoft Corp,1,137.78
+1,TVAR,Test VaR,2019-06-25,Microsoft Corp,1,133.43
+1,TVAR,Test VaR,2019-06-26,Microsoft Corp,1,133.93
+1,TVAR,Test VaR,2019-06-27,Microsoft Corp,1,134.15
+1,TVAR,Test VaR,2019-06-28,Microsoft Corp,1,133.96
+1,TVAR,Test VaR,2019-07-01,Microsoft Corp,1,135.68
+1,TVAR,Test VaR,2019-07-02,Microsoft Corp,1,136.58
+1,TVAR,Test VaR,2019-07-03,Microsoft Corp,1,137.46
+1,TVAR,Test VaR,2019-07-04,Microsoft Corp,1,137.46
+1,TVAR,Test VaR,2019-07-05,Microsoft Corp,1,137.06
+1,TVAR,Test VaR,2019-07-08,Microsoft Corp,1,136.96
+1,TVAR,Test VaR,2019-07-09,Microsoft Corp,1,136.46
+1,TVAR,Test VaR,2019-07-10,Microsoft Corp,1,137.85
+1,TVAR,Test VaR,2019-07-11,Microsoft Corp,1,138.4
+1,TVAR,Test VaR,2019-07-12,Microsoft Corp,1,138.9
+1,TVAR,Test VaR,2019-07-15,Microsoft Corp,1,138.9
+1,TVAR,Test VaR,2019-07-16,Microsoft Corp,1,137.08
+1,TVAR,Test VaR,2019-07-17,Microsoft Corp,1,136.27
+1,TVAR,Test VaR,2019-07-18,Microsoft Corp,1,136.42
+1,TVAR,Test VaR,2019-07-19,Microsoft Corp,1,136.62
+1,TVAR,Test VaR,2019-07-22,Microsoft Corp,1,138.43
+1,TVAR,Test VaR,2019-07-23,Microsoft Corp,1,139.29
+1,TVAR,Test VaR,2019-07-24,Microsoft Corp,1,140.72
+1,TVAR,Test VaR,2019-07-25,Microsoft Corp,1,140.19
+1,TVAR,Test VaR,2019-07-26,Microsoft Corp,1,141.34
+1,TVAR,Test VaR,2019-07-29,Microsoft Corp,1,141.03
+1,TVAR,Test VaR,2019-07-30,Microsoft Corp,1,140.35
+1,TVAR,Test VaR,2019-07-31,Microsoft Corp,1,136.27
+1,TVAR,Test VaR,2019-08-01,Microsoft Corp,1,138.06
+1,TVAR,Test VaR,2019-08-02,Microsoft Corp,1,136.9
+1,TVAR,Test VaR,2019-08-05,Microsoft Corp,1,132.21
+1,TVAR,Test VaR,2019-08-06,Microsoft Corp,1,134.69
+1,TVAR,Test VaR,2019-08-07,Microsoft Corp,1,135.28
+1,TVAR,Test VaR,2019-08-08,Microsoft Corp,1,138.89
+1,TVAR,Test VaR,2019-08-09,Microsoft Corp,1,137.71
+1,TVAR,Test VaR,2019-08-12,Microsoft Corp,1,135.79
+1,TVAR,Test VaR,2019-08-13,Microsoft Corp,1,138.6
+1,TVAR,Test VaR,2019-08-14,Microsoft Corp,1,133.98
+1,TVAR,Test VaR,2019-08-15,Microsoft Corp,1,133.68
+1,TVAR,Test VaR,2019-08-16,Microsoft Corp,1,136.13
+1,TVAR,Test VaR,2019-08-19,Microsoft Corp,1,138.41
+1,TVAR,Test VaR,2019-08-20,Microsoft Corp,1,137.26
+1,TVAR,Test VaR,2019-08-21,Microsoft Corp,1,138.79
+1,TVAR,Test VaR,2019-08-22,Microsoft Corp,1,137.78
+1,TVAR,Test VaR,2019-08-23,Microsoft Corp,1,133.39
+1,TVAR,Test VaR,2019-08-26,Microsoft Corp,1,135.45
+1,TVAR,Test VaR,2019-08-27,Microsoft Corp,1,135.74
+1,TVAR,Test VaR,2019-08-28,Microsoft Corp,1,135.56
+1,TVAR,Test VaR,2019-08-29,Microsoft Corp,1,138.12
+1,TVAR,Test VaR,2019-08-30,Microsoft Corp,1,137.86
+1,TVAR,Test VaR,2019-09-02,Microsoft Corp,1,137.86
+1,TVAR,Test VaR,2019-09-03,Microsoft Corp,1,136.04
+1,TVAR,Test VaR,2019-09-04,Microsoft Corp,1,137.63
+1,TVAR,Test VaR,2019-09-05,Microsoft Corp,1,140.05
+1,TVAR,Test VaR,2019-09-06,Microsoft Corp,1,139.1
+1,TVAR,Test VaR,2019-09-09,Microsoft Corp,1,137.52
+1,TVAR,Test VaR,2019-09-10,Microsoft Corp,1,136.08
+1,TVAR,Test VaR,2019-09-11,Microsoft Corp,1,136.12
+1,TVAR,Test VaR,2019-09-12,Microsoft Corp,1,137.52
+1,TVAR,Test VaR,2019-09-13,Microsoft Corp,1,137.32
+1,TVAR,Test VaR,2019-09-16,Microsoft Corp,1,136.33
+1,TVAR,Test VaR,2019-09-17,Microsoft Corp,1,137.39
+1,TVAR,Test VaR,2019-09-18,Microsoft Corp,1,138.52
+1,TVAR,Test VaR,2019-09-19,Microsoft Corp,1,141.07
+1,TVAR,Test VaR,2019-09-20,Microsoft Corp,1,139.44
+1,TVAR,Test VaR,2019-09-23,Microsoft Corp,1,139.14
+1,TVAR,Test VaR,2019-09-24,Microsoft Corp,1,137.38
+1,TVAR,Test VaR,2019-09-25,Microsoft Corp,1,139.36
+1,TVAR,Test VaR,2019-09-26,Microsoft Corp,1,139.54
+1,TVAR,Test VaR,2019-09-27,Microsoft Corp,1,137.73
+1,TVAR,Test VaR,2019-09-30,Microsoft Corp,1,139.03
+1,TVAR,Test VaR,2019-10-01,Microsoft Corp,1,137.07
+1,TVAR,Test VaR,2019-10-02,Microsoft Corp,1,134.65
+1,TVAR,Test VaR,2019-10-03,Microsoft Corp,1,136.28
+1,TVAR,Test VaR,2019-10-04,Microsoft Corp,1,138.12
+1,TVAR,Test VaR,2019-10-07,Microsoft Corp,1,137.12
+1,TVAR,Test VaR,2019-10-08,Microsoft Corp,1,135.67
+1,TVAR,Test VaR,2019-10-09,Microsoft Corp,1,138.24
+1,TVAR,Test VaR,2019-10-10,Microsoft Corp,1,139.1
+1,TVAR,Test VaR,2019-10-11,Microsoft Corp,1,139.68
+1,TVAR,Test VaR,2019-10-14,Microsoft Corp,1,139.55
+1,TVAR,Test VaR,2019-10-15,Microsoft Corp,1,141.58
+1,TVAR,Test VaR,2019-10-16,Microsoft Corp,1,140.41
+1,TVAR,Test VaR,2019-10-17,Microsoft Corp,1,139.69
+1,TVAR,Test VaR,2019-10-18,Microsoft Corp,1,137.41
+1,TVAR,Test VaR,2019-10-21,Microsoft Corp,1,138.43
+1,TVAR,Test VaR,2019-10-22,Microsoft Corp,1,136.37
+1,TVAR,Test VaR,2019-10-23,Microsoft Corp,1,137.24
+1,TVAR,Test VaR,2019-10-24,Microsoft Corp,1,139.94
+1,TVAR,Test VaR,2019-10-25,Microsoft Corp,1,140.73
+1,TVAR,Test VaR,2019-10-28,Microsoft Corp,1,144.19
+1,TVAR,Test VaR,2019-10-29,Microsoft Corp,1,142.83
+1,TVAR,Test VaR,2019-10-30,Microsoft Corp,1,144.61
+1,TVAR,Test VaR,2019-10-31,Microsoft Corp,1,143.37
+1,TVAR,Test VaR,2019-11-01,Microsoft Corp,1,143.72
+1,TVAR,Test VaR,2019-11-04,Microsoft Corp,1,144.55
+1,TVAR,Test VaR,2019-11-05,Microsoft Corp,1,144.46
+1,TVAR,Test VaR,2019-11-06,Microsoft Corp,1,144.06
+1,TVAR,Test VaR,2019-11-07,Microsoft Corp,1,144.26
+1,TVAR,Test VaR,2019-11-08,Microsoft Corp,1,145.96
+1,TVAR,Test VaR,2019-11-11,Microsoft Corp,1,146.11
+1,TVAR,Test VaR,2019-11-12,Microsoft Corp,1,147.07
+1,TVAR,Test VaR,2019-11-13,Microsoft Corp,1,147.31
+1,TVAR,Test VaR,2019-11-14,Microsoft Corp,1,148.06
+1,TVAR,Test VaR,2019-11-15,Microsoft Corp,1,149.97
+1,TVAR,Test VaR,2019-11-18,Microsoft Corp,1,150.34
+1,TVAR,Test VaR,2019-11-19,Microsoft Corp,1,150.39
+1,TVAR,Test VaR,2019-11-20,Microsoft Corp,1,149.62
+1,TVAR,Test VaR,2019-11-21,Microsoft Corp,1,149.48
+1,TVAR,Test VaR,2019-11-22,Microsoft Corp,1,149.59
+1,TVAR,Test VaR,2019-11-25,Microsoft Corp,1,151.23
+1,TVAR,Test VaR,2019-11-26,Microsoft Corp,1,152.03
+1,TVAR,Test VaR,2019-11-27,Microsoft Corp,1,152.32
+1,TVAR,Test VaR,2019-11-28,Microsoft Corp,1,152.32
+1,TVAR,Test VaR,2019-11-29,Microsoft Corp,1,151.38
+1,TVAR,Test VaR,2019-12-02,Microsoft Corp,1,149.55
+1,TVAR,Test VaR,2019-12-03,Microsoft Corp,1,149.31
+1,TVAR,Test VaR,2019-12-04,Microsoft Corp,1,149.85
+1,TVAR,Test VaR,2019-12-05,Microsoft Corp,1,149.93
+1,TVAR,Test VaR,2019-12-06,Microsoft Corp,1,151.75
+1,TVAR,Test VaR,2019-12-09,Microsoft Corp,1,151.36
+1,TVAR,Test VaR,2019-12-10,Microsoft Corp,1,151.13
+1,TVAR,Test VaR,2019-12-11,Microsoft Corp,1,151.7
+1,TVAR,Test VaR,2019-12-12,Microsoft Corp,1,153.24
+1,TVAR,Test VaR,2019-12-13,Microsoft Corp,1,154.53
+1,TVAR,Test VaR,2019-12-16,Microsoft Corp,1,155.53
+1,TVAR,Test VaR,2019-12-17,Microsoft Corp,1,154.69
+1,TVAR,Test VaR,2019-12-18,Microsoft Corp,1,154.37
+1,TVAR,Test VaR,2019-12-19,Microsoft Corp,1,155.71
+1,TVAR,Test VaR,2019-12-20,Microsoft Corp,1,157.41
+1,TVAR,Test VaR,2019-12-23,Microsoft Corp,1,157.41
+1,TVAR,Test VaR,2019-12-24,Microsoft Corp,1,157.38
+1,TVAR,Test VaR,2019-12-25,Microsoft Corp,1,157.38
+1,TVAR,Test VaR,2019-12-26,Microsoft Corp,1,158.67
+1,TVAR,Test VaR,2019-12-27,Microsoft Corp,1,158.96
+1,TVAR,Test VaR,2019-12-30,Microsoft Corp,1,157.59
+1,TVAR,Test VaR,2019-12-31,Microsoft Corp,1,157.7
+1,TVAR,Test VaR,2020-01-01,Microsoft Corp,1,157.7
+1,TVAR,Test VaR,2020-01-02,Microsoft Corp,1,160.62
+1,TVAR,Test VaR,2020-01-03,Microsoft Corp,1,158.62
+1,TVAR,Test VaR,2020-01-06,Microsoft Corp,1,159.03
+1,TVAR,Test VaR,2020-01-07,Microsoft Corp,1,157.58
+1,TVAR,Test VaR,2020-01-08,Microsoft Corp,1,160.09
+1,TVAR,Test VaR,2020-01-09,Microsoft Corp,1,162.09
+1,TVAR,Test VaR,2020-01-10,Microsoft Corp,1,161.34
+1,TVAR,Test VaR,2020-01-13,Microsoft Corp,1,163.28
+1,TVAR,Test VaR,2020-01-14,Microsoft Corp,1,162.13
+1,TVAR,Test VaR,2020-01-15,Microsoft Corp,1,163.18
+1,TVAR,Test VaR,2020-01-16,Microsoft Corp,1,166.17
+1,TVAR,Test VaR,2020-01-17,Microsoft Corp,1,167.1
+1,TVAR,Test VaR,2020-01-20,Microsoft Corp,1,167.1
+1,TVAR,Test VaR,2020-01-21,Microsoft Corp,1,166.5
+1,TVAR,Test VaR,2020-01-22,Microsoft Corp,1,165.7
+1,TVAR,Test VaR,2020-01-23,Microsoft Corp,1,166.72
+1,TVAR,Test VaR,2020-01-24,Microsoft Corp,1,165.04
+1,TVAR,Test VaR,2020-01-27,Microsoft Corp,1,162.28
+1,TVAR,Test VaR,2020-01-28,Microsoft Corp,1,165.46
+1,TVAR,Test VaR,2020-01-29,Microsoft Corp,1,168.04
+1,TVAR,Test VaR,2020-01-30,Microsoft Corp,1,172.78
+1,TVAR,Test VaR,2020-01-31,Microsoft Corp,1,170.23
+1,TVAR,Test VaR,2020-02-03,Microsoft Corp,1,174.38
+1,TVAR,Test VaR,2020-02-04,Microsoft Corp,1,180.12
+1,TVAR,Test VaR,2020-02-05,Microsoft Corp,1,179.9
+1,TVAR,Test VaR,2020-02-06,Microsoft Corp,1,183.63
+1,TVAR,Test VaR,2020-02-07,Microsoft Corp,1,183.89
+1,TVAR,Test VaR,2020-02-10,Microsoft Corp,1,188.7
+1,TVAR,Test VaR,2020-02-11,Microsoft Corp,1,184.44
+1,TVAR,Test VaR,2020-02-12,Microsoft Corp,1,184.71
+1,TVAR,Test VaR,2020-02-13,Microsoft Corp,1,183.71
+1,TVAR,Test VaR,2020-02-14,Microsoft Corp,1,185.35
+1,TVAR,Test VaR,2020-02-17,Microsoft Corp,1,185.35
+1,TVAR,Test VaR,2020-02-18,Microsoft Corp,1,187.23
+1,TVAR,Test VaR,2020-02-19,Microsoft Corp,1,187.28
+1,TVAR,Test VaR,2020-02-20,Microsoft Corp,1,184.42
+1,TVAR,Test VaR,2020-02-21,Microsoft Corp,1,178.59
+1,TVAR,Test VaR,2020-02-24,Microsoft Corp,1,170.89
+1,TVAR,Test VaR,2020-02-25,Microsoft Corp,1,168.07
+1,TVAR,Test VaR,2020-02-26,Microsoft Corp,1,170.17
+1,TVAR,Test VaR,2020-02-27,Microsoft Corp,1,158.18
+1,TVAR,Test VaR,2020-02-28,Microsoft Corp,1,162.01
+1,TVAR,Test VaR,2020-03-02,Microsoft Corp,1,172.79
+1,TVAR,Test VaR,2020-03-03,Microsoft Corp,1,164.51
+1,TVAR,Test VaR,2020-03-04,Microsoft Corp,1,170.55
+1,TVAR,Test VaR,2020-03-05,Microsoft Corp,1,166.27
+1,TVAR,Test VaR,2020-03-06,Microsoft Corp,1,161.57
+1,TVAR,Test VaR,2020-03-09,Microsoft Corp,1,150.62
+1,TVAR,Test VaR,2020-03-10,Microsoft Corp,1,160.92
+1,TVAR,Test VaR,2020-03-11,Microsoft Corp,1,153.63
+1,TVAR,Test VaR,2020-03-12,Microsoft Corp,1,139.06
+1,TVAR,Test VaR,2020-03-13,Microsoft Corp,1,158.83
+1,TVAR,Test VaR,2020-03-16,Microsoft Corp,1,135.42
+1,TVAR,Test VaR,2020-03-17,Microsoft Corp,1,146.57
+1,TVAR,Test VaR,2020-03-18,Microsoft Corp,1,140.4
+1,TVAR,Test VaR,2020-03-19,Microsoft Corp,1,142.71
+1,TVAR,Test VaR,2020-03-20,Microsoft Corp,1,137.35
+1,TVAR,Test VaR,2020-03-23,Microsoft Corp,1,135.98
+1,TVAR,Test VaR,2020-03-24,Microsoft Corp,1,148.34
+1,TVAR,Test VaR,2020-03-25,Microsoft Corp,1,146.92
+1,TVAR,Test VaR,2020-03-26,Microsoft Corp,1,156.11
+1,TVAR,Test VaR,2020-03-27,Microsoft Corp,1,149.7
+1,TVAR,Test VaR,2020-03-30,Microsoft Corp,1,160.23
+1,TVAR,Test VaR,2020-03-31,Microsoft Corp,1,157.71
+1,TVAR,Test VaR,2020-04-01,Microsoft Corp,1,152.11
+1,TVAR,Test VaR,2020-04-02,Microsoft Corp,1,155.26
+1,TVAR,Test VaR,2020-04-03,Microsoft Corp,1,153.83
+1,TVAR,Test VaR,2020-04-06,Microsoft Corp,1,165.27
+1,TVAR,Test VaR,2020-04-07,Microsoft Corp,1,163.49
+1,TVAR,Test VaR,2020-04-08,Microsoft Corp,1,165.13
+1,TVAR,Test VaR,2020-04-09,Microsoft Corp,1,165.14
+1,TVAR,Test VaR,2020-04-10,Microsoft Corp,1,165.14
+1,TVAR,Test VaR,2020-04-13,Microsoft Corp,1,165.51
+1,TVAR,Test VaR,2020-04-14,Microsoft Corp,1,173.7
+1,TVAR,Test VaR,2020-04-15,Microsoft Corp,1,171.88
+1,TVAR,Test VaR,2020-04-16,Microsoft Corp,1,177.04
+1,TVAR,Test VaR,2020-04-17,Microsoft Corp,1,178.6
+1,TVAR,Test VaR,2020-04-20,Microsoft Corp,1,175.06
+1,TVAR,Test VaR,2020-04-21,Microsoft Corp,1,167.82
+1,TVAR,Test VaR,2020-04-22,Microsoft Corp,1,173.52
+1,TVAR,Test VaR,2020-04-23,Microsoft Corp,1,171.42
+1,TVAR,Test VaR,2020-04-24,Microsoft Corp,1,174.55
+1,TVAR,Test VaR,2020-04-27,Microsoft Corp,1,174.05
+1,TVAR,Test VaR,2020-04-28,Microsoft Corp,1,169.81
+1,TVAR,Test VaR,2020-04-29,Microsoft Corp,1,177.43
+1,TVAR,Test VaR,2020-04-30,Microsoft Corp,1,179.21
+1,TVAR,Test VaR,2020-05-01,Microsoft Corp,1,174.57
+1,TVAR,Test VaR,2020-05-04,Microsoft Corp,1,178.84
+1,TVAR,Test VaR,2020-05-05,Microsoft Corp,1,180.76
+1,TVAR,Test VaR,2020-05-06,Microsoft Corp,1,182.54
+1,TVAR,Test VaR,2020-05-07,Microsoft Corp,1,183.6
+1,TVAR,Test VaR,2020-05-08,Microsoft Corp,1,184.68
+1,TVAR,Test VaR,2020-05-11,Microsoft Corp,1,186.74
+1,TVAR,Test VaR,2020-05-12,Microsoft Corp,1,182.51
+1,TVAR,Test VaR,2020-05-13,Microsoft Corp,1,179.75
+1,TVAR,Test VaR,2020-05-14,Microsoft Corp,1,180.53
+1,TVAR,Test VaR,2020-05-15,Microsoft Corp,1,183.16
+1,TVAR,Test VaR,2020-05-18,Microsoft Corp,1,184.91
+1,TVAR,Test VaR,2020-05-19,Microsoft Corp,1,183.63
+1,TVAR,Test VaR,2020-05-20,Microsoft Corp,1,185.66
+1,TVAR,Test VaR,2020-05-21,Microsoft Corp,1,183.43
+1,TVAR,Test VaR,2020-05-22,Microsoft Corp,1,183.51
+1,TVAR,Test VaR,2020-05-25,Microsoft Corp,1,183.51
+1,TVAR,Test VaR,2020-05-26,Microsoft Corp,1,181.57
+1,TVAR,Test VaR,2020-05-27,Microsoft Corp,1,181.81
+1,TVAR,Test VaR,2020-05-28,Microsoft Corp,1,181.4
+1,TVAR,Test VaR,2020-05-29,Microsoft Corp,1,183.25
+1,TVAR,Test VaR,2020-06-01,Microsoft Corp,1,182.83
+1,TVAR,Test VaR,2020-06-02,Microsoft Corp,1,184.91
+1,TVAR,Test VaR,2020-06-03,Microsoft Corp,1,185.36
+1,TVAR,Test VaR,2020-06-04,Microsoft Corp,1,182.92
+1,TVAR,Test VaR,2020-06-05,Microsoft Corp,1,187.2
+1,TVAR,Test VaR,2020-06-08,Microsoft Corp,1,188.36
+1,TVAR,Test VaR,2020-06-09,Microsoft Corp,1,189.8
+1,TVAR,Test VaR,2020-06-10,Microsoft Corp,1,196.84
+1,TVAR,Test VaR,2020-06-11,Microsoft Corp,1,186.27
+1,TVAR,Test VaR,2020-06-12,Microsoft Corp,1,187.74
+1,TVAR,Test VaR,2020-06-15,Microsoft Corp,1,188.94
+1,TVAR,Test VaR,2020-06-16,Microsoft Corp,1,193.57
+1,TVAR,Test VaR,2020-06-17,Microsoft Corp,1,194.24
+1,TVAR,Test VaR,2020-06-18,Microsoft Corp,1,196.32
+1,TVAR,Test VaR,2020-06-19,Microsoft Corp,1,195.15
+1,TVAR,Test VaR,2020-06-22,Microsoft Corp,1,200.57
+1,TVAR,Test VaR,2020-06-23,Microsoft Corp,1,201.91
+1,TVAR,Test VaR,2020-06-24,Microsoft Corp,1,197.84
