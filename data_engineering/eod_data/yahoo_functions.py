@@ -1,4 +1,4 @@
-"""Module for yahoo API helper functions."""
+
 import datetime
 
 import pandas as pd
