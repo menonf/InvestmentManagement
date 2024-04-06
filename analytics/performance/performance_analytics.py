@@ -103,14 +103,14 @@ def calculate_portfolio_asset_weights(portfolio_market_data: DataFrame, price_ty
     if weightage_type == "market_weighted":
         market_value = portfolio_market_data_pivot["HeldShares"].mul(portfolio_market_data_pivot[price_type])
         market_value = market_value.reorder_levels(["PortfolioShortName", "SecurityName"], axis=1)
-        market_values_sum_by_portfolio = market_value.groupby(level="PortfolioShortName", axis=1).sum()
+        market_values_sum_by_portfolio = market_value.T.groupby(level=[0]).sum().T
         weights_by_portfolio = market_value.div(market_values_sum_by_portfolio, axis=1)
 
     elif weightage_type == "price_weighted":
         market_value = portfolio_market_data_pivot[price_type]
         market_value = market_value.reorder_levels(["PortfolioShortName", "SecurityName"], axis=1)
         market_value = market_value.sort_index(axis=1)
-        market_values_sum_by_portfolio = market_value.groupby(level="PortfolioShortName", axis=1).sum()
+        market_values_sum_by_portfolio = market_value.T.groupby(level=[0]).sum().T
         weights_by_portfolio = market_value.div(market_values_sum_by_portfolio, axis=1)
 
     else:
