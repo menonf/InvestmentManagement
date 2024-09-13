@@ -18,4 +18,3 @@ def test_value_at_risk() -> None:
     df_var = pd.DataFrame.from_dict(portfolio_var, orient="columns")
     var_values = [-0.032606116579867096, -0.05581146041933242, -0.030116069430500835, -0.043124354820760574]
     assert df_var["MetricValue"].to_list() == var_values
-
