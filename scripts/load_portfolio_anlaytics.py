@@ -19,10 +19,10 @@ engine = sql.create_engine("mssql+pyodbc:///?odbc_connect=%s" % connection_param
 connection = engine.connect()
 session = Session(engine)
 
-# df_securities = db_func.read_security_master(orm_session=session, orm_engine=engine)
-# df_eod = yf_func.fetch_latest_data(df_securities["Ticker"].tolist(), df_securities["SecID"].tolist())
-# df_eod = yf_func.get_historical_data(df_securities["Ticker"].tolist(), df_securities["SecID"].tolist(), "2023-10-01", "2023-10-31")
-# db_func.write_market_data(df_eod, session)
+df_securities = db_func.read_security_master(orm_session=session, orm_engine=engine)
+df_eod = yf_func.fetch_latest_data(df_securities["Ticker"].tolist(), df_securities["SecID"].tolist())
+df_eod = yf_func.get_historical_data(df_securities["Ticker"].tolist(), df_securities["SecID"].tolist(), "2023-10-01", "2023-10-31")
+db_func.write_market_data(df_eod, session)
 
 
 portfolio_short_names = ["QQQ", "GTEF"]
