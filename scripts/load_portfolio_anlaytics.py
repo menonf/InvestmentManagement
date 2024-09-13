@@ -30,7 +30,7 @@ portfolio_market_data = db_func.get_portfolio_market_data(session, engine, "2023
 
 portfolio_asset_returns = perf.calculate_portfolio_asset_returns(portfolio_market_data, "Close")["LogReturns"]
 portfolio_asset_weights = perf.calculate_portfolio_asset_weights(portfolio_market_data, "Close", "price_weighted")
-# portfolio_asset_weights = yf_func.calculate_weights(portfolio_market_data, "Close", "equal_weighted")
+portfolio_asset_weights = yf_func.calculate_weights(portfolio_market_data, "Close", "equal_weighted")
 portfolio_return = (portfolio_asset_returns * portfolio_asset_weights).groupby(level=0, axis=1).sum()
 
 max_date_index = portfolio_asset_weights.index.max()
