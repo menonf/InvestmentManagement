@@ -1,4 +1,5 @@
 """Module for yahoo fundamental data."""
+
 import yfinance as yf
 
 msft = yf.Ticker("AAPL")

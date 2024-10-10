@@ -1,4 +1,5 @@
 """Module for financetoolkit fundamental data."""
+
 from financetoolkit import Toolkit
 
 tickers = ["AAPL", "MSFT"]

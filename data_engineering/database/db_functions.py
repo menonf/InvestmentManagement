@@ -1,4 +1,5 @@
 """SQLAlchemy ORM Module to connect to database objects."""
+
 import datetime
 
 import pandas as pd
@@ -21,10 +22,11 @@ class SecurityMaster(Base):
     __table_args__ = {"schema": "dbo"}
     SecID: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     Ticker: Mapped[str] = mapped_column()
+    SecurityName: Mapped[str] = mapped_column()
     Sector: Mapped[str] = mapped_column()
     Country: Mapped[str] = mapped_column()
     SecurityType: Mapped[str] = mapped_column()
-    SecurityName: Mapped[str] = mapped_column()
+    DailyLoad: Mapped[str] = mapped_column()
 
 
 class MarketData(Base):
@@ -42,6 +44,7 @@ class MarketData(Base):
     Volume: Mapped[int] = mapped_column()
     Dividends: Mapped[float] = mapped_column()
     Stock_Splits: Mapped[float] = mapped_column()
+    Interval: Mapped[str] = mapped_column()
     Dataload_Date: Mapped[str] = mapped_column()
 
 
@@ -81,11 +84,12 @@ def read_security_master(orm_session: Session, orm_engine: Engine) -> DataFrame:
     query = orm_session.query(
         SecurityMaster.SecID,
         SecurityMaster.Ticker,
+        SecurityMaster.SecurityName,
         SecurityMaster.Sector,
         SecurityMaster.Country,
         SecurityMaster.SecurityType,
-        SecurityMaster.SecurityName,
-    )
+        SecurityMaster.DailyLoad,
+    ).filter(SecurityMaster.DailyLoad == 1)
 
     df_securityMaster = pd.read_sql_query(query.statement, con=orm_engine)
 
@@ -162,6 +166,7 @@ def read_market_data(orm_session: Session, orm_engine: Engine, start_date: str, 
         MarketData.Volume,
         MarketData.Dividends,
         MarketData.Stock_Splits,
+        MarketData.Interval,
     ).filter(MarketData.AsOfDate.between(start_date, end_date))
 
     df_market_data = pd.read_sql_query(query.statement, con=orm_engine)
