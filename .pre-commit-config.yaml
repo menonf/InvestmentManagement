@@ -1,5 +1,5 @@
 # https://pre-commit.com
-default_stages: [commit, manual, push]
+default_stages: [pre-commit, manual, pre-push]
 exclude:  docs/ | scripts/ | data/ | templates/
 repos:
   - repo: local
@@ -7,13 +7,13 @@ repos:
     hooks:
     - id: isort
       name: isort
-      stages: [commit, manual]
+      stages: [pre-commit, manual]
       entry: isort 
       language: python
   
     - id: black
       name: black
-      stages: [commit, manual]
+      stages: [pre-commit, manual]
       entry:  black
       args: ['--line-length=135','data_engineering','analytics']
       language_version: python3.11
@@ -34,7 +34,7 @@ repos:
     hooks:
     - id: flake8
       name: flake8
-      stages: [commit, manual]
+      stages: [pre-commit, manual]
       entry: flake8 --max-line-length 135 --config=setup.cfg
       language: python
       exclude: (.csv|docs|tests|scripts|templates|.yml|.toml|.cfg|.json|setup.py|txt|gitignore|.yaml|.template|README.md|notebooks|reports|.idea)
@@ -44,7 +44,7 @@ repos:
     hooks:
     - id: mypy
       name: mypy
-      stages: [commit, manual]
+      stages: [pre-commit, manual]
       args: [--config-file, setup.cfg]
       require_serial: true
       additional_dependencies: [pydantic]
@@ -57,7 +57,17 @@ repos:
     hooks:
     - id: pydocstyle
       name: pydocstyle
-      stages: [commit, manual]
+      stages: [pre-commit, manual]
       entry: pydocstyle
       language: python
       exclude: (templates|reports|http_trigger|function.json|host.json|scripts|.yml|.toml|.cfg|setup.py|txt|.gitignore|.yaml|.template|README.md|notebooks)
+
+  - repo: local
+    hooks:
+    - id: pytest
+      name: run pytest unit tests
+      stages: [pre-commit, manual]
+      entry: pytest tests\\unit_tests\\analytics\\risk\\risk_analytics.py 
+      language: python
+      pass_filenames: false
+      always_run: true

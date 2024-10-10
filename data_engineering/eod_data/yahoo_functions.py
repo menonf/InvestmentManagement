@@ -1,4 +1,5 @@
 """Module for yahoo API helper functions."""
+
 import datetime
 
 import pandas as pd
@@ -6,7 +7,7 @@ import yfinance as yf
 from pandas import DataFrame
 
 
-def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, end_date: str) -> DataFrame:
+def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, end_date: str, interval: str) -> DataFrame:
     """Retrieve historical stock data from Yahoo Finance for multiple tickers.
 
     Params:
@@ -42,7 +43,7 @@ def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, 
             # print(stock.fast_info.last_price)
             # print(stock.fast_info.market_cap)
             # print(stock.fast_info.last_price * stock.fast_info.shares)
-            historical_data = stock.history(start=start_date, end=end_date)
+            historical_data = stock.history(start=start_date, end=end_date, period=interval)
 
             if not historical_data.empty:
                 historical_data.insert(0, "AsOfDate", historical_data.index.date)
@@ -64,9 +65,11 @@ def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, 
     df_all_historical_data = pd.concat(dataframes)
     df_all_historical_data = df_all_historical_data.reset_index()
     df_all_historical_data["Dataload_Date"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    df_all_historical_data["Interval"] = "1d"
     df_all_historical_data = df_all_historical_data.reset_index(drop=True)
 
-    print("No data for ", tickers_with_no_data)
+    if len(tickers_with_no_data) > 1:
+        print("Tickers that have no data ", tickers_with_no_data)
     return df_all_historical_data.round(4)
 
 
@@ -120,6 +123,7 @@ def fetch_latest_data(tickers: list[str], sec_id: list[str]) -> DataFrame:
             continue
 
     df_latest_data = pd.concat(dataframes)
+    df_latest_data["Interval"] = "1d"
     df_latest_data["Dataload_Date"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     df_latest_data = df_latest_data.reset_index(drop=True)
 

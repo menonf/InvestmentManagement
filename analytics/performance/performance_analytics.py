@@ -1,4 +1,5 @@
 """Module for investment performance analytics."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -68,7 +69,7 @@ def plot_cumulative_returns(asset_returns: DataFrame) -> None:
     # Set the initial value of cumulative returns to 100
     for line in ax.lines:
         ydata = line.get_ydata()
-        ydata[0] = 100
+        ydata[0] = 100  # type: ignore
         line.set_ydata(ydata)
 
     plt.show()
