@@ -44,7 +44,14 @@ for PortfolioShortName in portfolio_short_names:
     portfolio_returns = portfolio_asset_returns[PortfolioShortName]
     portfolio_weights = portfolio_asset_weights[PortfolioShortName]
     portfolio_latest_weights = portfolio_asset_weights[max_date_index:max_date_index][PortfolioShortName]
-    obj_risk = risk.PortfolioVaR(portfolio_asset_returns, portfolio_latest_weights, PortfolioShortName, lookback_days=249, horizon_days=1, confidence_interval=0.99)
+
+    obj_risk = risk.PortfolioVaR(portfolio_asset_returns,
+                                 portfolio_latest_weights, 
+                                 PortfolioShortName,
+                                 lookback_days=249,
+                                 horizon_days=1,
+                                 confidence_interval=0.99)
+
     var_result = obj_risk.calculate_var()
     df_var = pd.DataFrame.from_dict(var_result, orient="columns")
     df_portfolio_var.append(df_var)
