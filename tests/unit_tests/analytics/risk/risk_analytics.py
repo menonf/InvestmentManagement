@@ -14,14 +14,14 @@ def test_value_at_risk() -> None:
     portfolio_asset_weights = perf.calculate_portfolio_asset_weights(webData, "Close", "price_weighted")
     max_date_index = portfolio_asset_weights.index.max()
     portfolio_latest_weights = portfolio_asset_weights[max_date_index:max_date_index]
-    
+
     portfolio_var = risk.PortfolioVaR(portfolio_asset_returns,
                                       portfolio_latest_weights,
                                       "Portfolio_ABC",
                                       lookback_days=252,
                                       horizon_days=1,
                                       confidence_interval=0.95)
-    
+
     df_var = pd.DataFrame.from_dict(portfolio_var.calculate_var(), orient="columns")
     var_values = [-0.03265852459105973, -0.03059793484961368]
     assert df_var["MetricValue"].to_list() == var_values
