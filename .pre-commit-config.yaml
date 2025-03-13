@@ -67,7 +67,7 @@ repos:
     - id: pytest
       name: run pytest unit tests
       stages: [pre-commit, manual]
-      entry: pytest tests/unit_tests/analytics/risk/risk_analytics.py
+      entry: pytest tests/
       language: python
       pass_filenames: false
       always_run: true
