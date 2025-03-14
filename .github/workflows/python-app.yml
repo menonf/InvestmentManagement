@@ -39,3 +39,17 @@ jobs:
         
     - name: Run pre-commit hooks
       run: pre-commit run --all-files
+
+    - name: Run pre-commit hooks
+      run: pre-commit run --all-files || true  # Ensure pre-commit runs even if some hooks fail
+
+    - name: Auto-commit pre-commit fixes (if needed)
+      run: |
+        if [[ $(git status --porcelain) ]]; then
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add .
+          git commit -m "Apply pre-commit fixes"
+          git push
+        fi
+
