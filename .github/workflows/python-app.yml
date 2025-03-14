@@ -33,6 +33,9 @@ jobs:
 
     - name: Change to repository root
       run: cd $GITHUB_WORKSPACE
+
+    - name: List test files
+      run: ls -R tests/unit_tests/analytics/risk/
         
     - name: Run pre-commit hooks
       run: pre-commit run --all-files
