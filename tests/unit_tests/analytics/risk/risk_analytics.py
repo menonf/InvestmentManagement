@@ -1,5 +1,7 @@
 """Unit Tests for risk_analytics."""
 import pathlib
+import os
+import pytest
 
 import pandas as pd
 
@@ -7,6 +9,8 @@ from analytics.performance import performance_analytics as perf
 from analytics.risk import risk_analytics as risk
 
 
+file_path = os.path.join(os.path.dirname(__file__), "MSCIRiskMetricsPrices.csv")
+@pytest.mark.skipif(not os.path.exists(file_path), reason="Test file missing")
 def test_value_at_risk() -> None:
     """This function test whether the Value at Risk result is as expected."""
     webData = pd.read_csv(f"{pathlib.Path().resolve()}\\tests\\unit_tests\\analytics\\risk\\MSCIRiskMetricsPrices.csv", header=0)
