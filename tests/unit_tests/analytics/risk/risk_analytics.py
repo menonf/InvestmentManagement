@@ -9,7 +9,9 @@ from analytics.performance import performance_analytics as perf
 from analytics.risk import risk_analytics as risk
 
 
-file_path = os.path.join(os.path.dirname(__file__), "MSCIRiskMetricsPrices.csv")
+test_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(test_dir, "MSCIRiskMetricsPrices.csv")
+
 @pytest.mark.skipif(not os.path.exists(file_path), reason="Test file missing")
 def test_value_at_risk() -> None:
     """This function test whether the Value at Risk result is as expected."""
