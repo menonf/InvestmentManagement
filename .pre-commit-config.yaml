@@ -21,12 +21,6 @@ repos:
       exclude: (docs|scripts)
       files: data_engineering
 
-    - id: git_add
-      name: git_add
-      stages: [commit, manual]
-      entry: git add
-      args: ['-u']
-      language: system
 
   - repo: local #pre-commit-hooks
     #rev: v2.3.0
