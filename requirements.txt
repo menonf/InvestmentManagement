@@ -2,6 +2,7 @@ requests
 pandas
 simfin
 financetoolkit
+financedatabase
 yfinance
 pyodbc
 sqlalchemy
