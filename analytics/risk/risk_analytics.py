@@ -75,14 +75,14 @@ class PortfolioVaR:
         Returns:
         float: Parametric VaR at the specified confidence interval.
         """
-        portfolio_mean = (recent_returns.mean() * self.portfolio_latest_weights).sum(axis=1)
+        portfolio_mean = (recent_returns.mean().values * self.portfolio_latest_weights.values).sum()
         portfolio_variance = np.dot(np.dot(self.portfolio_latest_weights, recent_returns.cov()), self.portfolio_latest_weights.T)[0][0]
         portfolio_std_dev = np.sqrt(portfolio_variance)
 
         # Adjust for the horizon by scaling the standard deviation
         adjusted_std_dev = portfolio_std_dev * np.sqrt(self.horizon_days)
         alpha = 1 - self.confidence_interval
-        var = stats.norm.ppf(alpha, portfolio_mean, adjusted_std_dev)[0]
+        var = stats.norm.ppf(alpha, portfolio_mean, adjusted_std_dev)
 
         return var
 
@@ -93,7 +93,7 @@ class PortfolioVaR:
         Returns:
         DataFrame: A DataFrame containing VaR at the specified confidence interval.
         """
-        recent_returns = self.get_recent_returns()
+        recent_returns = self.get_recent_returns()[self.PortfolioShortName]
 
         # Calculate Historical VaR
         hist_var = self.calculate_historical_var(recent_returns)

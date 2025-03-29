@@ -46,9 +46,20 @@ def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, 
             historical_data = stock.history(start=start_date, end=end_date, period=interval)
 
             if not historical_data.empty:
-                historical_data.insert(0, "AsOfDate", historical_data.index.date)
-                historical_data.insert(1, "SecID", sec)
-                historical_data.rename(columns={"Stock Splits": "Stock_Splits"}, inplace=True)
+                historical_data.insert(0, "as_of_date", historical_data.index.date)
+                historical_data.insert(1, "security_id", sec)
+                historical_data.rename(
+                    columns={
+                        "Open": "open",
+                        "High": "high",
+                        "Low": "low",
+                        "Close": "close",
+                        "Volume": "volume",
+                        "Dividends": "dividends",
+                        "Stock Splits": "stock_splits",
+                    },
+                    inplace=True,
+                )
                 dataframes.append(historical_data)
             else:
                 tickers_with_no_data.append(ticker)
@@ -64,8 +75,8 @@ def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, 
 
     df_all_historical_data = pd.concat(dataframes)
     df_all_historical_data = df_all_historical_data.reset_index()
-    df_all_historical_data["Dataload_Date"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    df_all_historical_data["Interval"] = "1d"
+    df_all_historical_data["dataload_date"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    df_all_historical_data["interval"] = "1d"
     df_all_historical_data = df_all_historical_data.reset_index(drop=True)
 
     if len(tickers_with_no_data) > 1:
@@ -128,3 +139,44 @@ def fetch_latest_data(tickers: list[str], sec_id: list[str]) -> DataFrame:
     df_latest_data = df_latest_data.reset_index(drop=True)
 
     return df_latest_data.round(4)
+
+
+def fetch_fundamentals(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:
+    """Fetch all available fundamental data for given tickers and security IDs.
+
+    Params:
+        tickers: List of stock ticker symbols.
+        sec_ids: List of corresponding security IDs.
+
+    Returns:
+        DataFrame containing fundamental data ready for database insertion.
+    """
+    data_list = []
+
+    if len(tickers) != len(sec_ids):
+        raise ValueError("Length of tickers and sec_ids lists must be the same.")
+
+    for ticker, sec_id in zip(tickers, sec_ids):
+        try:
+            stock = yf.Ticker(ticker)
+            info = stock.info  # Fetch all available fundamentals
+
+            # Iterate through all available fundamentals
+            for key, value in info.items():
+                if isinstance(value, (int, float)) and not pd.isna(value):
+                    data_list.append(
+                        {
+                            "security_id": sec_id,
+                            "metric_type": key,  # Using Yahoo's raw key names as metric_type
+                            "metric_value": float(value),
+                            "source_vendor": "Yahoo Finance",
+                            "effective_date": datetime.date.today(),
+                            "end_date": None,  # Latest record
+                        }
+                    )
+
+        except Exception as e:
+            print(f"Failed to fetch data for {ticker}: {e}")
+            continue
+
+    return pd.DataFrame(data_list)
