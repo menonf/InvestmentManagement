@@ -1,8 +1,10 @@
 """Module for yahoo API helper functions."""
 
 import datetime
+import time
 
 import pandas as pd
+import requests
 import yfinance as yf
 from pandas import DataFrame
 
@@ -43,7 +45,8 @@ def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, 
             # print(stock.fast_info.last_price)
             # print(stock.fast_info.market_cap)
             # print(stock.fast_info.last_price * stock.fast_info.shares)
-            historical_data = stock.history(start=start_date, end=end_date, period=interval)
+            historical_data = stock.history(start=start_date, end=end_date, period=interval, auto_adjust=False)
+            # historical_data = yf.download(ticker, start=start_date, end=end_date, period=interval, auto_adjust=True)
 
             if not historical_data.empty:
                 historical_data.insert(0, "as_of_date", historical_data.index.date)
@@ -54,6 +57,7 @@ def get_historical_data(tickers: list[str], sec_id: list[str], start_date: str, 
                         "High": "high",
                         "Low": "low",
                         "Close": "close",
+                        "Adj Close": "adj_close",
                         "Volume": "volume",
                         "Dividends": "dividends",
                         "Stock Splits": "stock_splits",
@@ -141,8 +145,8 @@ def fetch_latest_data(tickers: list[str], sec_id: list[str]) -> DataFrame:
     return df_latest_data.round(4)
 
 
-def fetch_fundamentals(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:
-    """Fetch all available fundamental data for given tickers and security IDs.
+def fetch_fundamentals_yahoo(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:
+    """Fetch shares outstanding and market cap for given tickers and security IDs.
 
     Params:
         tickers: List of stock ticker symbols.
@@ -159,19 +163,19 @@ def fetch_fundamentals(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:
     for ticker, sec_id in zip(tickers, sec_ids):
         try:
             stock = yf.Ticker(ticker)
-            info = stock.info  # Fetch all available fundamentals
+            info = stock.info
 
-            # Iterate through all available fundamentals
-            for key, value in info.items():
-                if isinstance(value, (int, float)) and not pd.isna(value):
+            for key in ["sharesOutstanding", "marketCap"]:
+                value = info.get(key)
+                if value is not None and isinstance(value, (int, float)):
                     data_list.append(
                         {
                             "security_id": sec_id,
-                            "metric_type": key,  # Using Yahoo's raw key names as metric_type
+                            "metric_type": key,
                             "metric_value": float(value),
                             "source_vendor": "Yahoo Finance",
                             "effective_date": datetime.date.today(),
-                            "end_date": None,  # Latest record
+                            "end_date": None,
                         }
                     )
 
@@ -180,3 +184,58 @@ def fetch_fundamentals(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:
             continue
 
     return pd.DataFrame(data_list)
+
+
+def fetch_fundamentals_simfin(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:
+    """
+    Fetch fundamental data (e.g., common shares outstanding) for given tickers and security IDs from SimFin.
+
+    Params:
+        tickers: List of stock ticker symbols.
+        sec_ids: List of corresponding security IDs.
+
+    Returns:
+        DataFrame containing fundamental data ready for database insertion.
+    """
+    data_list = []
+
+    if len(tickers) != len(sec_ids):
+        raise ValueError("Length of tickers and sec_ids lists must be the same.")
+
+    for ticker, sec_id in zip(tickers, sec_ids):
+        url = f"https://backend.simfin.com/api/v3/companies/common-shares-outstanding?ticker={ticker}"
+        headers = {"accept": "application/json", "Authorization": "MFzWmtbTCssYk6YyGO7YSze13qmFUAWd"}
+
+        while True:
+            try:
+                response = requests.get(url, headers=headers)
+                response.raise_for_status()  # Raise for HTTP errors (e.g., 429)
+                data = response.json()
+
+                df = pd.json_normalize(data)
+                if not df.empty:
+                    df["security_id"] = sec_id
+                    df["metric_type"] = "shares_outstanding"
+                    df["source_vendor"] = "SimFin"
+                    df["end_date"] = None
+                    df = df.rename(columns={"value": "metric_value", "endDate": "effective_date"})
+                    df = df[["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"]]
+                    data_list.append(df)
+                else:
+                    print(f"[No Data] Empty response for {ticker}")
+                break  # Success — break the retry loop
+
+            except requests.exceptions.HTTPError as http_err:
+                if response.status_code == 429:
+                    print(f"[Quota Limit] 429 Too Many Requests for {ticker}. Retrying in 10 seconds...")
+                    time.sleep(10)
+                    continue  # Retry same ticker
+                else:
+                    print(f"[HTTP Error] {ticker}: {http_err}")
+                    break  # Break and move to next ticker
+
+            except Exception as e:
+                print(f"[Error] Failed to fetch SimFin data for {ticker}: {e}")
+                break  # Break and move to next ticker
+
+    return pd.concat(data_list, ignore_index=True) if data_list else pd.DataFrame()
