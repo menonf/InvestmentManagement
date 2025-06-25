@@ -81,8 +81,8 @@ print("Updated is_active for existing tickers.")
 df_nasdaq = df_nasdaq.merge(df_securities[['symbol', 'security_id']], on='symbol', how='left')
 
 
-start_date = "2025-01-01"
-end_date = "2025-03-01"
+start_date = "2024-12-31"
+end_date = "2025-06-06"
 df_eod = yf_func.get_historical_data(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
                                      df_securities[df_securities["is_active"] == 1]["security_id"].tolist(),
                                      start_date,
@@ -108,9 +108,12 @@ df_eod = yf_func.get_historical_data(df_securities[df_securities["is_active"] ==
                                      start_date, 
                                      end_date,
                                      "1d")
+db_func.write_market_data(df_eod, session)
+
 # df_eod = yf_func.fetch_latest_data(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
 #                                     df_securities[df_securities["is_active"] == 1]["security_id"].tolist())
-df_fundamentals = yf_func.fetch_fundamentals(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
+
+
+df_fundamentals = yf_func.fetch_fundamentals_yahoo(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
                                              df_securities[df_securities["is_active"] == 1]["security_id"].tolist())
-db_func.write_market_data(df_eod, session)
 db_func.write_security_fundamentals(df_fundamentals, session)

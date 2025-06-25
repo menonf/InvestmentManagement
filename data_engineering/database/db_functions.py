@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
 
 
 class SecurityMaster(Base):
-    """SQLAlchemy ORM Class maps on to SQL SecurityMaster table."""
+    """SQLAlchemy ORM Class maps on to security_master table."""
 
     __tablename__ = "security_master"
     __table_args__ = {"schema": "dbo"}
@@ -59,7 +59,7 @@ class SecurityFundamentals(Base):
 
 
 class MarketData(Base):
-    """SQLAlchemy ORM Class maps on to SQL MarketData table."""
+    """SQLAlchemy ORM Class maps on to market_data table."""
 
     __tablename__ = "market_data"
     __table_args__ = {"schema": "dbo"}
@@ -70,6 +70,7 @@ class MarketData(Base):
     high: Mapped[float] = mapped_column()
     low: Mapped[float] = mapped_column()
     close: Mapped[float] = mapped_column()
+    adj_close: Mapped[float] = mapped_column()
     volume: Mapped[int] = mapped_column()
     dividends: Mapped[float] = mapped_column()
     stock_splits: Mapped[float] = mapped_column()
@@ -78,7 +79,7 @@ class MarketData(Base):
 
 
 class Portfolio(Base):
-    """SQLAlchemy ORM Class maps on to SQL Portfolio table."""
+    """SQLAlchemy ORM Class maps on to portfolio table."""
 
     __tablename__ = "portfolio"
     __table_args__ = {"schema": "dbo"}
@@ -90,7 +91,7 @@ class Portfolio(Base):
 
 
 class PortfolioHoldings(Base):
-    """SQLAlchemy ORM Class maps on to SQL PortfolioHoldings table."""
+    """SQLAlchemy ORM Class maps on to portfolio_holdings table."""
 
     __tablename__ = "portfolio_holdings"
     __table_args__ = {"schema": "dbo"}
@@ -102,7 +103,7 @@ class PortfolioHoldings(Base):
 
 
 def read_security_master(orm_session: Session, orm_engine: Engine) -> DataFrame:
-    """Fetch all records from Security Master table.
+    """Fetch all records from security_master table.
 
     Params:
         orm_session: SQLAlchemy Session object.
@@ -144,14 +145,14 @@ def write_security_master(equities_df: pd.DataFrame, session: Session) -> None:
 
 
 def read_portfolio(orm_session: Session, orm_engine: Engine, portfolio_short_names: list[str]) -> DataFrame:
-    """Fetch records from Portfolio table.
+    """Fetch records from portfolio table.
 
     Params:
         orm_session: SQLAlchemy Session object.
         orm_engine: SQLAlchemy database engine object.
 
     Returns:
-        DataFrame containing Portfolio table records.
+        DataFrame containing portfolio table records.
 
     """
     query = orm_session.query(
@@ -162,14 +163,14 @@ def read_portfolio(orm_session: Session, orm_engine: Engine, portfolio_short_nam
 
 
 def read_portfolio_holdings(orm_session: Session, orm_engine: Engine, start_date: str, end_date: str) -> DataFrame:
-    """Fetch records from PortfolioHoldings table.
+    """Fetch records from portfolio_holdings table.
 
     Params:
         orm_session: SQLAlchemy Session object.
         orm_engine: SQLAlchemy database engine object.
 
     Returns:
-        DataFrame containing PortfolioHoldings table records.
+        DataFrame containing portfolio_holdings table records.
 
     """
     start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%d")
@@ -188,7 +189,7 @@ def read_portfolio_holdings(orm_session: Session, orm_engine: Engine, start_date
 
 
 def read_market_data(orm_session: Session, orm_engine: Engine, start_date: str, end_date: str) -> pd.DataFrame:
-    """Fetch records from MarketData table.
+    """Fetch records from market_data table.
 
     Params:
         orm_session: SQLAlchemy Session object.
@@ -197,7 +198,7 @@ def read_market_data(orm_session: Session, orm_engine: Engine, start_date: str, 
         end_date: End date as a string in "YYYY-MM-DD" format.
 
     Returns:
-        DataFrame containing MarketData table records.
+        DataFrame containing market_data table records.
     """
     # Parse input dates to datetime objects
     start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%d")
@@ -212,14 +213,14 @@ def read_market_data(orm_session: Session, orm_engine: Engine, start_date: str, 
 
 
 def write_market_data(market_data: DataFrame, orm_session: Session) -> None:
-    """Write records to MarketData table.
+    """Write records to market_data table.
 
     Params:
         orm_session: SQLAlchemy Session object.
         orm_engine: SQLAlchemy database engine object.
 
     Returns:
-        DataFrame containing MarketData table records.
+        DataFrame containing market_data table records.
 
     """
     try:
@@ -241,7 +242,7 @@ def write_market_data(market_data: DataFrame, orm_session: Session) -> None:
 
 
 def read_security_fundamentals(orm_session: Session, orm_engine: Engine, metric_type: Optional[str] = None) -> pd.DataFrame:
-    """Fetch records from SecurityFundamentals table with optional filtering on metric_type.
+    """Fetch records from security_fundamentals table with optional filtering on metric_type.
 
     Params:
         orm_session: SQLAlchemy Session object.
@@ -249,7 +250,7 @@ def read_security_fundamentals(orm_session: Session, orm_engine: Engine, metric_
         metric_type: Optional string to filter by metric_type. If None, fetch all records.
 
     Returns:
-        DataFrame containing SecurityFundamentals table records.
+        DataFrame containing security_fundamentals table records.
     """
     # Build query
     query = orm_session.query(*SecurityFundamentals.__table__.columns)
@@ -307,7 +308,7 @@ def write_security_fundamentals(fundamental_data: pd.DataFrame, orm_session: Ses
 
 
 def write_portfolio_holdings(df_holdings: DataFrame, orm_session: Session) -> None:
-    """Write records to PortfolioHoldings table.
+    """Write records to portfolio_holdings table.
 
     Params:
         df_holdings: DataFrame containing portfolio holdings data.
@@ -336,26 +337,63 @@ def get_portfolio_market_data(
     end_date: str,
     portfolio_short_names: list[str],
 ) -> DataFrame:
-    """Join all the SQLAlchemy Portfolio Data objects to return Portfolio Market Data.
+    """
+    Join all the SQLAlchemy Portfolio Data objects to return Portfolio Market Data.
 
     Params:
         orm_session: SQLAlchemy Session object.
         orm_engine: SQLAlchemy database engine object.
 
     Returns:
-        DataFrame containing Portfolio Market Data table records.
-
+        DataFrame containing Portfolio Market Data.
     """
+    # Load individual tables
     df_securities = read_security_master(orm_session, orm_engine)
     df_market_data = read_market_data(orm_session, orm_engine, start_date, end_date)
     df_portfolio_data = read_portfolio(orm_session, orm_engine, portfolio_short_names)
     df_portfolio_holdings_data = read_portfolio_holdings(orm_session, orm_engine, start_date, end_date)
-    df_security_fundamentals = read_security_fundamentals(orm_session, orm_engine, "sharesOutstanding")
+    df_security_fundamentals = read_security_fundamentals(orm_session, orm_engine, "shares_outstanding")
 
+    # Merge base market data
     df_portfolio_market_data = pd.merge(
         pd.merge(pd.merge(df_portfolio_data, df_portfolio_holdings_data), df_securities), df_market_data
     )
 
-    df_portfolio_market_data = pd.merge(df_portfolio_market_data, df_security_fundamentals, on="security_id")
+    # Ensure datetime format
+    df_portfolio_market_data["as_of_date"] = pd.to_datetime(df_portfolio_market_data["as_of_date"], errors="coerce")
+    df_security_fundamentals["effective_date"] = pd.to_datetime(df_security_fundamentals["effective_date"], errors="coerce")
 
-    return df_portfolio_market_data
+    # Drop rows with missing dates
+    df_portfolio_market_data = df_portfolio_market_data.dropna(subset=["as_of_date"])
+    df_security_fundamentals = df_security_fundamentals.dropna(subset=["effective_date"])
+
+    # Ensure matching dtypes for security_id
+    df_portfolio_market_data["security_id"] = df_portfolio_market_data["security_id"].astype(int)
+    df_security_fundamentals["security_id"] = df_security_fundamentals["security_id"].astype(int)
+
+    # Prepare for merge_asof using group-wise merge
+    merged_rows = []
+
+    for sec_id in df_portfolio_market_data["security_id"].unique():
+        df_left = df_portfolio_market_data[df_portfolio_market_data["security_id"] == sec_id].copy()
+        df_left = df_left.sort_values("as_of_date").reset_index(drop=True)
+
+        df_right = df_security_fundamentals[df_security_fundamentals["security_id"] == sec_id].copy()
+        df_right = df_right.sort_values("effective_date").reset_index(drop=True)
+
+        if not df_right.empty:
+            df_merged = pd.merge_asof(
+                df_left, df_right, by="security_id", left_on="as_of_date", right_on="effective_date", direction="backward"
+            )
+        else:
+            # Fill with missing columns if fundamental data is absent
+            missing_cols = set(df_security_fundamentals.columns) - set(df_left.columns)
+            for col in missing_cols:
+                df_left[col] = pd.NA
+            df_merged = df_left
+
+        merged_rows.append(df_merged)
+
+    df_merged_all = pd.concat(merged_rows, ignore_index=True)
+
+    return df_merged_all

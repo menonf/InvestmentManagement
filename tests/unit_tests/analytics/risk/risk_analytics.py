@@ -16,8 +16,8 @@ def test_value_at_risk() -> None:
     """This function tests whether the Value at Risk result is as expected."""
     webData = pd.read_csv(file_path, header=0) 
 
-    portfolio_asset_returns = perf.calculate_portfolio_asset_returns(webData, "close")["log_returns"]
-    portfolio_asset_weights = perf.calculate_portfolio_asset_weights(webData, "close", "price_weighted")
+    portfolio_asset_returns = perf.calculate_portfolio_constituent_returns(webData, "close")["log_returns"]
+    portfolio_asset_weights = perf.calculate_portfolio_constituent_weights(webData, "close", "price_weighted")
     
     max_date_index = portfolio_asset_weights.index.max()
     portfolio_latest_weights = portfolio_asset_weights.loc[max_date_index:max_date_index]
