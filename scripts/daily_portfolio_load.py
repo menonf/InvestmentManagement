@@ -1,13 +1,15 @@
-from ib_insync import *
-import pandas as pd
+import time
 from datetime import datetime, timedelta
 from urllib import parse
-from data_engineering.database import db_functions as db_func
-import sqlalchemy as sql
-from sqlalchemy.orm import Session
+
 import keyring
-import time
+import pandas as pd
+import sqlalchemy as sql
+from ib_insync import *
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import Session
+
+from data_engineering.database import db_functions as db_func
 
 
 def get_trading_day():
