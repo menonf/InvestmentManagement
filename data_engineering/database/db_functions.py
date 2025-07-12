@@ -100,6 +100,8 @@ class PortfolioHoldings(Base):
     port_id: Mapped[int] = mapped_column()
     security_id: Mapped[int] = mapped_column()
     held_shares: Mapped[float] = mapped_column()
+    upsert_date: Mapped[str] = mapped_column()
+    upsert_by: Mapped[str] = mapped_column()
 
 
 def read_security_master(orm_session: Session, orm_engine: Engine) -> DataFrame:
@@ -307,16 +309,31 @@ def write_security_fundamentals(fundamental_data: pd.DataFrame, orm_session: Ses
         orm_session.close()
 
 
-def write_portfolio_holdings(df_holdings: DataFrame, orm_session: Session) -> None:
-    """Write records to portfolio_holdings table.
+def write_portfolio_holdings(df_holdings: pd.DataFrame, orm_session: Session) -> None:
+    """
+    Write records to portfolio_holdings table.
 
     Params:
         df_holdings: DataFrame containing portfolio holdings data.
         orm_session: SQLAlchemy Session object.
     """
     try:
+        if df_holdings.empty:
+            print("No data to write.")
+            return
+
+        as_of_date = df_holdings["as_of_date"].iloc[0]
+        port_ids = df_holdings["port_id"].unique().tolist()
+
+        # Delete existing records for same portfolio and date
+        orm_session.query(PortfolioHoldings).filter(
+            PortfolioHoldings.as_of_date == as_of_date, PortfolioHoldings.port_id.in_(port_ids)
+        ).delete(synchronize_session=False)
+
+        df_holdings["upsert_date"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        df_holdings["upsert_by"] = "daily_portfolio_load.py"
+
         data_list = df_holdings.to_dict(orient="records")
-        orm_session.query(PortfolioHoldings)
         orm_session.bulk_insert_mappings(PortfolioHoldings, data_list)  # type: ignore
         orm_session.commit()
 
