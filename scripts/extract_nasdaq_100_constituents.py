@@ -1,29 +1,52 @@
 import datetime as dt
 import json
+import time
 from urllib import parse
 from urllib.request import urlopen
 
 import certifi
+import keyring
 import pandas as pd
 import sqlalchemy as sql
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from data_engineering.database import db_functions as db_func
 from data_engineering.eod_data import yahoo_functions as yf_func
 
-connection_string = "Driver={ODBC Driver 18 for SQL Server};\
-                    Server=tcp:ops-store-server.database.windows.net,1433;\
-                    Database=ihub;\
-                    Uid=dbomanager;\
-                    Pwd=Managemyserver123;\
-                    Encrypt=yes;\
-                    TrustServerCertificate=no;"
+# Secure credentials
+service_name = "ihub_sql_connection"
+db = keyring.get_password(service_name, "db")
+db_user = keyring.get_password(service_name, "uid")
+db_password = keyring.get_password(service_name, "pwd")
 
+
+connection_string = f"Driver={{ODBC Driver 18 for SQL Server}};"\
+                    f"Server=tcp:ops-store-server.database.windows.net,1433;"\
+                    f"Database={db};Uid={db_user};Pwd={db_password};"\
+                    f"Encrypt=yes;TrustServerCertificate=no;"
 connection_params = parse.quote_plus(connection_string)
-engine = sql.create_engine("mssql+pyodbc:///?odbc_connect=%s" % connection_params)
-connection = engine.connect()
-session = Session(engine)
 
+
+max_retries = 3
+retry_interval_minutes = 2
+
+for attempt in range(1, max_retries + 1):
+    try:
+        engine = sql.create_engine("mssql+pyodbc:///?odbc_connect=%s" % connection_params)
+        connection = engine.connect()
+        session = Session(engine)
+        print("Database connection successful.")
+        break
+    except OperationalError as e:
+        print(f"Attempt {attempt} failed with error:\n{e}")
+        if attempt < max_retries:
+            print(f"Retrying in {retry_interval_minutes} minutes...")
+            time.sleep(retry_interval_minutes * 60)
+        else:
+            print("All retry attempts failed. Exiting.")
+            raise
+        
 df_securities = db_func.read_security_master(orm_session=session, orm_engine=engine)
 
 def get_jsonparsed_data(url):
@@ -109,10 +132,6 @@ df_eod = yf_func.get_historical_data(df_securities[df_securities["is_active"] ==
                                      end_date,
                                      "1d")
 db_func.write_market_data(df_eod, session)
-
-# df_eod = yf_func.fetch_latest_data(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
-#                                     df_securities[df_securities["is_active"] == 1]["security_id"].tolist())
-
 
 df_fundamentals = yf_func.fetch_fundamentals_yahoo(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
                                              df_securities[df_securities["is_active"] == 1]["security_id"].tolist())

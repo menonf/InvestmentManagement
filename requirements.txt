@@ -19,3 +19,4 @@ flake8
 isort
 pre-commit
 types-requests
+keyring
