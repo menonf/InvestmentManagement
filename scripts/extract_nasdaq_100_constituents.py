@@ -1,17 +1,12 @@
 import datetime as dt
 import json
-import time
-from urllib import parse
 from urllib.request import urlopen
 
 import certifi
 import keyring
 import pandas as pd
-import sqlalchemy as sql
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Session
 
-from data_engineering.database import db_functions as db_func
+from data_engineering.database import db_functions as database
 from data_engineering.eod_data import yahoo_functions as yf_func
 
 # Secure credentials
@@ -21,33 +16,9 @@ db_user = keyring.get_password(service_name, "uid")
 db_password = keyring.get_password(service_name, "pwd")
 
 
-connection_string = f"Driver={{ODBC Driver 18 for SQL Server}};"\
-                    f"Server=tcp:ops-store-server.database.windows.net,1433;"\
-                    f"Database={db};Uid={db_user};Pwd={db_password};"\
-                    f"Encrypt=yes;TrustServerCertificate=no;"
-connection_params = parse.quote_plus(connection_string)
-
-
-max_retries = 3
-retry_interval_minutes = 2
-
-for attempt in range(1, max_retries + 1):
-    try:
-        engine = sql.create_engine("mssql+pyodbc:///?odbc_connect=%s" % connection_params)
-        connection = engine.connect()
-        session = Session(engine)
-        print("Database connection successful.")
-        break
-    except OperationalError as e:
-        print(f"Attempt {attempt} failed with error:\n{e}")
-        if attempt < max_retries:
-            print(f"Retrying in {retry_interval_minutes} minutes...")
-            time.sleep(retry_interval_minutes * 60)
-        else:
-            print("All retry attempts failed. Exiting.")
-            raise
+engine, connection, session = database.get_db_connection()
         
-df_securities = db_func.read_security_master(orm_session=session, orm_engine=engine)
+df_securities = database.read_security_master(orm_session=session, orm_engine=engine)
 
 def get_jsonparsed_data(url):
     response = urlopen(url, cafile=certifi.where())
@@ -64,7 +35,7 @@ print(missing_tickers)
 # Insert missing tickers into SecurityMaster
 if not missing_tickers.empty:
     new_records = [
-        db_func.SecurityMaster(
+        database.SecurityMaster(
             security_id = None,
             symbol=row.symbol,
             isin= None,
@@ -94,8 +65,8 @@ else:
     
 # Update is_active for existing tickers
 existing_tickers = df_nasdaq['symbol'].tolist()
-session.query(db_func.SecurityMaster)\
-        .filter(db_func.SecurityMaster.symbol.in_(existing_tickers))\
+session.query(database.SecurityMaster)\
+        .filter(database.SecurityMaster.symbol.in_(existing_tickers))\
         .update({"is_active": 1}, synchronize_session=False)
 
 session.commit()
@@ -121,9 +92,9 @@ df_nasdaq['held_shares'] = 1
 df_nasdaq = df_nasdaq[['as_of_date', 'port_id','security_id', 'held_shares']]
 print(df_nasdaq)
 
-db_func.write_portfolio_holdings(df_nasdaq, session)
+database.write_portfolio_holdings(df_nasdaq, session)
 
-df_securities = db_func.read_security_master(orm_session=session, orm_engine=engine)
+df_securities = database.read_security_master(orm_session=session, orm_engine=engine)
 
 
 df_eod = yf_func.get_historical_data(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
@@ -131,8 +102,8 @@ df_eod = yf_func.get_historical_data(df_securities[df_securities["is_active"] ==
                                      start_date, 
                                      end_date,
                                      "1d")
-db_func.write_market_data(df_eod, session)
+database.write_market_data(df_eod, session)
 
 df_fundamentals = yf_func.fetch_fundamentals_yahoo(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
                                              df_securities[df_securities["is_active"] == 1]["security_id"].tolist())
-db_func.write_security_fundamentals(df_fundamentals, session)
+database.write_security_fundamentals(df_fundamentals, session)

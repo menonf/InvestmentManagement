@@ -1,15 +1,10 @@
-import time
 from datetime import datetime, timedelta
-from urllib import parse
 
 import keyring
 import pandas as pd
-import sqlalchemy as sql
 from ib_insync import *
-from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Session
 
-from data_engineering.database import db_functions as db_func
+from data_engineering.database import db_functions as database
 
 
 def get_trading_day():
@@ -51,40 +46,15 @@ db = keyring.get_password(service_name, "db")
 db_user = keyring.get_password(service_name, "uid")
 db_password = keyring.get_password(service_name, "pwd")
 
-# Build connection string
-connection_string = f"Driver={{ODBC Driver 18 for SQL Server}};"\
-                    f"Server=tcp:ops-store-server.database.windows.net,1433;"\
-                    f"Database={db};Uid={db_user};Pwd={db_password};"\
-                    f"Encrypt=yes;TrustServerCertificate=no;"
-connection_params = parse.quote_plus(connection_string)
+engine, connection, session = database.get_db_connection()
 
-
-max_retries = 3
-retry_interval_minutes = 2
-
-for attempt in range(1, max_retries + 1):
-    try:
-        engine = sql.create_engine("mssql+pyodbc:///?odbc_connect=%s" % connection_params)
-        connection = engine.connect()
-        session = Session(engine)
-        print("Database connection successful.")
-        break
-    except OperationalError as e:
-        print(f"Attempt {attempt} failed with error:\n{e}")
-        if attempt < max_retries:
-            print(f"Retrying in {retry_interval_minutes} minutes...")
-            time.sleep(retry_interval_minutes * 60)
-        else:
-            print("All retry attempts failed. Exiting.")
-            raise
-
-df_securities = db_func.read_security_master(session, engine)
-df_portfolio_data = db_func.read_portfolio(session, engine, df_portfolio_holdings_data['portfolio_short_name'].unique().tolist())
+df_securities = database.read_security_master(session, engine)
+df_portfolio_data = database.read_portfolio(session, engine, df_portfolio_holdings_data['portfolio_short_name'].unique().tolist())
 
 df_portfolio_market_data = pd.merge(pd.merge(df_portfolio_data, df_portfolio_holdings_data),
                                     df_securities, on='symbol', how='inner')
 
 df_portfolio_market_data = df_portfolio_market_data[['as_of_date','port_id', 'security_id', 'held_shares']]
 
-db_func.write_portfolio_holdings(df_portfolio_market_data, session)
+database.write_portfolio_holdings(df_portfolio_market_data, session)
 ib.disconnect()

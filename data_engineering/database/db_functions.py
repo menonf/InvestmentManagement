@@ -2,12 +2,16 @@
 
 import datetime
 import re
-from typing import Optional
+import time
+from typing import Optional, Tuple
+from urllib import parse
 
+import keyring
 import pandas as pd
+import sqlalchemy as sql
 from pandas import DataFrame
 from sqlalchemy import Engine, delete
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 
@@ -102,6 +106,50 @@ class PortfolioHoldings(Base):
     held_shares: Mapped[float] = mapped_column()
     upsert_date: Mapped[str] = mapped_column()
     upsert_by: Mapped[str] = mapped_column()
+
+
+def get_db_connection(
+    service_name: str = "ihub_sql_connection",
+    server: str = "ops-store-server.database.windows.net",
+    driver: str = "ODBC Driver 18 for SQL Server",
+    max_retries: int = 3,
+    retry_interval_minutes: int = 2,
+) -> Tuple[sql.Engine, sql.Connection, Session]:
+    """
+    Establish a connection to SQL Server with retry logic.
+
+    Returns:
+        (engine, connection, session): SQLAlchemy engine, raw connection, and ORM session
+    """
+    db = keyring.get_password(service_name, "db")
+    db_user = keyring.get_password(service_name, "uid")
+    db_password = keyring.get_password(service_name, "pwd")
+
+    connection_string = (
+        f"Driver={{{driver}}};"
+        f"Server=tcp:{server},1433;"
+        f"Database={db};Uid={db_user};Pwd={db_password};"
+        "Encrypt=yes;TrustServerCertificate=no;"
+    )
+    connection_params = parse.quote_plus(connection_string)
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            engine = sql.create_engine(f"mssql+pyodbc:///?odbc_connect={connection_params}")
+            connection = engine.connect()
+            session = Session(engine)
+            print("Database connection successful.")
+            return engine, connection, session
+        except OperationalError as e:
+            print(f"Attempt {attempt} failed with error:\n{e}")
+            if attempt < max_retries:
+                print(f"Retrying in {retry_interval_minutes} minutes...")
+                time.sleep(retry_interval_minutes * 60)
+            else:
+                print("All retry attempts failed. Exiting.")
+                raise
+
+    raise RuntimeError("Database connection failed: maximum retries exceeded")
 
 
 def read_security_master(orm_session: Session, orm_engine: Engine) -> DataFrame:

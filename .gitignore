@@ -137,3 +137,4 @@ reports
 reports/mypy
 reports/pytest
 
+vector_db
