@@ -147,8 +147,8 @@ def get_db_connection(
                 time.sleep(retry_interval_minutes * 60)
             else:
                 print("All retry attempts failed. Exiting.")
-                raise 
-            
+                raise
+
     raise RuntimeError("Database connection failed: maximum retries exceeded")
 
 

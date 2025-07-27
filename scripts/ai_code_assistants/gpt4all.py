@@ -1,15 +1,17 @@
-import os
-import faiss
-import numpy as np
-from sqlalchemy import text
-from InstructorEmbedding import INSTRUCTOR
-from gpt4all import GPT4All
-from data_engineering.database import db_functions as database
 import hashlib
 import json
-import re
-from typing import List, Tuple, Dict
 import logging
+import os
+import re
+from typing import Dict, List, Tuple
+
+import faiss
+import numpy as np
+from gpt4all import GPT4All
+from InstructorEmbedding import INSTRUCTOR
+from sqlalchemy import text
+
+from data_engineering.database import db_functions as database
 
 # === Configuration ===
 PROJECT_CODE_DIR = "C:\\Users\\menon\\OneDrive\\Documents\\SourceCode\\InvestmentManagement"
