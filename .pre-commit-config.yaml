@@ -50,8 +50,8 @@ repos:
       additional_dependencies: [pydantic]
       entry: mypy
       language: python
-      exclude: (.xml|.csv|templates|reports|http_trigger|function.json|host.json|scripts|.yml|.toml|.cfg|setup.py|txt|.gitignore|.yaml|.template|README.md|notebooks)
-    
+      exclude: (.xml|.csv|templates|reports|http_trigger|function.json|host.json|scripts|.yml|.toml|.cfg|setup.py|txt|.gitignore|.yaml|.template|README.md|notebooks|azure_functions)
+
   - repo: local #pydocstyle
     #rev: 5.1.1
     hooks:
