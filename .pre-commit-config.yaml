@@ -37,7 +37,7 @@ repos:
       stages: [pre-commit, manual]
       entry: flake8 --max-line-length 135 --config=setup.cfg
       language: python
-      exclude: (.csv|docs|tests|scripts|templates|.yml|.toml|.cfg|.json|setup.py|txt|gitignore|.yaml|.template|README.md|notebooks|reports|.idea)
+      exclude: (.csv|docs|tests|scripts|templates|.yml|.toml|.cfg|.json|setup.py|txt|gitignore|.yaml|.template|README.md|notebooks|reports|.idea|azure_functions)
 
   - repo: local #mypy
     #rev: v0.812
@@ -50,8 +50,8 @@ repos:
       additional_dependencies: [pydantic]
       entry: mypy
       language: python
-      exclude: (.xml|.csv|templates|reports|http_trigger|function.json|host.json|scripts|.yml|.toml|.cfg|setup.py|txt|.gitignore|.yaml|.template|README.md|notebooks)
-    
+      exclude: (.xml|.csv|templates|reports|http_trigger|function.json|host.json|scripts|.yml|.toml|.cfg|setup.py|txt|.gitignore|.yaml|.template|README.md|notebooks|azure_functions)
+
   - repo: local #pydocstyle
     #rev: 5.1.1
     hooks:
