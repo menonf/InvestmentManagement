@@ -1,5 +1,22 @@
-# DO NOT include azure-functions-worker in this file
-# The Python Worker is managed by Azure Functions platform
-# Manually managing azure-functions-worker may cause unexpected issues
-
-azure-functions
+requests
+pandas
+simfin
+financetoolkit
+financedatabase
+yfinance
+pyodbc
+sqlalchemy
+matplotlib
+pytest
+pytest-mock
+pytest-env
+requests_mock
+black
+pydantic
+mypy
+pydocstyle
+flake8
+isort
+pre-commit
+types-requests
+keyring
