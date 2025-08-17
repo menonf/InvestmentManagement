@@ -10,7 +10,7 @@ import keyring
 import pandas as pd
 import sqlalchemy as sql
 from pandas import DataFrame
-from sqlalchemy import Engine, delete
+from sqlalchemy import Engine, delete, update
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
@@ -320,32 +320,125 @@ def read_security_fundamentals(orm_session: Session, orm_engine: Engine, metric_
 
 
 def write_security_fundamentals(fundamental_data: pd.DataFrame, orm_session: Session) -> None:
-    """Write records to the security_fundamentals table.
+    """Write security fundamentals data with intelligent upsert/versioning logic.
 
-    Params:
-        fundamental_data: DataFrame containing security fundamentals.
-        orm_session: SQLAlchemy Session object.
+    This function handles three scenarios when writing security fundamentals data:
+
+    1. **New data**: If no existing records exist for the same security_id, metric_type,
+       source_vendor, and effective_date combination, new records are inserted.
+
+    2. **Data update (same count)**: If existing active records are found and the number
+       of new records matches the existing count, the old records are deleted and
+       replaced with the new data (overwrite behavior).
+
+    3. **Data versioning (different count)**: If existing active records are found but
+       the count differs from the new data, existing records are closed by setting
+       their end_date to today, and new records are inserted as the latest version.
+
+    Args:
+        fundamental_data (pd.DataFrame): DataFrame containing security fundamentals data.
+            Must include columns: security_id, metric_type, metric_value, source_vendor,
+            effective_date. May optionally include end_date (will be set to None for new records).
+        orm_session (Session): SQLAlchemy Session object for database operations.
+
+    Returns:
+        None
+
+    Raises:
+        SQLAlchemyError: If database operations fail.
+        Exception: For any other unexpected errors during processing.
+
+    Note:
+        - Function assumes single source_vendor and effective_date per call
+        - Active records are identified by end_date being NULL
+        - Session is closed after operation completion
     """
     try:
         if fundamental_data.empty:
             print("No fundamental data to insert.")
             return
 
-        # Remove previous latest records for the same security_id and metric_type
+        # Get unique combinations from incoming data
+        source_vendor = fundamental_data["source_vendor"].iloc[0]  # Assuming single source per call
+        effective_date = fundamental_data["effective_date"].iloc[0]  # Assuming single date per call
+
         security_ids = fundamental_data["security_id"].unique().tolist()
         metric_types = fundamental_data["metric_type"].unique().tolist()
 
-        orm_session.execute(
-            delete(SecurityFundamentals)
-            .where(SecurityFundamentals.security_id.in_(security_ids))
-            .where(SecurityFundamentals.metric_type.in_(metric_types))
-            .where(SecurityFundamentals.end_date.is_(None))  # Remove latest records
+        # Query existing records for this source_vendor, effective_date, and metrics
+        existing_records = (
+            orm_session.query(SecurityFundamentals)
+            .filter(
+                SecurityFundamentals.security_id.in_(security_ids),
+                SecurityFundamentals.metric_type.in_(metric_types),
+                SecurityFundamentals.source_vendor == source_vendor,
+                SecurityFundamentals.effective_date == effective_date,
+                SecurityFundamentals.end_date.is_(None),  # Only active records
+            )
+            .all()
         )
 
-        # Insert new records
-        data_list = fundamental_data.to_dict(orient="records")
-        orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)  # type: ignore
+        # Count existing vs new records
+        existing_count = len(existing_records)
+        new_count = len(fundamental_data)
+
+        if existing_records:
+            if existing_count == new_count:
+                # Same count - overwrite existing records
+                print(f"Record counts match ({existing_count}). Overwriting existing records.")
+
+                # Delete existing records
+                orm_session.execute(
+                    delete(SecurityFundamentals)
+                    .where(SecurityFundamentals.security_id.in_(security_ids))
+                    .where(SecurityFundamentals.metric_type.in_(metric_types))
+                    .where(SecurityFundamentals.source_vendor == source_vendor)
+                    .where(SecurityFundamentals.effective_date == effective_date)
+                    .where(SecurityFundamentals.end_date.is_(None))
+                )
+
+                # Insert new records
+                data_list = fundamental_data.to_dict(orient="records")
+                orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)
+
+            else:
+                # Different count - version the data
+                print(f"Record counts differ (existing: {existing_count}, new: {new_count}). Versioning data.")
+
+                # Set end_date on existing records (using today's date as end_date)
+                from datetime import date
+
+                today = date.today()
+
+                orm_session.execute(
+                    update(SecurityFundamentals)
+                    .where(SecurityFundamentals.security_id.in_(security_ids))
+                    .where(SecurityFundamentals.metric_type.in_(metric_types))
+                    .where(SecurityFundamentals.source_vendor == source_vendor)
+                    .where(SecurityFundamentals.effective_date == effective_date)
+                    .where(SecurityFundamentals.end_date.is_(None))
+                    .values(end_date=today)
+                )
+
+                # Insert new records with end_date as NULL
+                data_list = fundamental_data.to_dict(orient="records")
+                # Ensure end_date is None for new records
+                for record in data_list:
+                    record["end_date"] = None
+
+                orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)
+        else:
+            # No existing records - insert new ones
+            print(f"No existing records found. Inserting {new_count} new records.")
+            data_list = fundamental_data.to_dict(orient="records")
+            # Ensure end_date is None for new records
+            for record in data_list:
+                record["end_date"] = None
+
+            orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)
+
         orm_session.commit()
+        print("Security fundamentals data successfully written.")
 
     except SQLAlchemyError as e:
         print(f"Database error: {e}")
