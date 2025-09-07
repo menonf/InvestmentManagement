@@ -10,7 +10,6 @@ cachetools==5.3.1
 certifi==2023.7.22
 cfgv==3.4.0
 charset-normalizer==3.2.0
-chromedrivermanager==0.0.1
 constantly==15.1.0
 cssselect==1.1.0
 daal4py==2023.1.1
@@ -94,4 +93,3 @@ urllib3==2.0.4
 virtualenv==20.24.5
 yfinance==0.2.26
 zstandard==0.19.0
-
