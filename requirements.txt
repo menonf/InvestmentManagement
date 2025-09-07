@@ -92,6 +92,6 @@ termcolor==2.3.0
 tzdata==2023.3
 urllib3==2.0.4
 virtualenv==20.24.5
-webencodings==0.5.1
 yfinance==0.2.26
 zstandard==0.19.0
+
