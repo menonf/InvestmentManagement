@@ -69,7 +69,6 @@ PyNaCl
 pyodbc
 pyOpenSSL
 pyparsing
-pypiwin32==223
 PyQt5==5.15.7
 PyQtWebEngine==5.15.4
 pytest-env==1.0.1
@@ -100,3 +99,4 @@ virtualenv==20.24.5
 webencodings==0.5.1
 yfinance==0.2.26
 zstandard==0.19.0
+
