@@ -9,14 +9,7 @@ import pandas as pd
 from data_engineering.database import db_functions as database
 from data_engineering.eod_data import yahoo_functions as yf_func
 
-# Secure credentials
-service_name = "ihub_sql_connection"
-db = keyring.get_password(service_name, "db")
-db_user = keyring.get_password(service_name, "uid")
-db_password = keyring.get_password(service_name, "pwd")
-
-
-engine, connection, session = database.get_db_connection()
+engine, connection, conn_str, session = database.get_db_connection()
         
 df_securities = database.read_security_master(orm_session=session, orm_engine=engine)
 
@@ -77,11 +70,9 @@ df_nasdaq = df_nasdaq.merge(df_securities[['symbol', 'security_id']], on='symbol
 
 start_date = "2024-12-31"
 end_date = "2025-06-06"
-df_eod = yf_func.get_historical_data(df_securities[df_securities["is_active"] == 1]["symbol"].tolist(),
-                                     df_securities[df_securities["is_active"] == 1]["security_id"].tolist(),
-                                     start_date,
-                                     end_date,
-                                     "1d")
+
+df_eod = yf_func.get_stock_data(df_nasdaq, start_date, end_date)
+
 
 unique_as_of_dates = df_eod[['as_of_date']].drop_duplicates()
 df_nasdaq = df_nasdaq.merge(unique_as_of_dates, how='cross')
