@@ -3,7 +3,7 @@
 import time
 
 import pandas as pd
-import requests
+import requests  # type: ignore[import-untyped]
 
 
 def fetch_fundamentals_simfin(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Interactive Brokers Module
+Interactive Brokers Module.
 
 This module contains all Interactive Brokers related classes and functions
 for connecting to IB Gateway and retrieving portfolio data.
@@ -8,19 +8,20 @@ for connecting to IB Gateway and retrieving portfolio data.
 
 
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import nest_asyncio
 import pandas as pd
-from ib_insync import *
+from ib_insync import IB, Contract, Stock
 
 from data_engineering.database import db_functions as database
 
 
 class DateUtils:
-    """Utility functions for date operations"""
+    """Utility functions for date operations."""
 
     @staticmethod
-    def get_trading_day():
+    def get_trading_day() -> str:
         """
         Get the most recent trading day (excluding weekends).
 
@@ -34,15 +35,16 @@ class DateUtils:
 
 
 class InteractiveBroker:
-    """Interactive Brokers portfolio management with integrated connection handling"""
+    """Interactive Brokers portfolio management with integrated connection handling."""
 
-    def __init__(self):
-        self.ib = None
+    def __init__(self) -> None:
+        """Initialize Interactive Brokers connection handler."""
+        self.ib: Optional[IB] = None
         nest_asyncio.apply()
 
-    def connect(self, host="127.0.0.1", port=4001, client_id=1, timeout=10):
+    def connect(self, host: str = "127.0.0.1", port: int = 4001, client_id: int = 1, timeout: int = 10) -> bool:
         """
-        Connect to IB Gateway
+        Connect to IB Gateway.
 
         Args:
             host: IB Gateway host
@@ -74,30 +76,28 @@ class InteractiveBroker:
             print("Make sure IB Gateway is running and API is enabled")
             return False
 
-    def disconnect(self):
-        """Disconnect from IB Gateway"""
+    def disconnect(self) -> None:
+        """Disconnect from IB Gateway."""
         if self.ib and self.ib.isConnected():
             self.ib.disconnect()
             print("Disconnected from IB Gateway")
 
-    def is_connected(self):
-        """Check if connected to IB Gateway"""
-        return self.ib and self.ib.isConnected()
+    def is_connected(self) -> bool:
+        """Check if connected to IB Gateway."""
+        return self.ib is not None and self.ib.isConnected()
 
-    def _cleanup_existing_connection(self):
-        """Clean up any existing IB connections"""
+    def _cleanup_existing_connection(self) -> None:
+        """Clean up any existing IB connections."""
         try:
-            if "ib" in globals() and IB.isConnected():
+            if hasattr(self, "ib") and self.ib and self.ib.isConnected():
                 print("Existing connection found. Disconnecting...")
-                IB.disconnect()
+                self.ib.disconnect()
                 print("Disconnected successfully")
-        except NameError:
-            print("No existing connection variable found")
         except Exception as e:
             print(f"Error checking/closing existing connection: {e}")
 
-    def _test_connection(self):
-        """Test the connection with a simple request"""
+    def _test_connection(self) -> None:
+        """Test the connection with a simple request."""
         if self.ib and self.ib.isConnected():
             try:
                 account_summary = self.ib.accountSummary()
@@ -105,9 +105,9 @@ class InteractiveBroker:
             except Exception as e:
                 print(f"Warning: Could not retrieve account summary: {e}")
 
-    def get_positions(self, account_id):
+    def get_positions(self, account_id: str) -> List[Dict[str, Any]]:
         """
-        Retrieve portfolio positions for given account
+        Retrieve portfolio positions for given account.
 
         Args:
             account_id: IB account ID
@@ -118,7 +118,7 @@ class InteractiveBroker:
         Raises:
             RuntimeError: If not connected to IB Gateway
         """
-        if not self.is_connected():
+        if not self.is_connected() or self.ib is None:
             raise RuntimeError("Not connected to IB Gateway")
 
         try:
@@ -146,9 +146,9 @@ class InteractiveBroker:
             print(f"Error retrieving positions: {e}")
             raise
 
-    def get_account_summary(self, account_id=None):
+    def get_account_summary(self, account_id: Optional[str] = None) -> List[Any]:
         """
-        Get account summary information
+        Get account summary information.
 
         Args:
             account_id: Optional account ID, if None gets all accounts
@@ -156,7 +156,7 @@ class InteractiveBroker:
         Returns:
             list: Account summary data
         """
-        if not self.is_connected():
+        if not self.is_connected() or self.ib is None:
             raise RuntimeError("Not connected to IB Gateway")
 
         try:
@@ -169,9 +169,11 @@ class InteractiveBroker:
             print(f"Error retrieving account summary: {e}")
             raise
 
-    def get_contract_details(self, symbol, sec_type="STK", exchange="SMART", currency="USD"):
+    def get_contract_details(
+        self, symbol: str, sec_type: str = "STK", exchange: str = "SMART", currency: str = "USD"
+    ) -> Optional[Any]:
         """
-        Get contract details for a security
+        Get contract details for a security.
 
         Args:
             symbol: Security symbol
@@ -182,7 +184,7 @@ class InteractiveBroker:
         Returns:
             Contract details or None if not found
         """
-        if not self.is_connected():
+        if not self.is_connected() or self.ib is None:
             raise RuntimeError("Not connected to IB Gateway")
 
         try:
@@ -199,9 +201,9 @@ class InteractiveBroker:
             print(f"Error getting contract details for {symbol}: {e}")
             return None
 
-    def get_positions_by_account(self, account_ids):
+    def get_positions_by_account(self, account_ids: Union[str, List[str]]) -> pd.DataFrame:
         """
-        Get complete portfolio data for one or multiple accounts
+        Get complete portfolio data for one or multiple accounts.
 
         Args:
             account_ids: Single IB account ID (str) or list of IB account IDs
@@ -251,12 +253,12 @@ class InteractiveBroker:
 
 
 class IBDataValidator:
-    """Validates IB data and handles common data issues"""
+    """Validates IB data and handles common data issues."""
 
     @staticmethod
-    def validate_ib_data(df):
+    def validate_ib_data(df: pd.DataFrame) -> Tuple[bool, List[str]]:
         """
-        Validate IB data DataFrame
+        Validate IB data DataFrame.
 
         Args:
             df: IB data DataFrame
@@ -310,9 +312,9 @@ class IBDataValidator:
         return is_valid, issues
 
     @staticmethod
-    def clean_ib_data(df):
+    def clean_ib_data(df: pd.DataFrame) -> pd.DataFrame:
         """
-        Clean IB data DataFrame
+        Clean IB data DataFrame.
 
         Args:
             df: IB data DataFrame
@@ -342,13 +344,13 @@ class IBDataValidator:
         return df_clean
 
 
-def get_trading_day():
-    """Get current trading day - convenience function"""
+def get_trading_day() -> str:
+    """Get current trading day - convenience function."""
     return DateUtils.get_trading_day()
 
 
 class SecurityMasterManager:
-    """Manages security master data operations"""
+    """Manages security master data operations."""
 
     # Static mappings for security data standardization
     SECURITY_TYPE_MAPPING = {"STK": "Common Stock", "OPT": "Option", "FUT": "Future", "BOND": "Bond", "CASH": "Cash", "CFD": "CFD"}
@@ -372,10 +374,11 @@ class SecurityMasterManager:
         "CFD": "Derivatives",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize database connection for security master operations."""
         self.engine, self.connection, self.session = database.get_db_connection()
 
-    def insert_missing_securities(self, missing_tickers):
+    def insert_missing_securities(self, missing_tickers: pd.DataFrame) -> bool:
         """
         Insert missing securities into the SecurityMaster table.
 
@@ -400,8 +403,8 @@ class SecurityMasterManager:
 
         return self._insert_records(new_records)
 
-    def _create_security_records(self, unique_missing):
-        """Create new security records for insertion"""
+    def _create_security_records(self, unique_missing: pd.DataFrame) -> List[Any]:
+        """Create new security records for insertion."""
         new_records = []
 
         for _, row in unique_missing.iterrows():
@@ -429,8 +432,8 @@ class SecurityMasterManager:
 
         return new_records
 
-    def _insert_records(self, new_records):
-        """Insert new records with error handling"""
+    def _insert_records(self, new_records: List[Any]) -> bool:
+        """Insert new records with error handling."""
         try:
             self.session.add_all(new_records)
             self.session.commit()

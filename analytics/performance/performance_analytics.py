@@ -1,5 +1,7 @@
 """Module for investment performance analytics."""
 
+from typing import Dict, List, Optional, Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -50,10 +52,10 @@ def calculate_portfolio_constituent_returns(portfolio_market_data: DataFrame, pr
 
 
 def calculate_portfolio_constituent_weights(
-    portfolio_market_data: DataFrame, 
-    price_type: str, 
+    portfolio_market_data: DataFrame,
+    price_type: str,
     weightage_type: str = "equal_weighted",
-    portfolio_specific_weights: dict = None
+    portfolio_specific_weights: Optional[Dict[str, Union[str, List[str]]]] = None,
 ) -> DataFrame:
     """
     Calculate asset weights in each portfolio for a given weightage methodology.
@@ -71,10 +73,10 @@ def calculate_portfolio_constituent_weights(
     """
     if portfolio_specific_weights is None:
         portfolio_specific_weights = {}
-    
+
     # Get all unique portfolios in the data
-    unique_portfolios = portfolio_market_data['portfolio_short_name'].unique()
-    
+    unique_portfolios = portfolio_market_data["portfolio_short_name"].unique()
+
     # Determine required columns based on all weight types that will be used
     all_weight_types = {weightage_type}
     for portfolio, weight_spec in portfolio_specific_weights.items():
@@ -82,11 +84,11 @@ def calculate_portfolio_constituent_weights(
             all_weight_types.update(weight_spec)
         else:
             all_weight_types.add(weight_spec)
-    
+
     required_columns = {"as_of_date", "portfolio_short_name", "security_id", "portfolio_type", price_type}
     if "market_weighted" in all_weight_types:
         required_columns.add("shares_outstanding")
-    
+
     missing_cols = required_columns - set(portfolio_market_data.columns)
     if missing_cols:
         raise ValueError(f"Missing required columns: {missing_cols}")
@@ -125,16 +127,16 @@ def calculate_portfolio_constituent_weights(
                 portfolio_weight_type = portfolio_weight_type[0]
         else:
             portfolio_weight_type = weightage_type
-        
+
         # Get columns for this portfolio
         portfolio_cols = [col for col in held_shares.columns if col[0] == portfolio]
-        
+
         if not portfolio_cols:
             continue
-            
+
         portfolio_held_shares = held_shares[portfolio_cols]
         portfolio_prices = prices[portfolio_cols]
-        
+
         # Calculate weights based on the specific weight type
         if portfolio_weight_type == "equal_weighted":
             nonzero_counts = portfolio_held_shares.apply(lambda row: (row != 0).sum(), axis=1)
@@ -152,7 +154,7 @@ def calculate_portfolio_constituent_weights(
 
         else:
             raise ValueError(f"Unsupported weightage_type: {portfolio_weight_type} for portfolio: {portfolio}")
-        
+
         # Assign the calculated weights back to the main weights DataFrame
         weights[portfolio_cols] = portfolio_weights
 
@@ -235,4 +237,3 @@ def plot_cumulative_returns(asset_returns: DataFrame, start_at_zero: bool = True
     # --- Step 4: Show plot
     plt.tight_layout()
     plt.show()
-

@@ -137,7 +137,7 @@ def get_db_connection(
             connection = engine.connect()
             session = Session(engine)
             print("Database connection successful.")
-            return engine, connection, connection_string, session
+            return engine, connection, connection_string, session  # type: ignore
         except OperationalError as e:
             print(f"Attempt {attempt} failed with error:\n{e}")
             if attempt < max_retries:
