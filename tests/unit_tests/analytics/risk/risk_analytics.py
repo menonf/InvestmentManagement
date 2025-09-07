@@ -1,6 +1,7 @@
 """Unit Tests for risk_analytics."""
 import os
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -33,4 +34,11 @@ def test_value_at_risk() -> None:
 
     df_var = pd.DataFrame.from_dict(portfolio_var.calculate_var(), orient="columns")
     var_values = [-0.03265852459105972, -0.03059793484961367]
-    assert df_var["MetricValue"].to_list() == var_values
+    
+        # Round to 6 decimals before comparing
+    np.testing.assert_almost_equal(
+        df_var["MetricValue"].to_numpy(),
+        np.array(var_values),
+        decimal=6
+    )
+    

@@ -397,7 +397,7 @@ def write_security_fundamentals(fundamental_data: pd.DataFrame, orm_session: Ses
 
                 # Insert new records
                 data_list = fundamental_data.to_dict(orient="records")
-                orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)
+                orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)  # type: ignore
 
             else:
                 # Different count - version the data
@@ -424,7 +424,7 @@ def write_security_fundamentals(fundamental_data: pd.DataFrame, orm_session: Ses
                 for record in data_list:
                     record["end_date"] = None
 
-                orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)
+                orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)  # type: ignore
         else:
             # No existing records - insert new ones
             print(f"No existing records found. Inserting {new_count} new records.")
@@ -433,7 +433,7 @@ def write_security_fundamentals(fundamental_data: pd.DataFrame, orm_session: Ses
             for record in data_list:
                 record["end_date"] = None
 
-            orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)
+            orm_session.bulk_insert_mappings(SecurityFundamentals, data_list)  # type: ignore
 
         orm_session.commit()
         print("Security fundamentals data successfully written.")
