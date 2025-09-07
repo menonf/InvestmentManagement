@@ -7,11 +7,11 @@ import yfinance as yf
 from pandas import DataFrame
 
 
-def get_stock_data(ticker_df: DataFrame, start_date: str, end_date: str, interval: str = "1d") -> DataFrame:
-    """Retrieve stock data from Yahoo Finance for multiple tickers within a specified date range.
+def get_stock_data(symbol_df: DataFrame, start_date: str, end_date: str, interval: str = "1d") -> DataFrame:
+    """Retrieve stock data from Yahoo Finance for multiple symbols within a specified date range.
 
     Args:
-        ticker_df: DataFrame with columns 'ticker' and 'security_id'.
+        symbol_df: DataFrame with columns 'symbol' and 'security_id'.
         start_date: Start date in format YYYY-MM-DD.
         end_date: End date in format YYYY-MM-DD.
         interval: Data interval (default "1d"). Valid intervals: 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo.
@@ -21,17 +21,17 @@ def get_stock_data(ticker_df: DataFrame, start_date: str, end_date: str, interva
                   adj_close, volume, dividends, stock_splits, dataload_date, interval.
 
     Raises:
-        ValueError: If required columns 'ticker' and 'security_id' are missing from ticker_df.
+        ValueError: If required columns 'symbol' and 'security_id' are missing from symbol_df.
 
     Examples:
         # Historical data (e.g., last year)
         >>> import pandas as pd
-        >>> tickers_df = pd.DataFrame({
-        ...     'ticker': ['AAPL', 'GOOGL', 'MSFT'],
+        >>> symbols_df = pd.DataFrame({
+        ...     'symbol': ['AAPL', 'GOOGL', 'MSFT'],
         ...     'security_id': ['SEC001', 'SEC002', 'SEC003']
         ... })
         >>> historical_data = get_stock_data(
-        ...     ticker_df=tickers_df,
+        ...     symbol_df=symbols_df,
         ...     start_date='2023-01-01',
         ...     end_date='2023-12-31',
         ...     interval='1d'
@@ -42,7 +42,7 @@ def get_stock_data(ticker_df: DataFrame, start_date: str, end_date: str, interva
         >>> end_date = datetime.now().strftime('%Y-%m-%d')
         >>> start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
         >>> recent_data = get_stock_data(
-        ...     ticker_df=tickers_df,
+        ...     symbol_df=symbols_df,
         ...     start_date=start_date,
         ...     end_date=end_date,
         ...     interval='1d'
@@ -51,24 +51,24 @@ def get_stock_data(ticker_df: DataFrame, start_date: str, end_date: str, interva
         # Intraday data (latest trading session)
         >>> today = datetime.now().strftime('%Y-%m-%d')
         >>> intraday_data = get_stock_data(
-        ...     ticker_df=tickers_df,
+        ...     symbol_df=symbols_df,
         ...     start_date=today,
         ...     end_date=today,
         ...     interval='5m'  # 5-minute intervals
         ... )
 
     Note:
-        - Failed/delisted tickers are logged and skipped
+        - Failed/delisted symbols are logged and skipped
         - Data is rounded to 4 decimal places
         - Returns empty DataFrame if no valid data found
     """
     # Validate input DataFrame
-    required_columns = ["ticker", "security_id"]
-    missing_columns = [col for col in required_columns if col not in ticker_df.columns]
+    required_columns = ["symbol", "security_id"]
+    missing_columns = [col for col in required_columns if col not in symbol_df.columns]
     if missing_columns:
         raise ValueError(f"DataFrame must contain columns: {missing_columns}")
 
-    tickers_with_no_data = []
+    symbols_with_no_data = []
     dataframes = []
 
     # Validate date format once
@@ -84,11 +84,11 @@ def get_stock_data(ticker_df: DataFrame, start_date: str, end_date: str, interva
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    for _, row in ticker_df.iterrows():
-        ticker = row["ticker"]
+    for _, row in symbol_df.iterrows():
+        symbol = row["symbol"]
         sec = row["security_id"]
         try:
-            stock = yf.Ticker(ticker)
+            stock = yf.Ticker(symbol)
             historical_data = stock.history(start=start_date, end=end_date, interval=interval, auto_adjust=False)
 
             if not historical_data.empty:
@@ -116,27 +116,27 @@ def get_stock_data(ticker_df: DataFrame, start_date: str, end_date: str, interva
 
                 dataframes.append(historical_data)
             else:
-                tickers_with_no_data.append(ticker)
-                print(f"No data found for ticker: {ticker}")
+                symbols_with_no_data.append(symbol)
+                print(f"No data found for symbol: {symbol}")
 
         except Exception as e:
             error_message = str(e)
-            tickers_with_no_data.append(ticker)
+            symbols_with_no_data.append(symbol)
 
             if "404 Client Error" in error_message or "symbol may be delisted" in error_message:
-                print(f"Ticker {ticker} may be invalid or delisted: {error_message}")
+                print(f"Symbol {symbol} may be invalid or delisted: {error_message}")
             else:
-                print(f"Error retrieving data for {ticker}: {error_message}")
+                print(f"Error retrieving data for {symbol}: {error_message}")
 
     # Combine all data
     if not dataframes:
-        print("Warning: No valid data retrieved for any ticker")
+        print("Warning: No valid data retrieved for any symbol")
         return pd.DataFrame()
 
     df_combined = pd.concat(dataframes, ignore_index=True)
 
-    if tickers_with_no_data:
-        print(f"Tickers with no data: {tickers_with_no_data}")
+    if symbols_with_no_data:
+        print(f"symbols with no data: {symbols_with_no_data}")
 
     return df_combined.round(4)
 
@@ -147,7 +147,7 @@ def fetch_fundamentals(securities_df: pd.DataFrame, metrics: list[str]) -> pd.Da
     Parameters
     ----------
     securities_df : pd.DataFrame
-        DataFrame with columns 'ticker' and 'security_id'.
+        DataFrame with columns 'symbol' and 'security_id'.
     metrics : list[str], optional
         List of metric keys to fetch from Yahoo Finance info.
         If None, defaults to ["sharesOutstanding", "marketCap"].
@@ -161,7 +161,7 @@ def fetch_fundamentals(securities_df: pd.DataFrame, metrics: list[str]) -> pd.Da
     --------
     >>> import pandas as pd
     >>> securities = pd.DataFrame({
-    ...     'ticker': ['AAPL', 'MSFT'],
+    ...     'symbol': ['AAPL', 'MSFT'],
     ...     'security_id': [1, 2]
     ... })
 
@@ -196,7 +196,7 @@ def fetch_fundamentals(securities_df: pd.DataFrame, metrics: list[str]) -> pd.Da
     ...     )
     """
     # Validate input DataFrame
-    required_columns = {"ticker", "security_id"}
+    required_columns = {"symbol", "security_id"}
     if not required_columns.issubset(securities_df.columns):
         raise ValueError(f"Input DataFrame must contain columns: {required_columns}")
 
@@ -206,11 +206,11 @@ def fetch_fundamentals(securities_df: pd.DataFrame, metrics: list[str]) -> pd.Da
     data_list = []
 
     for _, row in securities_df.iterrows():
-        ticker = row["ticker"]
+        symbol = row["symbol"]
         sec_id = row["security_id"]
 
         try:
-            stock = yf.Ticker(ticker)
+            stock = yf.symbol(symbol)
             info = stock.info
 
             for key in metrics:
@@ -228,7 +228,7 @@ def fetch_fundamentals(securities_df: pd.DataFrame, metrics: list[str]) -> pd.Da
                     )
 
         except Exception as e:
-            print(f"Failed to fetch data for {ticker}: {e}")
+            print(f"Failed to fetch data for {symbol}: {e}")
             continue
 
     return pd.DataFrame(data_list)

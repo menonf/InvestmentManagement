@@ -126,20 +126,18 @@ def get_db_connection(
     db_password = keyring.get_password(service_name, "pwd")
 
     connection_string = (
-        f"Driver={{{driver}}};"
-        f"Server=tcp:{server},1433;"
-        f"Database={db};Uid={db_user};Pwd={db_password};"
-        "Encrypt=yes;TrustServerCertificate=no;"
+        f"mssql+pyodbc://{db_user}:{db_password}"
+        f"@{server}:1433/{db}"
+        f"?driver={parse.quote_plus(driver)}&Encrypt=yes&TrustServerCertificate=no&autocommit=true"
     )
-    connection_params = parse.quote_plus(connection_string)
 
     for attempt in range(1, max_retries + 1):
         try:
-            engine = sql.create_engine(f"mssql+pyodbc:///?odbc_connect={connection_params}")
+            engine = sql.create_engine(connection_string)
             connection = engine.connect()
             session = Session(engine)
             print("Database connection successful.")
-            return engine, connection, session
+            return engine, connection, connection_string, session
         except OperationalError as e:
             print(f"Attempt {attempt} failed with error:\n{e}")
             if attempt < max_retries:

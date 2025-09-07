@@ -49,21 +49,44 @@ def calculate_portfolio_constituent_returns(portfolio_market_data: DataFrame, pr
     return return_matrix.sort_index(axis=1, level=[0, 1])
 
 
-def calculate_portfolio_constituent_weights(portfolio_market_data: DataFrame, price_type: str, weightage_type: str) -> DataFrame:
+def calculate_portfolio_constituent_weights(
+    portfolio_market_data: DataFrame, 
+    price_type: str, 
+    weightage_type: str = "equal_weighted",
+    portfolio_specific_weights: dict = None
+) -> DataFrame:
     """
     Calculate asset weights in each portfolio for a given weightage methodology.
 
     Params:
         portfolio_market_data: DataFrame containing price and quantity data of assets.
         price_type: Column name for price (e.g. 'close', 'adj_close').
-        weightage_type: One of ['equal_weighted', 'market_weighted', 'price_weighted'].
+        weightage_type: Default weightage type for all portfolios. One of ['equal_weighted', 'market_weighted', 'price_weighted'].
+        portfolio_specific_weights: Dict mapping portfolio_short_name(s) to specific weightage types.
+                                  Can be: {'portfolio_name': 'weight_type'} or {'portfolio_name': ['weight_type1', 'weight_type2']}
+                                  If a list is provided for a portfolio, the first valid weight type will be used.
 
     Returns:
         DataFrame: MultiIndex (as_of_date x [portfolio_short_name, security_id]) weights.
     """
+    if portfolio_specific_weights is None:
+        portfolio_specific_weights = {}
+    
+    # Get all unique portfolios in the data
+    unique_portfolios = portfolio_market_data['portfolio_short_name'].unique()
+    
+    # Determine required columns based on all weight types that will be used
+    all_weight_types = {weightage_type}
+    for portfolio, weight_spec in portfolio_specific_weights.items():
+        if isinstance(weight_spec, list):
+            all_weight_types.update(weight_spec)
+        else:
+            all_weight_types.add(weight_spec)
+    
     required_columns = {"as_of_date", "portfolio_short_name", "security_id", "portfolio_type", price_type}
-    if weightage_type == "market_weighted":
+    if "market_weighted" in all_weight_types:
         required_columns.add("shares_outstanding")
+    
     missing_cols = required_columns - set(portfolio_market_data.columns)
     if missing_cols:
         raise ValueError(f"Missing required columns: {missing_cols}")
@@ -89,22 +112,49 @@ def calculate_portfolio_constituent_weights(portfolio_market_data: DataFrame, pr
     held_shares = pivoted["held_shares"]
     prices = pivoted[price_type]
 
-    if weightage_type == "equal_weighted":
-        nonzero_counts = held_shares.apply(lambda row: (row != 0).groupby(level=0).sum(), axis=1)
-        weights = held_shares.apply(lambda row: (row != 0).astype(int), axis=1)
-        weights = weights.div(nonzero_counts, axis=0).fillna(0)
+    # Initialize weights DataFrame with the same structure
+    weights = pd.DataFrame(index=held_shares.index, columns=held_shares.columns).fillna(0.0)
 
-    elif weightage_type == "market_weighted":
-        market_value = held_shares * prices.shift(1)
-        portfolio_totals = market_value.T.groupby(level=0).sum().T
-        weights = market_value.div(portfolio_totals, axis=1).fillna(0)
+    # Process each portfolio with its specific weight type
+    for portfolio in unique_portfolios:
+        # Determine weight type for this portfolio
+        if portfolio in portfolio_specific_weights:
+            portfolio_weight_type = portfolio_specific_weights[portfolio]
+            # If it's a list, use the first one (you could add logic to validate and pick the best one)
+            if isinstance(portfolio_weight_type, list):
+                portfolio_weight_type = portfolio_weight_type[0]
+        else:
+            portfolio_weight_type = weightage_type
+        
+        # Get columns for this portfolio
+        portfolio_cols = [col for col in held_shares.columns if col[0] == portfolio]
+        
+        if not portfolio_cols:
+            continue
+            
+        portfolio_held_shares = held_shares[portfolio_cols]
+        portfolio_prices = prices[portfolio_cols]
+        
+        # Calculate weights based on the specific weight type
+        if portfolio_weight_type == "equal_weighted":
+            nonzero_counts = portfolio_held_shares.apply(lambda row: (row != 0).sum(), axis=1)
+            portfolio_weights = portfolio_held_shares.apply(lambda row: (row != 0).astype(int), axis=1)
+            portfolio_weights = portfolio_weights.div(nonzero_counts, axis=0).fillna(0)
 
-    elif weightage_type == "price_weighted":
-        portfolio_totals = prices.T.groupby(level=0).sum().T
-        weights = prices.div(portfolio_totals, axis=1).fillna(0)
+        elif portfolio_weight_type == "market_weighted":
+            market_value = portfolio_held_shares * portfolio_prices.shift(1)
+            portfolio_totals = market_value.sum(axis=1)
+            portfolio_weights = market_value.div(portfolio_totals, axis=0).fillna(0)
 
-    else:
-        raise ValueError(f"Unsupported weightage_type: {weightage_type}")
+        elif portfolio_weight_type == "price_weighted":
+            portfolio_totals = portfolio_prices.sum(axis=1)
+            portfolio_weights = portfolio_prices.div(portfolio_totals, axis=0).fillna(0)
+
+        else:
+            raise ValueError(f"Unsupported weightage_type: {portfolio_weight_type} for portfolio: {portfolio}")
+        
+        # Assign the calculated weights back to the main weights DataFrame
+        weights[portfolio_cols] = portfolio_weights
 
     return weights.sort_index(axis=1, level=[0, 1])
 
@@ -185,3 +235,4 @@ def plot_cumulative_returns(asset_returns: DataFrame, start_at_zero: bool = True
     # --- Step 4: Show plot
     plt.tight_layout()
     plt.show()
+
