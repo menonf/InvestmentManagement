@@ -31,12 +31,14 @@ html5lib==1.1
 ib-insync==0.9.86
 identify==2.5.30
 idna==3.4
+isort
 jsonpointer==2.1
 keras==2.14.0
 keyring
 libclang==16.0.6
 mkl-service==2.4.1
 ml-dtypes==0.2.0
+matplotlib
 mpmath==1.2.1
 multitasking==0.0.11
 munkres==1.1.4
@@ -89,7 +91,9 @@ tensorflow==2.14.0
 tensorflow-estimator==2.14.0
 termcolor==2.3.0
 tzdata==2023.3
+types-requests
 urllib3==2.0.4
 virtualenv==20.24.5
 yfinance==0.2.26
 zstandard==0.19.0
+
