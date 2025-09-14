@@ -550,6 +550,6 @@ def get_portfolio_market_data(
 
         merged_rows.append(df_merged)
 
-    df_merged_all = pd.concat(merged_rows, ignore_index=True)
+    df_merged_all = pd.concat([df.dropna(axis=1, how="all") for df in merged_rows if not df.empty], ignore_index=True)
 
     return df_merged_all

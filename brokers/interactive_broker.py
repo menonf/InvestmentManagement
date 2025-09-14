@@ -376,7 +376,7 @@ class SecurityMasterManager:
 
     def __init__(self) -> None:
         """Initialize database connection for security master operations."""
-        self.engine, self.connection, self.session = database.get_db_connection()
+        self.engine, self.connection, self.conn_str, self.session = database.get_db_connection()
 
     def insert_missing_securities(self, missing_tickers: pd.DataFrame) -> bool:
         """
@@ -441,6 +441,6 @@ class SecurityMasterManager:
             return True
 
         except Exception as e:
-            self.session.rollback()
+            self.session.rollback()  # type: ignore
             print(f"Error inserting new records: {e}")
             return False
