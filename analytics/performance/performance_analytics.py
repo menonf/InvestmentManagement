@@ -115,7 +115,8 @@ def calculate_portfolio_constituent_weights(
     prices = pivoted[price_type]
 
     # Initialize weights DataFrame with the same structure
-    weights = pd.DataFrame(index=held_shares.index, columns=held_shares.columns).fillna(0.0)
+    # weights = pd.DataFrame(index=held_shares.index, columns=held_shares.columns).fillna(0.0)
+    weights = pd.DataFrame(index=held_shares.index, columns=held_shares.columns, dtype=float).fillna(0.0)
 
     # Process each portfolio with its specific weight type
     for portfolio in unique_portfolios:

@@ -114,12 +114,12 @@ def get_db_connection(
     driver: str = "ODBC Driver 18 for SQL Server",
     max_retries: int = 3,
     retry_interval_minutes: int = 2,
-) -> Tuple[sql.Engine, sql.Connection, Session]:
+) -> Tuple[sql.Engine, sql.Connection, str, Session]:
     """
     Establish a connection to SQL Server with retry logic.
 
     Returns:
-        (engine, connection, session): SQLAlchemy engine, raw connection, and ORM session
+        (engine, connection, connection_string, session): SQLAlchemy engine, raw connection, connection string, and ORM session
     """
     db = keyring.get_password(service_name, "db")
     db_user = keyring.get_password(service_name, "uid")
@@ -137,7 +137,7 @@ def get_db_connection(
             connection = engine.connect()
             session = Session(engine)
             print("Database connection successful.")
-            return engine, connection, connection_string, session  # type: ignore
+            return engine, connection, connection_string, session
         except OperationalError as e:
             print(f"Attempt {attempt} failed with error:\n{e}")
             if attempt < max_retries:
@@ -550,6 +550,6 @@ def get_portfolio_market_data(
 
         merged_rows.append(df_merged)
 
-    df_merged_all = pd.concat(merged_rows, ignore_index=True)
+    df_merged_all = pd.concat([df.dropna(axis=1, how="all") for df in merged_rows if not df.empty], ignore_index=True)
 
     return df_merged_all
