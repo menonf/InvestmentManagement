@@ -435,8 +435,8 @@ class SecurityMasterManager:
     def _insert_records(self, new_records: List[Any]) -> bool:
         """Insert new records with error handling."""
         try:
-            self.session.add_all(new_records)
-            self.session.commit()
+            self.session.add_all(new_records)  # type: ignore
+            self.session.commit()  # type: ignore
             print(f"Successfully inserted {len(new_records)} new records into SecurityMaster.")
             return True
 
