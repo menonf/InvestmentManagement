@@ -13,9 +13,9 @@ While many open-source libraries support various aspects of the quantitative inv
 The platform supports the complete investment lifecycle:
 
 1. **Defining Investment Objectives**
-2. **Acquiring, Processing, Storing & Managing Data**
+2. **Acquiring, Processing, Storing & Managing Data** — [Market Data Load Demo](https://github.com/menonf/InvestmentManagement/blob/main/toolkit/notebooks/market_data_load.ipynb)
 3. **Developing Investment Strategies**
-4. **Backtesting Strategies**
+4. **Backtesting Strategies** - [Backtesting Demo](https://github.com/menonf/InvestmentManagement/blob/main/toolkit/notebooks/backtest_research_demo.ipynb)
 5. **Constructing Portfolios**
 6. **Integrating Brokers & Executing Trades** — [Broker Integration Demo](https://github.com/menonf/InvestmentManagement/blob/main/toolkit/notebooks/daily_portfolio_load.ipynb)
 7. **Monitoring & Rebalancing Portfolios**
@@ -62,11 +62,16 @@ Mature the platform to build the data acquisition layer, including:
 ### Long-Term Vision
 Use the data acquisition layer to:
 
-1. Build factor exposures such as style, countries, industries, thematic but mostly growth & momentum
-2. Measure risk of factor exposures
-3. Use value factor to identify securities trading below intrinsic value
-4. Use all the above ingredients to backtest growth at reasonable price (GARP) investment strategy
-5. Run real money using this framework
+1. Build factor exposures such as style, countries, industries, thematic but mostly growth & momentum<br>reference books<br>
+   [Quantitative Momentum](https://www.amazon.co.uk/Quantitative-Momentum-Practitioners-Momentum-Based-Selection/dp/111923719X)<br>
+   [Factor Investing for Dummies](https://www.amazon.co.uk/Investing-Dummies-Business-Personal-Finance/dp/1119906741)<br>
+3. Measure risk of factor exposures
+4. Use value factor to identify securities trading below intrinsic value<br>reference books<br>
+   [Intelligent Investor](https://en.wikipedia.org/wiki/The_Intelligent_Investor)<br>
+   [Quantitative Value](https://www.amazon.co.uk/Quantitative-Value-Practitioners-Intelligent-Eliminating/dp/1118328078)<br>
+   [AI investor](https://aiinvestor.gumroad.com/l/BuildYourOwnAIInvestor)<br>
+6. Use all the above ingredients to backtest growth at reasonable price (GARP) investment strategy
+7. Run real money using this framework
 
 ### Data Layers
 ![Picture1](https://github.com/user-attachments/assets/cdcd1c9a-74f4-4d92-8db6-1c11786da7a2)
@@ -118,7 +123,7 @@ If using **VS Code**, use the following settings in launch.json:
 
 ### Navigate & Debug
 
-Run and debug **`scripts/load_portfolio_analytics.py`**.
+Run and debug **[Backtesting Demo](https://github.com/menonf/InvestmentManagement/blob/main/toolkit/notebooks/backtest_research_demo.ipynb)**.
 
 ### Contributing
 
