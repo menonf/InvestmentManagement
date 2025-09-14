@@ -376,7 +376,7 @@ class SecurityMasterManager:
 
     def __init__(self) -> None:
         """Initialize database connection for security master operations."""
-        self.engine, self.connection, self.conn_str, self.session = database.get_db_connection()
+        self.engine, self.connection, self.conn_str, self.session = database.get_db_connection()  # type: ignore
 
     def insert_missing_securities(self, missing_tickers: pd.DataFrame) -> bool:
         """
