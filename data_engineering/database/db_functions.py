@@ -114,12 +114,12 @@ def get_db_connection(
     driver: str = "ODBC Driver 18 for SQL Server",
     max_retries: int = 3,
     retry_interval_minutes: int = 2,
-) -> Tuple[sql.Engine, sql.Connection, Session]:
+) -> Tuple[sql.Engine, sql.Connection, str, Session]:
     """
     Establish a connection to SQL Server with retry logic.
 
     Returns:
-        (engine, connection, session): SQLAlchemy engine, raw connection, and ORM session
+        (engine, connection, connection_string, session): SQLAlchemy engine, raw connection, connection string, and ORM session
     """
     db = keyring.get_password(service_name, "db")
     db_user = keyring.get_password(service_name, "uid")
