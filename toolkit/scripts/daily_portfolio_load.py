@@ -2,7 +2,7 @@ import os
 import sys
 
 from brokers.interactive_broker import *
-from data_engineering.database import db_functions as database
+from data_engineering.database import database as database
 
 
 def main():

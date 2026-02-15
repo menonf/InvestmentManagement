@@ -70,93 +70,78 @@ def calculate_portfolio_constituent_weights(
 
     Returns:
         DataFrame: MultiIndex (as_of_date x [portfolio_short_name, security_id]) weights.
+
     """
-    if portfolio_specific_weights is None:
-        portfolio_specific_weights = {}
-
-    # Get all unique portfolios in the data
-    unique_portfolios = portfolio_market_data["portfolio_short_name"].unique()
-
-    # Determine required columns based on all weight types that will be used
-    all_weight_types = {weightage_type}
-    for portfolio, weight_spec in portfolio_specific_weights.items():
-        if isinstance(weight_spec, list):
-            all_weight_types.update(weight_spec)
-        else:
-            all_weight_types.add(weight_spec)
-
-    required_columns = {"as_of_date", "portfolio_short_name", "security_id", "portfolio_type", price_type}
-    if "market_weighted" in all_weight_types:
-        required_columns.add("shares_outstanding")
-
-    missing_cols = required_columns - set(portfolio_market_data.columns)
-    if missing_cols:
-        raise ValueError(f"Missing required columns: {missing_cols}")
-
+    portfolio_specific_weights = portfolio_specific_weights or {}
     df = portfolio_market_data.copy()
 
-    # Compute market_value for Benchmark portfolios
+    # ---------------------------------------------------
+    # 1. Compute market_value & held shares (for benchmark indices reconstruction only)
+    # ---------------------------------------------------
     if "market_cap" in df.columns:
         df.loc[df["portfolio_type"] == "Benchmark", "market_value"] = df["market_cap"]
     else:
-        df.loc[df["portfolio_type"] == "Benchmark", "market_value"] = df["shares_outstanding"].shift(1) * df[price_type].shift(1)
+        df.loc[df["portfolio_type"] == "Benchmark", "market_value"] = df["shares_outstanding"] * df[price_type]
 
-    # Compute held_shares using user-defined function
     df = df.groupby(["as_of_date", "portfolio_short_name"], group_keys=False).apply(calculate_held_shares)
 
-    # Pivot held_shares and price
-    pivoted = df.pivot_table(
-        index="as_of_date", columns=["portfolio_short_name", "security_id"], values=["held_shares", price_type]
-    ).fillna(0)
+    # ---------------------------------------------------
+    # 2. Pivot held_shares and prices
+    # ---------------------------------------------------
+    pivot = (
+        df.pivot_table(
+            index="as_of_date",
+            columns=["portfolio_short_name", "security_id"],
+            values=["held_shares", price_type],
+        )
+        .fillna(0)
+        .sort_index(axis=1, level=[0, 1])
+    )
 
-    # Reorder and sort columns
-    pivoted = pivoted.sort_index(axis=1, level=[0, 1])
-    held_shares = pivoted["held_shares"]
-    prices = pivoted[price_type]
+    held_shares = pivot["held_shares"]
+    prices = pivot[price_type]
 
-    # Initialize weights DataFrame with the same structure
-    # weights = pd.DataFrame(index=held_shares.index, columns=held_shares.columns).fillna(0.0)
-    weights = pd.DataFrame(index=held_shares.index, columns=held_shares.columns, dtype=float).fillna(0.0)
+    weights = pd.DataFrame(
+        index=held_shares.index,
+        columns=held_shares.columns,
+        dtype=float,
+    ).fillna(0.0)
 
-    # Process each portfolio with its specific weight type
-    for portfolio in unique_portfolios:
-        # Determine weight type for this portfolio
-        if portfolio in portfolio_specific_weights:
-            portfolio_weight_type = portfolio_specific_weights[portfolio]
-            # If it's a list, use the first one (you could add logic to validate and pick the best one)
-            if isinstance(portfolio_weight_type, list):
-                portfolio_weight_type = portfolio_weight_type[0]
-        else:
-            portfolio_weight_type = weightage_type
+    # ---------------------------------------------------
+    # 3. Process each portfolio independently
+    # ---------------------------------------------------
+    for portfolio in df["portfolio_short_name"].unique():
 
-        # Get columns for this portfolio
-        portfolio_cols = [col for col in held_shares.columns if col[0] == portfolio]
+        # Determine weight method for this portfolio
+        weight_method = portfolio_specific_weights.get(portfolio, weightage_type)
+        if isinstance(weight_method, list):
+            weight_method = weight_method[0]
 
+        portfolio_cols = [c for c in held_shares.columns if c[0] == portfolio]
         if not portfolio_cols:
             continue
 
-        portfolio_held_shares = held_shares[portfolio_cols]
-        portfolio_prices = prices[portfolio_cols]
+        shares = held_shares[portfolio_cols]
+        px = prices[portfolio_cols]
 
-        # Calculate weights based on the specific weight type
-        if portfolio_weight_type == "equal_weighted":
-            nonzero_counts = portfolio_held_shares.apply(lambda row: (row != 0).sum(), axis=1)
-            portfolio_weights = portfolio_held_shares.apply(lambda row: (row != 0).astype(int), axis=1)
-            portfolio_weights = portfolio_weights.div(nonzero_counts, axis=0).fillna(0)
+        # -------- Weight calculations --------
+        if weight_method == "equal_weighted":
+            active = (shares != 0).astype(int)
+            counts = active.sum(axis=1)
+            portfolio_weights = active.div(counts, axis=0).fillna(0)
 
-        elif portfolio_weight_type == "market_weighted":
-            market_value = portfolio_held_shares * portfolio_prices.shift(1)
-            portfolio_totals = market_value.sum(axis=1)
-            portfolio_weights = market_value.div(portfolio_totals, axis=0).fillna(0)
+        elif weight_method == "market_weighted":
+            market_value = shares * px.shift(1)
+            totals = market_value.sum(axis=1)
+            portfolio_weights = market_value.div(totals, axis=0).fillna(0)
 
-        elif portfolio_weight_type == "price_weighted":
-            portfolio_totals = portfolio_prices.sum(axis=1)
-            portfolio_weights = portfolio_prices.div(portfolio_totals, axis=0).fillna(0)
+        elif weight_method == "price_weighted":
+            totals = px.sum(axis=1)
+            portfolio_weights = px.div(totals, axis=0).fillna(0)
 
         else:
-            raise ValueError(f"Unsupported weightage_type: {portfolio_weight_type} for portfolio: {portfolio}")
+            raise ValueError(f"Unsupported weightage_type '{weight_method}' " f"for portfolio '{portfolio}'")
 
-        # Assign the calculated weights back to the main weights DataFrame
         weights[portfolio_cols] = portfolio_weights
 
     return weights.sort_index(axis=1, level=[0, 1])
@@ -204,37 +189,107 @@ def plot_cumulative_returns(asset_returns: DataFrame, start_at_zero: bool = True
     Parameters:
         asset_returns (DataFrame): MultiIndex or wide-format DataFrame with time index
                                    and portfolios (or asset identifiers) as columns.
-                                   Values should be periodic (log) returns.
+                                   Values should be periodic (log returns).
         start_at_zero (bool): If True, cumulative returns will start at 0.
 
     Returns:
         None
-
-    Example:
-        >>> plot_cumulative_returns(log_returns_df)
     """
-    # --- Step 1: Create plot
+    import matplotlib.dates as mdates
+    import mplcursors
+
+    # Ensure datetime index
+    if not isinstance(asset_returns.index, pd.DatetimeIndex):
+        asset_returns = asset_returns.copy()
+        asset_returns.index = pd.to_datetime(asset_returns.index)
+
+    # Create plot
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # --- Step 2: Loop over each portfolio or asset column
+    # Plot each series
     for column in asset_returns.columns:
         cumulative_returns = np.exp(asset_returns[column].cumsum()) - 1
         if start_at_zero:
             cumulative_returns = cumulative_returns - cumulative_returns.iloc[0]
-
         cumulative_returns *= 100
-
-        # Plot the series
         ax.plot(asset_returns.index, cumulative_returns, label=str(column), linewidth=2)
 
-    # --- Step 3: Style plot
+    # Style plot
     ax.set_title("Cumulative Returns Over Time", fontsize=14)
-    ax.set_xlabel("Date", fontsize=12)
+    ax.set_xlabel("")  # no x-axis label
     ax.set_ylabel("Cumulative Returns (%)", fontsize=12)
     ax.axhline(y=0, color="black", linestyle="--", linewidth=1)
     ax.legend(loc="upper left", fontsize=9)
     ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
 
-    # --- Step 4: Show plot
-    plt.tight_layout()
+    # Show monthly x-axis labels
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+    ax.tick_params(axis="x", which="major", labelrotation=45, labelsize=9)
+    ax.xaxis.set_minor_locator(mdates.WeekdayLocator(byweekday=mdates.MO))  # optional minor ticks
+
+    fig.tight_layout()
+    fig.autofmt_xdate()
+
+    # Interactive hover: show date + cumulative return
+    cursor = mplcursors.cursor(ax, hover=True)
+
+    @cursor.connect("add")
+    def on_add(sel) -> None:  # type: ignore
+        x, y = sel.target
+        date = mdates.num2date(x).strftime("%Y-%m-%d")
+        sel.annotation.set_text(f"{sel.artist.get_label()}\n" f"Date: {date}\n" f"Cumulative Return: {y:.2f}%")
+
+    plt.show()
+
+
+def plot_returns(asset_returns: DataFrame) -> None:
+    """
+    Plot periodic (non-cumulative) returns over time for each portfolio in the given returns DataFrame.
+
+    Parameters:
+        asset_returns (DataFrame): DataFrame with time index and portfolios
+                                   (or asset identifiers) as columns.
+                                   Values should be periodic (log or simple) returns.
+
+    Returns:
+        None
+    """
+    import matplotlib.dates as mdates
+    import mplcursors
+
+    # Ensure datetime index
+    if not isinstance(asset_returns.index, pd.DatetimeIndex):
+        asset_returns = asset_returns.copy()
+        asset_returns.index = pd.to_datetime(asset_returns.index)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot each series
+    for column in asset_returns.columns:
+        returns_pct = asset_returns[column] * 100
+        ax.plot(asset_returns.index, returns_pct, label=str(column), linewidth=1.5)
+
+    # Style plot
+    ax.set_title("Periodic Returns Over Time", fontsize=14)
+    ax.set_xlabel("")  # no x-axis label
+    ax.set_ylabel("Returns (%)", fontsize=12)
+    ax.axhline(y=0, color="black", linestyle="--", linewidth=1)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+
+    # Hide x-axis ticks & labels entirely
+    ax.xaxis.set_visible(False)
+
+    fig.tight_layout()
+
+    # Interactive hover: show date + value
+    cursor = mplcursors.cursor(ax, hover=True)
+
+    @cursor.connect("add")
+    def on_add(sel) -> None:  # type: ignore
+        x, y = sel.target
+        date = mdates.num2date(x).strftime("%Y-%m-%d")
+        sel.annotation.set_text(f"{sel.artist.get_label()}\n" f"Date: {date}\n" f"Return: {y:.2f}%")
+
     plt.show()

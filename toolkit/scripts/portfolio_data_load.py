@@ -3,7 +3,7 @@ import pandas as pd
 
 from analytics.performance import performance_analytics as perf
 from analytics.risk import risk_analytics as risk
-from data_engineering.database import db_functions as database
+from data_engineering.database import database as database
 
 engine, connection, conn_str, session = database.get_db_connection()
 

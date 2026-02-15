@@ -17,7 +17,7 @@ import requests
 from InstructorEmbedding import INSTRUCTOR
 from sqlalchemy import text
 
-from data_engineering.database import db_functions as database
+from data_engineering.database import database as database
 
 # === Configuration ===
 PROJECT_CODE_DIR = (
@@ -581,7 +581,7 @@ def load_code_chunks_parallel(path: str, exclude_dirs: set) -> List[Dict]:
 
 def introspect_sql_schema_enhanced() -> List[Dict]:
     """Enhanced SQL schema introspection with relationships and constraints"""
-    engine, connection, session = database.get_db_connection()
+    engine, connection, conn_str, session = database.get_db_connection()
     chunks = []
 
     try:

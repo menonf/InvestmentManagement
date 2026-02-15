@@ -1,0 +1,7 @@
+[
+  {
+    "timestamp": "2025-09-16T21:52:24.595430",
+    "query": "i want to build growth at reasonable price strategy",
+    "response": "Error: Unable to generate response - HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=300)"
+  }
+]

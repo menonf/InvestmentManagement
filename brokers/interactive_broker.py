@@ -14,7 +14,7 @@ import nest_asyncio
 import pandas as pd
 from ib_insync import IB, Contract, Stock
 
-from data_engineering.database import db_functions as database
+from data_engineering.database import database as database
 
 
 class DateUtils:
