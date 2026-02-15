@@ -6,7 +6,6 @@ This module contains all Interactive Brokers related classes and functions
 for connecting to IB Gateway and retrieving portfolio data.
 """
 
-
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
