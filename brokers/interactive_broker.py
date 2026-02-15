@@ -6,7 +6,6 @@ This module contains all Interactive Brokers related classes and functions
 for connecting to IB Gateway and retrieving portfolio data.
 """
 
-
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -14,7 +13,7 @@ import nest_asyncio
 import pandas as pd
 from ib_insync import IB, Contract, Stock
 
-from data_engineering.database import db_functions as database
+from data_engineering.database import database as database
 
 
 class DateUtils:

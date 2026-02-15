@@ -6,8 +6,8 @@ import certifi
 import keyring
 import pandas as pd
 
-from data_engineering.database import db_functions as database
-from data_engineering.eod_data import yahoo_functions as yf_func
+from data_engineering.database import database as database
+from data_engineering.eod_data import yahoo as yf_func
 
 engine, connection, conn_str, session = database.get_db_connection()
         
@@ -18,7 +18,7 @@ def get_jsonparsed_data(url):
     data = response.read().decode("utf-8")
     return json.loads(data)
 
-url = ("https://financialmodelingprep.com/api/v3/nasdaq_constituent?apikey=eaa83187bd18f51cf2c84830f00e89ae")
+url = ("https://financialmodelingprep.com/api/v3/nasdaq_constituent?apikey")
 df_nasdaq=pd.DataFrame(get_jsonparsed_data(url))[['symbol','name','sector','subSector']]
 df_nasdaq = df_nasdaq.rename(columns={'name': 'security_name'})
 
