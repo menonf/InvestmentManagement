@@ -7,7 +7,7 @@ for connecting to IB Gateway and retrieving portfolio data.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import nest_asyncio
 import pandas as pd
@@ -163,7 +163,7 @@ class InteractiveBroker:
                 summary = self.ib.accountSummary(account=account_id)
             else:
                 summary = self.ib.accountSummary()
-            return summary
+            return cast(List[Any], summary)
         except Exception as e:
             print(f"Error retrieving account summary: {e}")
             raise

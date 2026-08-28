@@ -7,7 +7,7 @@ import yfinance as yf
 from pandas import DataFrame
 
 
-def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interval: str = "1d") -> DataFrame:
+def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interval: str = "1d") -> tuple[DataFrame, DataFrame]:
     """Retrieve stock data from Yahoo Finance for multiple symbols within a specified date range.
 
     Args:
@@ -17,8 +17,10 @@ def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interv
         interval: Data interval (default "1d"). Valid intervals: 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo.
 
     Returns:
-        DataFrame: Stock data with columns: as_of_date, security_id, open, high, low, close,
-                  adj_close, volume, dividends, stock_splits, dataload_date, interval.
+        tuple[DataFrame, DataFrame]:
+            - Stock data with columns: as_of_date, security_id, open, high, low, close,
+              adj_close, volume, dividends, stock_splits, dataload_date, interval.
+            - DataFrame with symbols that had no data, containing 'symbol' and 'security_id'.
 
     Raises:
         ValueError: If required columns 'symbol' and 'security_id' are missing from symbol_df.
@@ -30,37 +32,17 @@ def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interv
         ...     'symbol': ['AAPL', 'GOOGL', 'MSFT'],
         ...     'security_id': ['SEC001', 'SEC002', 'SEC003']
         ... })
-        >>> historical_data = get_stock_data(
+        >>> df_stock, df_no_data = get_stock_price(
         ...     symbol_df=symbols_df,
         ...     start_date='2023-01-01',
         ...     end_date='2023-12-31',
         ...     interval='1d'
         ... )
 
-        # Recent/latest data (e.g., last 30 days)
-        >>> from datetime import datetime, timedelta
-        >>> end_date = datetime.now().strftime('%Y-%m-%d')
-        >>> start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-        >>> recent_data = get_stock_data(
-        ...     symbol_df=symbols_df,
-        ...     start_date=start_date,
-        ...     end_date=end_date,
-        ...     interval='1d'
-        ... )
-
-        # Intraday data (latest trading session)
-        >>> today = datetime.now().strftime('%Y-%m-%d')
-        >>> intraday_data = get_stock_data(
-        ...     symbol_df=symbols_df,
-        ...     start_date=today,
-        ...     end_date=today,
-        ...     interval='5m'  # 5-minute intervals
-        ... )
-
     Note:
         - Failed/delisted symbols are logged and skipped
         - Data is rounded to 4 decimal places
-        - Returns empty DataFrame if no valid data found
+        - Returns empty DataFrames if no valid data found
     """
     # Validate input DataFrame
     required_columns = ["symbol", "security_id"]
@@ -116,12 +98,12 @@ def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interv
 
                 dataframes.append(historical_data)
             else:
-                symbols_with_no_data.append(symbol)
+                symbols_with_no_data.append({"symbol": symbol, "security_id": sec})
                 print(f"No data found for symbol: {symbol}")
 
         except Exception as e:
             error_message = str(e)
-            symbols_with_no_data.append(symbol)
+            symbols_with_no_data.append({"symbol": symbol, "security_id": sec})
 
             if "404 Client Error" in error_message or "symbol may be delisted" in error_message:
                 print(f"Symbol {symbol} may be invalid or delisted: {error_message}")
@@ -131,14 +113,16 @@ def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interv
     # Combine all data
     if not dataframes:
         print("Warning: No valid data retrieved for any symbol")
-        return pd.DataFrame()
+        df_combined = pd.DataFrame()
+    else:
+        df_combined = pd.concat(dataframes, ignore_index=True).round(4)
 
-    df_combined = pd.concat(dataframes, ignore_index=True)
+    df_no_data = pd.DataFrame(symbols_with_no_data)
 
-    if symbols_with_no_data:
-        print(f"symbols with no data: {symbols_with_no_data}")
+    if not df_no_data.empty:
+        print(f"symbols with no data: {df_no_data['symbol'].tolist()}")
 
-    return df_combined.round(4)
+    return df_combined, df_no_data
 
 
 def fetch_fundamentals(securities_df: pd.DataFrame, metrics: list[str]) -> pd.DataFrame:
@@ -210,7 +194,8 @@ def fetch_fundamentals(securities_df: pd.DataFrame, metrics: list[str]) -> pd.Da
         sec_id = row["security_id"]
 
         try:
-            stock = yf.symbol(symbol)
+            print(symbol)
+            stock = yf.Ticker(symbol)
             info = stock.info
 
             for key in metrics:

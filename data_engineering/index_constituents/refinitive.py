@@ -365,14 +365,33 @@ def build_float_adjusted_shares(df_constituents: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    nasdaq100 = build_index_constituents(
-        index=".NDX",
-        start="2025-01-01",
+    index = build_index_constituents(
+        index=".SPX",
+        start="1990-01-01",
         end="2025-12-31",
     )
 
-    df_to_write = enrich_with_security_master(nasdaq100)
+    index["Constituent RIC"].unique().tolist()
+
+    asset_attributes = ld.get_data(
+        universe=index["Constituent RIC"].unique().tolist(),
+        fields=[
+            "TR.CommonName",
+            "TR.ISIN",
+            "TR.SEDOL",
+            "TR.CUSIP",
+            "TR.ExchangeCountryCode",
+            "TR.Currency",
+            "TR.GICSSector",
+            "TR.GICSIndustry",
+            "TR.GICSSubIndustry",
+            "TR.ExchangeTicker",
+            "TR.ExchangeCode",
+        ],
+    )
+
+    Joined = index.merge(asset_attributes, left_on="Constituent RIC", right_on="Instrument", how="left")
+
+    df_to_write = enrich_with_security_master(Joined)
 
     metrics_df = build_float_adjusted_shares(df_to_write)
-
-    print(metrics_df.head())

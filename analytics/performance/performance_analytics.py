@@ -32,13 +32,11 @@ def calculate_portfolio_constituent_returns(portfolio_market_data: DataFrame, pr
     # Sort once to avoid sorting in every group
     sorted_data = portfolio_market_data.sort_values(by=["port_id", "security_id", "as_of_date"])
 
-    # Group and compute returns more efficiently
-    def compute_returns(group: DataFrame) -> DataFrame:
-        group["returns"] = group[price_type].pct_change()
-        group["log_returns"] = np.log(group[price_type] / group[price_type].shift(1))
-        return group
-
-    returns_df = sorted_data.groupby(["port_id", "security_id"], group_keys=False).apply(compute_returns)
+    # Transform keeps the grouping columns in the result across pandas versions.
+    grouped_prices = sorted_data.groupby(["port_id", "security_id"])[price_type]
+    returns_df = sorted_data.copy()
+    returns_df["returns"] = grouped_prices.transform("pct_change")
+    returns_df["log_returns"] = grouped_prices.transform(lambda prices: np.log(prices / prices.shift(1)))
 
     # Drop rows where returns are NaN (typically the first row of each group)
     returns_df = returns_df.dropna(subset=["returns", "log_returns"])
@@ -83,7 +81,16 @@ def calculate_portfolio_constituent_weights(
     else:
         df.loc[df["portfolio_type"] == "Benchmark", "market_value"] = df["shares_outstanding"] * df[price_type]
 
-    df = df.groupby(["as_of_date", "portfolio_short_name"], group_keys=False).apply(calculate_held_shares)
+    if "held_shares" not in df.columns:
+        df["held_shares"] = pd.NA
+
+    benchmark_mask = df["portfolio_type"] == "Benchmark"
+    benchmark_totals = (
+        df["market_value"].where(benchmark_mask).groupby([df["as_of_date"], df["portfolio_short_name"]]).transform("sum")
+    )
+    df.loc[benchmark_mask, "held_shares"] = (
+        df.loc[benchmark_mask, "market_value"] / benchmark_totals.loc[benchmark_mask].replace(0, np.nan)
+    ).fillna(0.0)
 
     # ---------------------------------------------------
     # 2. Pivot held_shares and prices

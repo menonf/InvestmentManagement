@@ -21,9 +21,11 @@ REFINITIV_FIELDS = [
     "TR.OPENPRICE",
     "TR.HIGHPRICE",
     "TR.LOWPRICE",
-    "TR.CLOSEPRICE",
+    "TR.CLOSEPRICE(Adjusted=0)",
     "TR.CLOSEPRICE(Adjusted=1)",
     "TR.ACCUMULATEDVOLUME",
+    "TR.DivUnadjustedNet",
+    "TR.AdjmtFactorAdjustmentFactor",
 ]
 
 # Note: Refinitiv returns both TR.CLOSEPRICE and TR.CLOSEPRICE(Adjusted=1)
@@ -34,6 +36,8 @@ COLUMN_MAPPING = {
     "High Price": "high",
     "Low Price": "low",
     "Accumulated Volume": "volume",
+    "TR.DivUnadjustedNet": "dividends",
+    "TR.AdjmtFactorAdjustmentFactor": "stock_splits",
 }
 
 OUTPUT_COLUMNS = [
