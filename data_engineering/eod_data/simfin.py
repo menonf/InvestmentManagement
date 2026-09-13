@@ -1,30 +1,43 @@
-"""Module for yahoo API helper functions."""
+"""SimFin fundamentals (common shares outstanding) vendor helper."""
 
+import os
 import time
+from typing import Optional
 
 import pandas as pd
 import requests  # type: ignore[import-untyped]
 
+try:  # config package may not be importable in all contexts
+    from config.secrets import simfin_token
+except Exception:  # pragma: no cover - fallback path
+    def simfin_token() -> Optional[str]:  # type: ignore
+        return os.environ.get("SIMFIN_API_TOKEN")
 
-def fetch_fundamentals_simfin(tickers: list[str], sec_ids: list[int]) -> pd.DataFrame:
-    """
-    Fetch fundamental data (e.g., common shares outstanding) for given tickers and security IDs from SimFin.
 
-    Params:
+def fetch_fundamentals_simfin(tickers: list[str], sec_ids: list[int], token: Optional[str] = None) -> pd.DataFrame:
+    """Fetch common shares outstanding from SimFin.
+
+    Args:
         tickers: List of stock ticker symbols.
-        sec_ids: List of corresponding security IDs.
+        sec_ids: Corresponding security IDs (same order/length as ``tickers``).
+        token: SimFin API token. If omitted, resolved via keyring/env
+            (``SIMFIN_API_TOKEN``). Never hardcode tokens in source.
 
     Returns:
-        DataFrame containing fundamental data ready for database insertion.
+        DataFrame ready for DB insertion with columns:
+        security_id, metric_type, metric_value, source_vendor, effective_date, end_date.
     """
-    data_list = []
-
     if len(tickers) != len(sec_ids):
         raise ValueError("Length of tickers and sec_ids lists must be the same.")
 
+    token = token or simfin_token()
+    if not token:
+        raise RuntimeError("SimFin token not provided and SIMFIN_API_TOKEN is unset.")
+
+    data_list = []
     for ticker, sec_id in zip(tickers, sec_ids):
         url = f"https://backend.simfin.com/api/v3/companies/common-shares-outstanding?ticker={ticker}"
-        headers = {"accept": "application/json", "Authorization": "MFzWmtbTCssYk6YyGO7YSze13qmFUAWd"}
+        headers = {"accept": "application/json", "Authorization": token}
 
         while True:
             try:

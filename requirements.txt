@@ -4,3 +4,5 @@ pandas
 keyring
 pyodbc==5.3.0
 financedatabase
+tqdm
+scikit-learn>=1.3

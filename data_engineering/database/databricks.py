@@ -21,7 +21,7 @@ import keyring
 import pandas as pd
 import sqlalchemy as sql
 from pandas import DataFrame
-from sqlalchemy import Engine, delete, insert, update
+from sqlalchemy import Engine, Date, Float, Integer, String, delete, insert, update
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
@@ -56,6 +56,9 @@ class SecurityMaster(Base):
     industry: Mapped[Optional[str]] = mapped_column()
     security_type: Mapped[str] = mapped_column()
     asset_class: Mapped[str] = mapped_column()
+    region: Mapped[Optional[str]] = mapped_column()
+    exchange_mic: Mapped[Optional[str]] = mapped_column()
+    listing_country: Mapped[Optional[str]] = mapped_column()
     exchange: Mapped[Optional[str]] = mapped_column()
     is_active: Mapped[Optional[int]] = mapped_column()
     source_vendor: Mapped[str] = mapped_column()
@@ -77,8 +80,8 @@ class SecurityFundamentals(Base):
     metric_type: Mapped[str] = mapped_column()
     metric_value: Mapped[float] = mapped_column()
     source_vendor: Mapped[str] = mapped_column()
-    effective_date: Mapped[datetime.date] = mapped_column()
-    end_date: Mapped[Optional[datetime.date]] = mapped_column(nullable=True)
+    effective_date: Mapped[date] = mapped_column()
+    end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
 
 
 class MarketData(Base):
@@ -87,7 +90,7 @@ class MarketData(Base):
     __tablename__ = "market_data"
 
     md_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    as_of_date: Mapped[datetime.date] = mapped_column()
+    as_of_date: Mapped[date] = mapped_column()
     security_id: Mapped[int] = mapped_column()
     open: Mapped[Optional[float]] = mapped_column()
     high: Mapped[Optional[float]] = mapped_column()
@@ -99,6 +102,8 @@ class MarketData(Base):
     stock_splits: Mapped[Optional[float]] = mapped_column()
     interval: Mapped[Optional[str]] = mapped_column()
     dataload_date: Mapped[Optional[datetime.datetime]] = mapped_column()
+    price_currency: Mapped[Optional[str]] = mapped_column(String(8))
+    source_vendor: Mapped[Optional[str]] = mapped_column(String(64))
 
 
 class Portfolio(Base):
@@ -111,6 +116,8 @@ class Portfolio(Base):
     portfolio_name: Mapped[Optional[str]] = mapped_column()
     portfolio_type: Mapped[Optional[str]] = mapped_column()
     is_active: Mapped[Optional[int]] = mapped_column()
+    reporting_currency: Mapped[Optional[str]] = mapped_column(String(8))
+    base_currency: Mapped[Optional[str]] = mapped_column(String(8))
 
 
 class PortfolioHoldings(Base):
@@ -137,8 +144,8 @@ class IndexConstituents(Base):
     index_id: Mapped[int] = mapped_column()
     security_id: Mapped[Optional[int]] = mapped_column()
     exchange_ticker: Mapped[str] = mapped_column()
-    start_date: Mapped[datetime.date] = mapped_column()
-    end_date: Mapped[Optional[datetime.date]] = mapped_column(nullable=True)
+    start_date: Mapped[date] = mapped_column()
+    end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     source_vendor: Mapped[Optional[str]] = mapped_column()
     upsert_date: Mapped[datetime.datetime] = mapped_column()
     upsert_by: Mapped[str] = mapped_column()
@@ -552,3 +559,181 @@ def get_portfolio_market_data(
         [df.dropna(axis=1, how="all") for df in merged_rows if not df.empty],
         ignore_index=True,
     )
+
+
+# ---------------------------------------------------------------------------
+# Analytics Layer (persistent daily analytics — README differentiator)
+#   factor_scores, portfolio_returns, attribution
+# Models are defined once in schema_analytics and reused by both backends.
+# ---------------------------------------------------------------------------
+
+from .schema_analytics import (  # noqa: E402
+    FactorScores,
+    PortfolioReturns,
+    Attribution,
+    create_analytics_tables,
+)
+from .schema_fx import (  # noqa: E402
+    FxRates,
+    RiskSnapshots,
+    FactorExposures,
+    create_fx_tables,
+)
+
+
+def write_factor_scores(df: DataFrame, orm_session: Session) -> None:
+    """Upsert factor scores. One row per (date, security, factor, universe)."""
+    if df.empty:
+        print("No factor scores to write.")
+        return
+    df = df.copy()
+    df["upsert_date"] = datetime.datetime.now()
+    as_of = df["as_of_date"].unique().tolist()
+    secs = df["security_id"].unique().tolist()
+
+    def _upsert(data_list):
+        _bulk_delete_insert(
+            orm_session, FactorScores, data_list,
+            FactorScores.as_of_date.in_(as_of),
+            FactorScores.security_id.in_(secs),
+        )
+
+    _execute_with_session(orm_session, _upsert, df.to_dict(orient="records"))
+
+
+def read_factor_scores(orm_session, orm_engine, as_of_date=None, factor_name=None) -> DataFrame:
+    """Read factor scores, optionally filtered by date / factor."""
+    q = orm_session.query(*FactorScores.__table__.columns)
+    if as_of_date:
+        q = q.filter(FactorScores.as_of_date == _parse_date(as_of_date))
+    if factor_name:
+        q = q.filter(FactorScores.factor_name == factor_name)
+    return pd.read_sql_query(q.statement, con=orm_engine)
+
+
+def write_portfolio_returns(df: DataFrame, orm_session: Session) -> None:
+    """Upsert daily portfolio returns."""
+    if df.empty:
+        print("No portfolio returns to write.")
+        return
+    df = df.copy()
+    df["upsert_date"] = datetime.datetime.now()
+    as_of = df["as_of_date"].unique().tolist()
+    ports = df["port_id"].unique().tolist()
+
+    def _upsert(data_list):
+        _bulk_delete_insert(
+            orm_session, PortfolioReturns, data_list,
+            PortfolioReturns.as_of_date.in_(as_of),
+            PortfolioReturns.port_id.in_(ports),
+        )
+
+    _execute_with_session(orm_session, _upsert, df.to_dict(orient="records"))
+
+
+def write_attribution(df: DataFrame, orm_session: Session) -> None:
+    """Upsert daily performance attribution rows."""
+    if df.empty:
+        print("No attribution rows to write.")
+        return
+    df = df.copy()
+    df["upsert_date"] = datetime.datetime.now()
+    as_of = df["as_of_date"].unique().tolist()
+    ports = df["port_id"].unique().tolist()
+
+    def _upsert(data_list):
+        _bulk_delete_insert(
+            orm_session, Attribution, data_list,
+            Attribution.as_of_date.in_(as_of),
+            Attribution.port_id.in_(ports),
+        )
+
+    _execute_with_session(orm_session, _upsert, df.to_dict(orient="records"))
+
+
+# ---------------------------------------------------------------------------
+# FX / Risk / Factor-exposure helpers (schema_fx)
+# ---------------------------------------------------------------------------
+
+def write_fx_rates(df: DataFrame, orm_session: Session) -> None:
+    """Upsert FX rates. One row per (from, to, date, vendor)."""
+    if df.empty:
+        print("No FX rates to write.")
+        return
+    df = df.copy()
+    df["upsert_date"] = datetime.datetime.now()
+    _execute_with_session(
+        orm_session,
+        lambda data: _bulk_delete_insert(
+            orm_session, FxRates, data,
+            FxRates.as_of_date.in_(df["as_of_date"].unique().tolist()),
+            FxRates.source_vendor.in_(df["source_vendor"].unique().tolist()),
+        ),
+        df.to_dict(orient="records"),
+    )
+
+
+def write_risk_snapshots(df: DataFrame, orm_session: Session) -> None:
+    """Upsert daily risk snapshots. One row per (date, port, metric, vendor)."""
+    if df.empty:
+        print("No risk snapshots to write.")
+        return
+    df = df.copy()
+    df["upsert_date"] = datetime.datetime.now()
+    _execute_with_session(
+        orm_session,
+        lambda data: _bulk_delete_insert(
+            orm_session, RiskSnapshots, data,
+            RiskSnapshots.as_of_date.in_(df["as_of_date"].unique().tolist()),
+            RiskSnapshots.port_id.in_(df["port_id"].unique().tolist()),
+        ),
+        df.to_dict(orient="records"),
+    )
+
+
+def write_factor_exposures(df: DataFrame, orm_session: Session) -> None:
+    """Upsert daily portfolio factor exposures."""
+    if df.empty:
+        print("No factor exposures to write.")
+        return
+    df = df.copy()
+    df["upsert_date"] = datetime.datetime.now()
+    _execute_with_session(
+        orm_session,
+        lambda data: _bulk_delete_insert(
+            orm_session, FactorExposures, data,
+            FactorExposures.as_of_date.in_(df["as_of_date"].unique().tolist()),
+            FactorExposures.port_id.in_(df["port_id"].unique().tolist()),
+        ),
+        df.to_dict(orient="records"),
+    )
+
+
+def compute_and_store_factors(prices: DataFrame, factors: dict, universe: str,
+                              source_vendor: str, orm_session: Session) -> None:
+    """Compute factor scores for a price panel and persist to factor_scores."""
+    from analytics.factors import Factor
+
+    rows = []
+    today = datetime.datetime.now()
+    for name, fac in factors.items():
+        scores = fac.compute(prices) if isinstance(fac, Factor) else fac(prices)
+        if scores is None:
+            continue
+        rank = scores.rank(axis=1, pct=True)
+        for dt, row in scores.iterrows():
+            for sec, val in row.items():
+                if pd.isna(val):
+                    continue
+                rows.append({
+                    "as_of_date": pd.to_datetime(dt).date(),
+                    "security_id": int(sec),
+                    "factor_name": name,
+                    "factor_value": float(val),
+                    "rank_pct": float(rank.loc[dt, sec]) if not pd.isna(rank.loc[dt, sec]) else None,
+                    "universe": universe,
+                    "source_vendor": source_vendor,
+                    "upsert_date": today,
+                })
+    if rows:
+        write_factor_scores(pd.DataFrame(rows), orm_session)

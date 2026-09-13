@@ -1,119 +1,81 @@
-import requests
+"""Tiingo EOD price vendor.
+
+Public API (unchanged):
+    get_stock_price(symbol_df, token, start_date, end_date) -> (df, no_data)
+"""
+
+from __future__ import annotations
+
 import datetime
+from typing import Iterable
+
 import pandas as pd
+import requests
+from pandas import DataFrame
+
+from .base import PriceVendor, STANDARD_COLUMNS, NUMERIC_COLUMNS
+
+_TIINGO_COLUMN_MAP = {
+    "date": "as_of_date",
+    "adjClose": "adj_close",
+    "divCash": "dividends",
+    "splitFactor": "stock_splits",
+}
+
+
+class TiingoVendor(PriceVendor):
+    name = "tiingo"
+    base_url = "https://api.tiingo.com/tiingo/daily"
+
+    def __init__(self, token: str):
+        self.token = token
+
+    @classmethod
+    def from_env(cls, env_var: str = "TIINGO_API_TOKEN"):
+        import os
+
+        tok = os.environ.get(env_var)
+        if not tok:
+            raise RuntimeError(f"{env_var} not set")
+        return cls(tok)
+
+    def _fetch_raw(self, symbol_df, start_date, end_date, interval):
+        headers = {"Content-Type": "application/json"}
+        frames, missing = [], []
+        for _, row in symbol_df.iterrows():
+            symbol, sec = row["symbol"], row["security_id"]
+            url = (
+                f"{self.base_url}/{symbol}/prices"
+                f"?startDate={start_date}&endDate={end_date}&token={self.token}"
+            )
+            try:
+                resp = requests.get(url, headers=headers, timeout=30)
+                resp.raise_for_status()
+                data = pd.DataFrame(resp.json())
+                if data.empty:
+                    missing.append(symbol)
+                    print(f"No data found for symbol: {symbol}")
+                    continue
+                data = data.copy()
+                data.insert(0, "security_id", sec)
+                frames.append(data)
+            except Exception as exc:  # noqa: BLE001
+                missing.append(symbol)
+                print(f"Error retrieving data for {symbol}: {exc}")
+        combined = pd.concat(frames, ignore_index=True).round(4) if frames else pd.DataFrame()
+        return combined, missing
+
+    def _map_columns(self, raw_df: DataFrame) -> DataFrame:
+        df = raw_df.rename(columns=_TIINGO_COLUMN_MAP)
+        df["interval"] = "1d"
+        out = [c for c in STANDARD_COLUMNS if c in df.columns]
+        return df[out]
 
 
 def get_stock_price(symbol_df, token, start_date, end_date):
-    """
-    Fetch historical data for multiple symbols from Tiingo API.
-
-    Args:
-        symbol_df: DataFrame with 'symbol' and 'security_id' columns
-        token: API token for Tiingo
-        start_date: Start date in YYYY-MM-DD format
-        end_date: End date in YYYY-MM-DD format
-
-    Returns:
-        Combined DataFrame with historical data
-    """
-    # Validate input DataFrame
-    required_columns = ["symbol", "security_id"]
-    missing_columns = [col for col in required_columns if col not in symbol_df.columns]
-    if missing_columns:
-        raise ValueError(f"DataFrame must contain columns: {missing_columns}")
-
-    symbols_with_no_data = []
-    dataframes = []
-
-    # Validate date format once
-    try:
-        start_dt = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-        end_dt = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-        if start_dt >= end_dt:
-            raise ValueError("start_date must be before end_date")
-    except ValueError as e:
-        raise ValueError(f"Invalid date format. Use YYYY-MM-DD: {e}")
-
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    headers = {"Content-Type": "application/json"}
-
-    for _, row in symbol_df.iterrows():
-        symbol = row["symbol"]
-        sec = row["security_id"]
-        try:
-            url = f"https://api.tiingo.com/tiingo/daily/{symbol}/prices?startDate={start_date}&endDate={end_date}&token={token}"
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-
-            historical_data = pd.DataFrame(response.json())
-
-            if not historical_data.empty:
-                historical_data = historical_data.copy()
-                historical_data.insert(0, "security_id", sec)
-                historical_data["dataload_date"] = current_time
-                dataframes.append(historical_data)
-            else:
-                symbols_with_no_data.append({"symbol": symbol, "security_id": sec})
-                print(f"No data found for symbol: {symbol}")
-
-        except Exception as e:
-            symbols_with_no_data.append({"symbol": symbol, "security_id": sec})
-            print(f"Error retrieving data for {symbol}: {str(e)}")
-
-    # Combine all data
-    if not dataframes:
-        print("Warning: No valid data retrieved for any symbol")
-        df_combined = pd.DataFrame()
-    else:
-        df_combined = pd.concat(dataframes, ignore_index=True).round(4)
-
-    df_no_data = pd.DataFrame(symbols_with_no_data)
-
-    if not df_no_data.empty:
-        print(f"symbols with no data: {df_no_data['symbol'].tolist()}")
-
-    # rename columns and keep only the desired set
-    df_combined = df_combined.rename(
-        columns={"date": "as_of_date", "adjClose": "adj_close", "divCash": "dividends", "splitFactor": "stock_splits"}
-    )
-
-    if "interval" not in df_combined.columns:
-        df_combined["interval"] = "1d" if "daily" in url else None
-
-    # re‑order/subset to the target column list
-    df_combined = df_combined[
-        [
-            "security_id",
-            "as_of_date",
-            "open",
-            "high",
-            "low",
-            "close",
-            "adj_close",
-            "volume",
-            "dividends",
-            "stock_splits",
-            "interval",
-            "dataload_date",
-        ]
-    ]
-
-    return df_combined, df_no_data
-
-
-# Usage example
-if __name__ == "__main__":
-    token = "81f0783ae3d1756869af76d72b52a86f08e2ca15"
-
-    # Create a DataFrame with required columns
-    symbol_df = pd.DataFrame({"symbol": ["AAPL", "GOOGL", "ANSS", "INVALID"], "security_id": [1, 2, 3, 4]})
-
-    # Call the function with proper arguments
-    data, no_data = get_stock_price(
-        symbol_df=symbol_df,
-        token=token,
-        start_date="2025-01-01",
-        end_date="2025-01-04",
-    )
-    print(data)
-    print(no_data)
+    """Fetch EOD prices from Tiingo (backward-compatible signature/return)."""
+    vendor = TiingoVendor(token)
+    data, no_data = vendor.fetch(symbol_df, start_date, end_date, interval="1d")
+    if data.empty and no_data.empty:
+        data = pd.DataFrame(columns=STANDARD_COLUMNS)
+    return data, no_data
