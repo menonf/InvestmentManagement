@@ -25,10 +25,6 @@ Usage:
 
 from __future__ import annotations
 
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
-
 import logging
 import math
 import time
@@ -41,6 +37,11 @@ import sqlalchemy as sql
 from sqlalchemy.orm import Session
 
 from data_engineering.database import database
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
+
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -456,7 +457,9 @@ def fetch_enrich(rics: List[str]) -> pd.DataFrame:
 # =============================================================================
 
 
-def build_frames(universe: pd.DataFrame, gics: pd.DataFrame, enrich: Optional[pd.DataFrame] = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+def build_frames(
+    universe: pd.DataFrame, gics: pd.DataFrame, enrich: Optional[pd.DataFrame] = None
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Assemble the security_master and vendor_xref rows from the raw pulls.
 
     Args:

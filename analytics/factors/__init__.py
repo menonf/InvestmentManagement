@@ -17,7 +17,7 @@ from .factors import Factor, MomentumFactor, ValueFactor
 from .ml_factor import MLReturnFactor
 
 # Name -> class registry for config-driven factor selection.
-registry = {
+registry: dict[str, type[Factor]] = {
     "momentum": MomentumFactor,
     "value": ValueFactor,
     "ml_return": MLReturnFactor,

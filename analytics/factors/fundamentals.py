@@ -31,12 +31,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Iterable, Optional
 
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
-
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
 
 # ---------------------------------------------------------------------------
 # Canonical ratio contract
@@ -323,9 +322,13 @@ class YahooFundamentalsProvider(FundamentalsProvider):
         ratios["Debt/Equity"] = _safe_ratio(total_debt, total_equity, numerator=total_debt, denominator=total_equity)
         ratios["Debt Ratio"] = _safe_ratio(total_debt, total_assets, numerator=total_debt, denominator=total_assets)
         ratios["Cash Ratio"] = _safe_ratio(current_liab, cash, numerator=cash, denominator=current_liab)
-        ratios["Working Capital Ratio"] = _safe_ratio(current_liab, current_assets, numerator=current_assets, denominator=current_liab) if current_liab else None
+        ratios["Working Capital Ratio"] = (
+            _safe_ratio(current_liab, current_assets, numerator=current_assets, denominator=current_liab) if current_liab else None
+        )
         ratios["(CA-CL)/TA"] = (
-            _safe_ratio(total_assets, current_assets, current_liab, numerator=(current_assets - current_liab), denominator=total_assets)
+            _safe_ratio(
+                total_assets, current_assets, current_liab, numerator=(current_assets - current_liab), denominator=total_assets
+            )
             if (total_assets and current_assets is not None and current_liab is not None)
             else None
         )
@@ -342,7 +345,13 @@ class YahooFundamentalsProvider(FundamentalsProvider):
             else None
         )
         ratios["Op. In./(NWC+FA)"] = (
-            _safe_ratio(operating_income, working_capital, fixed_assets, numerator=operating_income, denominator=(working_capital + fixed_assets))
+            _safe_ratio(
+                operating_income,
+                working_capital,
+                fixed_assets,
+                numerator=operating_income,
+                denominator=(working_capital + fixed_assets),
+            )
             if (operating_income and (working_capital + fixed_assets))
             else None
         )
@@ -450,6 +459,7 @@ def _compute_refinitiv_ratios(raw: DataFrame) -> DataFrame:
     def safe(s: "pd.Series") -> "pd.Series":
         # div-by-zero -> NaN, not inf
         return s.replace(0, np.nan)
+
     nwc = current_assets - current_liab
     # Derive book equity from the accounting identity (Total Assets - Total Liab)
     # since LSEG does not return a direct StockholdersEquity field here. This

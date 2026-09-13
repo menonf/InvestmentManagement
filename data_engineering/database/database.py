@@ -986,7 +986,9 @@ def write_factor_scores(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(orm_session, _upsert, df.to_dict(orient="records"))
 
 
-def read_factor_scores(orm_session: Session, orm_engine: Engine, as_of_date: Optional[date] = None, factor_name: Optional[str] = None) -> DataFrame:
+def read_factor_scores(
+    orm_session: Session, orm_engine: Engine, as_of_date: Optional[date] = None, factor_name: Optional[str] = None
+) -> DataFrame:
     """Read factor scores, optionally filtered by date / factor."""
     q = orm_session.query(*FactorScores.__table__.columns)
     if as_of_date:
@@ -1105,7 +1107,9 @@ def write_factor_exposures(df: DataFrame, orm_session: Session) -> None:
     )
 
 
-def compute_and_store_factors(prices: DataFrame, factors: dict[str, Any], universe: str, source_vendor: str, orm_session: Session) -> None:
+def compute_and_store_factors(
+    prices: DataFrame, factors: dict[str, Any], universe: str, source_vendor: str, orm_session: Session
+) -> None:
     """Compute factor scores for a price panel and persist to factor_scores.
 
     Args:

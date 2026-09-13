@@ -17,10 +17,6 @@ Usage:
 
 from __future__ import annotations
 
-# ---------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------
-
 import logging
 from datetime import datetime
 from typing import Any, Optional
@@ -31,6 +27,11 @@ import sqlalchemy as sql
 from sqlalchemy.orm import Session
 
 from data_engineering.database import database
+
+# ---------------------------------------------------------------------------
+# Imports
+# ---------------------------------------------------------------------------
+
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -106,7 +107,7 @@ def fetch_fd_universe() -> pd.DataFrame:
 # =============================================================================
 
 
-def build_frames(df: pd.DataFrame) -> dict[str, Any]:
+def build_frames(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Split the FinanceDatabase universe into master and xref frames.
 
     Args:

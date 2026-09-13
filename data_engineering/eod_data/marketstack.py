@@ -7,6 +7,8 @@ Public API (unchanged):
 
 from __future__ import annotations
 
+from typing import Any
+
 import pandas as pd
 import requests
 
@@ -52,7 +54,7 @@ class MarketstackVendor(PriceVendor):
         all_rows, missing = [], []
 
         while True:
-            params = {
+            params: dict[str, Any] = {
                 "access_key": self.api_key,
                 "symbols": ",".join(symbols),
                 "date_from": start_date,
@@ -102,7 +104,9 @@ class MarketstackVendor(PriceVendor):
         return df, missing
 
 
-def get_stock_price_marketstack(symbol_df: pd.DataFrame, start_date: str, end_date: str, api_key: str, interval: str = "1d") -> pd.DataFrame:
+def get_stock_price_marketstack(
+    symbol_df: pd.DataFrame, start_date: str, end_date: str, api_key: str, interval: str = "1d"
+) -> pd.DataFrame:
     """Fetch EOD prices from Marketstack (backward-compatible signature/return)."""
     vendor = MarketstackVendor(api_key)
     data, no_data = vendor.fetch(symbol_df, start_date, end_date, interval)

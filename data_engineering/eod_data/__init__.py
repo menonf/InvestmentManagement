@@ -21,7 +21,7 @@ from .refinitiv import RefinitivVendor
 from .tiingo import TiingoVendor
 from .yahoo import YahooVendor
 
-_REGISTRY = {
+_REGISTRY: dict[str, type[PriceVendor]] = {
     "yahoo": YahooVendor,
     "refinitiv": RefinitivVendor,
     "tiingo": TiingoVendor,

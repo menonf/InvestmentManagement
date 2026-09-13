@@ -121,7 +121,7 @@ def build_estimator(key: str) -> Any:
 def _is_classifier(obj: Any) -> bool:
     from sklearn.base import is_classifier
 
-    return is_classifier(obj)
+    return bool(is_classifier(obj))
 
 
 def _as_pipelines(items: list[Any]) -> list[Any]:

@@ -32,11 +32,10 @@ from __future__ import annotations
 import os
 from typing import Any, Optional, Sequence
 
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
-
 import pandas as pd
 from pandas import DataFrame
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
 from tqdm import tqdm
 
 from .fundamentals import RATIO_COLUMNS, FundamentalsProvider, get_fundamentals_provider
@@ -153,7 +152,7 @@ def build_modelling_table(
 def time_based_split(
     df: DataFrame,
     test_size: float = 0.2,
-) -> tuple[DataFrame, DataFrame]:
+) -> tuple[DataFrame, DataFrame, Any, Any, Any]:
     """Split a modelling table on time (snapshot_date), not randomly.
 
     The cut is made on the *sorted unique snapshot dates* (not row count), so all
@@ -196,7 +195,7 @@ def train_models(
     if verbose:
         print(f"Training on {len(X_train)} rows, testing on {len(X_test)} rows " f"(split date {split_date}).")
 
-    metrics: dict = {}
+    metrics: dict[str, Any] = {}
     # Fit on numpy arrays so the persisted pipelines carry no feature-name
     # expectation (predicting from a numpy panel in compute() then warns/strict-
     # matches otherwise).

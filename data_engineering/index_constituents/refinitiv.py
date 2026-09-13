@@ -10,9 +10,10 @@ This module performs the following:
 All functionality remains equivalent to the original implementation.
 """
 
+from typing import Any, Optional
+
 import lseg.data as ld
 import pandas as pd
-from typing import Any, Optional
 
 from data_engineering.database import database as database
 
@@ -366,7 +367,7 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
     # Strip/blank-coalesce identifiers so "" never becomes a map key.
     sm = database.read_security_master(session, engine)
 
-    def _id_map(col: str) -> dict[str, str]:
+    def _id_map(col: str) -> Any:
         if col not in sm.columns:
             return {}
         s = sm[col].astype("string").str.strip().replace({"": pd.NA}).dropna()
@@ -536,7 +537,9 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
     ]
 
 
-def _ld_get_data_retry(universe: Any, fields: Any, parameters: Optional[dict[str, Any]] = None, max_retries: int = 8, chunk_size: int = 200) -> Any:
+def _ld_get_data_retry(
+    universe: Any, fields: Any, parameters: Optional[dict[str, Any]] = None, max_retries: int = 8, chunk_size: int = 200
+) -> Any:
     """Single-call wrapper around ld.get_data with chunking + retry.
 
     Used for one-shot fetches (e.g. the constituent attribute pull) that would
@@ -546,7 +549,9 @@ def _ld_get_data_retry(universe: Any, fields: Any, parameters: Optional[dict[str
     return _ld_get_data_chunked(universe, fields, parameters or {}, chunk_size=chunk_size, max_retries=max_retries)
 
 
-def _ld_get_data_chunked(universe: Any, fields: Any, parameters: Any, chunk_size: int = 200, max_retries: int = 8, inter_chunk_sleep: float = 3.0) -> Any:
+def _ld_get_data_chunked(
+    universe: Any, fields: Any, parameters: Any, chunk_size: int = 200, max_retries: int = 8, inter_chunk_sleep: float = 3.0
+) -> Any:
     """Fetch Refinitiv data in chunks with retry and backoff.
 
     Fetch Refinitiv data in chunks to avoid gateway timeouts on large

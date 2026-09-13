@@ -12,7 +12,7 @@ from analytics.factors.fundamentals import (
 )
 
 
-def _raw_row():
+def _raw_row() -> dict[str, float]:
     # A plausible fundamental snapshot for one RIC, keyed by the *display names*
     # LSEG's get_data returns (see REFINITIV_RAW_FIELDS). Only the fields this
     # LSEG setup actually returns are present.
@@ -35,7 +35,7 @@ def _raw_row():
     }
 
 
-def test_all_fields_mapped():
+def test_all_fields_mapped() -> None:
     assert set(REFINITIV_RAW_FIELDS.values()) == {
         "price", "mkt_cap", "ebit", "revenue", "net_income", "total_debt",
         "total_assets", "current_assets", "current_liab", "total_liab",
@@ -44,7 +44,7 @@ def test_all_fields_mapped():
     }
 
 
-def test_ratios_computed_correctly():
+def test_ratios_computed_correctly() -> None:
     raw = pd.DataFrame([_raw_row()], index=["ABC.O"])
     out = _compute_refinitiv_ratios(raw)
     assert list(out.columns) == RATIO_COLUMNS
@@ -77,7 +77,7 @@ def test_ratios_computed_correctly():
     assert np.isclose(out.loc["ABC.O", "Op. In./Interest Expense"], 220_000_000 / 20_000_000)
 
 
-def test_derived_market_cap_when_direct_field_null():
+def test_derived_market_cap_when_direct_field_null() -> None:
     # This LSEG entitlement returns Market Capitalization as null but does return
     # PriceClose and SharesOutstanding. Verify mkt_cap is derived from price*shares
     # so P/E, P/B, P/S still populate.
@@ -101,7 +101,7 @@ def test_derived_market_cap_when_direct_field_null():
     assert np.isclose(out.loc["DERIV.O", "P/S"], 1_000_000_000 / 500_000_000)
 
 
-def test_missing_components_yield_nan_not_inf():
+def test_missing_components_yield_nan_not_inf() -> None:
     raw = pd.DataFrame(
         [{"Market Capitalization": 1_000_000_000, "Total Revenue": 0.0}],
         index=["ZERO.O"],

@@ -143,7 +143,7 @@ class RefinitivVendor(PriceVendor):
                 symbol_df = resolve_tickers_to_rics(symbol_df)
             except Exception as exc:  # noqa: BLE001
                 print(f"Error resolving tickers to RICs: {exc}")
-                return pd.DataFrame(columns=STANDARD_COLUMNS)
+                return pd.DataFrame(columns=STANDARD_COLUMNS), pd.DataFrame(columns=["symbol", "security_id"])
 
         no_ric = symbol_df[symbol_df["ric"].isna()]["symbol"].tolist()
         for s in no_ric:
@@ -151,7 +151,7 @@ class RefinitivVendor(PriceVendor):
         valid = symbol_df[symbol_df["ric"].notna()].copy()
         if valid.empty:
             print("Warning: No valid data retrieved for any symbol")
-            return pd.DataFrame(columns=STANDARD_COLUMNS)
+            return pd.DataFrame(columns=STANDARD_COLUMNS), pd.DataFrame(columns=["symbol", "security_id"])
 
         rics = valid["ric"].drop_duplicates().tolist()
         # Refinitiv rejects very large universes in a single get_data call, so
@@ -163,16 +163,18 @@ class RefinitivVendor(PriceVendor):
         raw = pd.concat(raw_frames, ignore_index=True) if raw_frames else pd.DataFrame()
         if raw.empty:
             print("Warning: No valid data retrieved for any symbol")
-            return pd.DataFrame(columns=STANDARD_COLUMNS)
+            return pd.DataFrame(columns=STANDARD_COLUMNS), pd.DataFrame(columns=["symbol", "security_id"])
 
         df = _standardize_dataframe(raw, valid, now, interval)
         returned = set(df["security_id"])
         missing = [s for s in valid["symbol"] if valid.loc[valid["symbol"] == s, "security_id"].iloc[0] not in returned]
         if missing:
             print(f"symbols with no data: {missing}")
-        return df.round(4)
+        return df.round(4), pd.DataFrame(columns=["symbol", "security_id"])
 
-    def _fetch_raw(self, symbol_df: DataFrame, start_date: str, end_date: str, interval: str) -> tuple[DataFrame, DataFrame]:  # pragma: no cover
+    def _fetch_raw(
+        self, symbol_df: DataFrame, start_date: str, end_date: str, interval: str
+    ) -> tuple[DataFrame, DataFrame]:  # pragma: no cover
         raise NotImplementedError("Use RefinitivVendor.fetch directly.")
 
 
@@ -180,8 +182,10 @@ _VENDOR = RefinitivVendor()
 
 
 def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interval: str = "1d") -> DataFrame:
-    """Fetch EOD prices from Refinitiv (backward-compatible single-DataFrame return)."""
-    return _VENDOR.fetch(symbol_df, start_date, end_date, interval)
+    """Fetch EOD prices from Refinitiv (backward-compatible single-frame return)."""
+    vendor = RefinitivVendor()
+    data, _no_data = vendor.fetch(symbol_df, start_date, end_date, interval)
+    return data
 
 
 # --- internal helpers retained from prior implementation -----------------

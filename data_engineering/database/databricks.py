@@ -201,7 +201,7 @@ def _bulk_delete_insert(
     orm_session: Session,
     model: Type[DeclarativeBase],
     data_list: List[dict[str, Any]],
-    *filter_criteria,
+    *filter_criteria: Any,
 ) -> None:
     """Delete matching rows then bulk-insert new records."""
     orm_session.query(model).filter(*filter_criteria).delete(synchronize_session=False)
@@ -603,11 +603,13 @@ def write_factor_scores(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(orm_session, _upsert, df.to_dict(orient="records"))
 
 
-def read_factor_scores(orm_session: Session, orm_engine: Engine, as_of_date: Optional[date] = None, factor_name: Optional[str] = None) -> DataFrame:
+def read_factor_scores(
+    orm_session: Session, orm_engine: Engine, as_of_date: Optional[date] = None, factor_name: Optional[str] = None
+) -> DataFrame:
     """Read factor scores, optionally filtered by date / factor."""
     q = orm_session.query(*FactorScores.__table__.columns)
     if as_of_date:
-        q = q.filter(FactorScores.as_of_date == _parse_date(as_of_date))
+        q = q.filter(FactorScores.as_of_date == as_of_date)
     if factor_name:
         q = q.filter(FactorScores.factor_name == factor_name)
     return pd.read_sql_query(q.statement, con=orm_engine)
@@ -722,7 +724,9 @@ def write_factor_exposures(df: DataFrame, orm_session: Session) -> None:
     )
 
 
-def compute_and_store_factors(prices: DataFrame, factors: dict[str, Any], universe: str, source_vendor: str, orm_session: Session) -> None:
+def compute_and_store_factors(
+    prices: DataFrame, factors: dict[str, Any], universe: str, source_vendor: str, orm_session: Session
+) -> None:
     """Compute factor scores for a price panel and persist to factor_scores."""
     from analytics.factors import Factor
 
