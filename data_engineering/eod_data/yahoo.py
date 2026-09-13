@@ -12,13 +12,12 @@ New unified entry point:
 from __future__ import annotations
 
 import datetime
-from typing import Iterable
 
 import pandas as pd
 import yfinance as yf
 from pandas import DataFrame
 
-from .base import PriceVendor, STANDARD_COLUMNS, NUMERIC_COLUMNS
+from .base import NUMERIC_COLUMNS, STANDARD_COLUMNS, PriceVendor
 
 _YAHOO_COLUMN_MAP = {
     "Open": "open",
@@ -33,18 +32,21 @@ _YAHOO_COLUMN_MAP = {
 
 
 class YahooVendor(PriceVendor):
+    """Yahoo Finance end-of-day price vendor.
+
+    Fetches EOD bars via ``yfinance`` and returns the standardized schema.
+    """
+
     name = "yahoo"
 
-    def _fetch_raw(self, symbol_df, start_date, end_date, interval):
+    def _fetch_raw(self, symbol_df: DataFrame, start_date: str, end_date: str, interval: str) -> tuple[DataFrame, DataFrame]:
         dataframes = []
         missing = []
         for _, row in symbol_df.iterrows():
             symbol = row["symbol"]
             sec = row["security_id"]
             try:
-                hist = yf.Ticker(symbol).history(
-                    start=start_date, end=end_date, interval=interval, auto_adjust=False
-                )
+                hist = yf.Ticker(symbol).history(start=start_date, end=end_date, interval=interval, auto_adjust=False)
                 if hist.empty:
                     missing.append(symbol)
                     print(f"No data found for symbol: {symbol}")
@@ -76,9 +78,7 @@ class YahooVendor(PriceVendor):
 _VENDOR = YahooVendor()
 
 
-def get_stock_price(
-    symbol_df: DataFrame, start_date: str, end_date: str, interval: str = "1d"
-) -> tuple[DataFrame, DataFrame]:
+def get_stock_price(symbol_df: DataFrame, start_date: str, end_date: str, interval: str = "1d") -> tuple[DataFrame, DataFrame]:
     """Fetch EOD prices from Yahoo (backward-compatible tuple return)."""
     data, no_data = _VENDOR.fetch(symbol_df, start_date, end_date, interval)
     if data.empty:

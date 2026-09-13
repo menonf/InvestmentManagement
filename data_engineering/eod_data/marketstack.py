@@ -7,27 +7,37 @@ Public API (unchanged):
 
 from __future__ import annotations
 
-import datetime
-from typing import Iterable
-
 import pandas as pd
 import requests
-from pandas import DataFrame
 
-from .base import PriceVendor, STANDARD_COLUMNS, NUMERIC_COLUMNS
+from .base import STANDARD_COLUMNS, PriceVendor
 
 _BASE_URL = "https://api.marketstack.com/v1/eod"
 
 
 class MarketstackVendor(PriceVendor):
+    """Marketstack end-of-day price vendor.
+
+    Fetches EOD bars from the Marketstack REST API using an API key.
+    """
+
     name = "marketstack"
     base_url = _BASE_URL
 
     def __init__(self, api_key: str):
+        """Initialize the vendor with a Marketstack API key."""
         self.api_key = api_key
 
     @classmethod
-    def from_env(cls, env_var: str = "MARKETSTACK_API_KEY"):
+    def from_env(cls, env_var: str = "MARKETSTACK_API_KEY") -> MarketstackVendor:
+        """Build a vendor instance from an environment variable.
+
+        Args:
+            env_var: Name of the environment variable holding the API key.
+
+        Returns:
+            A configured :class:`MarketstackVendor`.
+        """
         import os
 
         key = os.environ.get(env_var)
@@ -35,7 +45,7 @@ class MarketstackVendor(PriceVendor):
             raise RuntimeError(f"{env_var} not set")
         return cls(key)
 
-    def _fetch_raw(self, symbol_df, start_date, end_date, interval):
+    def _fetch_raw(self, symbol_df: pd.DataFrame, start_date: str, end_date: str, interval: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         symbols = symbol_df["symbol"].tolist()
         symbol_map = dict(zip(symbol_df["symbol"], symbol_df["security_id"]))
         limit, offset = 1000, 0
@@ -87,16 +97,12 @@ class MarketstackVendor(PriceVendor):
             offset += limit
 
         df = pd.DataFrame(all_rows)
-        returned = (
-            set(df["security_id"].map({v: k for k, v in symbol_map.items()}).dropna())
-            if not df.empty
-            else set()
-        )
+        returned = set(df["security_id"].map({v: k for k, v in symbol_map.items()}).dropna()) if not df.empty else set()
         missing = [s for s in symbols if s not in returned]
         return df, missing
 
 
-def get_stock_price_marketstack(symbol_df, start_date, end_date, api_key, interval="1d"):
+def get_stock_price_marketstack(symbol_df: pd.DataFrame, start_date: str, end_date: str, api_key: str, interval: str = "1d") -> pd.DataFrame:
     """Fetch EOD prices from Marketstack (backward-compatible signature/return)."""
     vendor = MarketstackVendor(api_key)
     data, no_data = vendor.fetch(symbol_df, start_date, end_date, interval)

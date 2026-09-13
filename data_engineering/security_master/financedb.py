@@ -1,6 +1,5 @@
-"""
-FinanceDatabase Security Master Ingestion
-=========================================
+"""Ingest the equity universe from FinanceDatabase into the security master.
+
 Fetches the full equity universe from the open-source FinanceDatabase package,
 enriches it, and upserts into the two-table security master:
 
@@ -16,16 +15,18 @@ Usage:
     python financedatabase_ingest.py
 """
 
+from __future__ import annotations
+
 # ---------------------------------------------------------------------------
 # Imports
 # ---------------------------------------------------------------------------
 
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
-import pandas as pd
 import financedatabase as fd
+import pandas as pd
 import sqlalchemy as sql
 from sqlalchemy.orm import Session
 
@@ -55,7 +56,7 @@ DB_BATCH_SIZE = 1000  # rows per DB commit
 # ===========================================================================
 
 
-def clean(val) -> Optional[str]:
+def clean(val: Any) -> Optional[str]:
     """Return None for blank / null / NaN / NA values; stripped string otherwise."""
     if val is None:
         return None
@@ -76,8 +77,8 @@ def _safe_column(df: pd.DataFrame, name: str) -> pd.Series:
 
 
 def fetch_fd_universe() -> pd.DataFrame:
-    """
-    Fetches the full Equities dataset from FinanceDatabase.
+    """Fetch the full Equities dataset from FinanceDatabase.
+
     The resulting dataframe uses the ticker symbol as the index.
     """
     log.info("Initializing FinanceDatabase Equities module...")
@@ -105,7 +106,15 @@ def fetch_fd_universe() -> pd.DataFrame:
 # =============================================================================
 
 
-def build_frames(df: pd.DataFrame):
+def build_frames(df: pd.DataFrame) -> dict[str, Any]:
+    """Split the FinanceDatabase universe into master and xref frames.
+
+    Args:
+        df: Raw FinanceDatabase equities DataFrame.
+
+    Returns:
+        Tuple of (security_master rows, vendor_xref rows) as lists of dicts.
+    """
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     master = pd.DataFrame(
@@ -149,7 +158,17 @@ def build_frames(df: pd.DataFrame):
 # =============================================================================
 # Security Resolution
 # =============================================================================
-def resolve_security_ids(master: pd.DataFrame, session: Session, engine: sql.Engine):
+def resolve_security_ids(master: pd.DataFrame, session: Session, engine: sql.Engine) -> pd.DataFrame:
+    """Resolve internal security_ids for the ingested master rows.
+
+    Args:
+        master: Incoming security_master frame.
+        session: Active ORM session.
+        engine: SQLAlchemy engine.
+
+    Returns:
+        The master frame enriched with resolved ``security_id`` values.
+    """
     existing = database.read_security_master(session, engine)
 
     # 1. Build lookup maps for cross-vendor resolution
@@ -223,7 +242,14 @@ def resolve_security_ids(master: pd.DataFrame, session: Session, engine: sql.Eng
 # =============================================================================
 
 
-def write_xref(master: pd.DataFrame, xref: pd.DataFrame, engine: sql.Engine):
+def write_xref(master: pd.DataFrame, xref: pd.DataFrame, engine: sql.Engine) -> None:
+    """Upsert the vendor xref rows for the ingested universe.
+
+    Args:
+        master: Security master frame (used to map vendor tickers to ids).
+        xref: Vendor xref rows to write.
+        engine: SQLAlchemy engine.
+    """
     id_map = master.set_index("_vendor_ticker")["security_id"].to_dict()
 
     xref["security_id"] = xref["_vendor_ticker"].map(id_map)
@@ -258,7 +284,8 @@ def write_xref(master: pd.DataFrame, xref: pd.DataFrame, engine: sql.Engine):
 # ===========================================================================
 
 
-def main():
+def main() -> None:
+    """Run the FinanceDatabase ingestion pipeline end to end."""
     log.info("START FinanceDatabase ingestion")
 
     universe = fetch_fd_universe()

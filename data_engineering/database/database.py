@@ -1,5 +1,7 @@
 """SQLAlchemy ORM module to connect to database objects."""
 
+from __future__ import annotations
+
 import re
 import time
 from datetime import date, datetime
@@ -10,7 +12,7 @@ import keyring
 import pandas as pd
 import sqlalchemy as sql
 from pandas import DataFrame
-from sqlalchemy import Engine, Date, Float, Integer, String, delete, update
+from sqlalchemy import Date, Engine, String
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
@@ -221,7 +223,7 @@ def _read_table(orm_session: Session, orm_engine: Engine, model: Type[Base]) -> 
 
 def _bulk_delete_insert(
     orm_session: Session,
-    model: Type[Base],
+    model: Type[DeclarativeBase],
     data_list: List[Dict[str, Any]],
     *filter_criteria: Any,
 ) -> None:
@@ -559,8 +561,6 @@ def write_market_data(market_data: DataFrame, orm_session: Session) -> None:
     market_data = market_data.copy()
     market_data = market_data.dropna(subset=["as_of_date"])
     before = len(market_data)
-    price_cols = ["open", "high", "low", "close", "adj_close"]
-    present_price = [c for c in price_cols if c in market_data.columns]
     for c in ["open", "high", "low", "adj_close"]:
         if c in market_data.columns:
             market_data[c] = market_data[c].fillna(market_data["close"])
@@ -663,7 +663,7 @@ def write_security_fundamentals(
     fundamental_data: DataFrame,
     orm_session: Session,
     _retry_attempt: int = 0,
-) -> None:
+) -> int:
     """
     Write security fundamentals with a NON-DESTRUCTIVE upsert.
 
@@ -688,7 +688,7 @@ def write_security_fundamentals(
     """
     if fundamental_data.empty:
         print("No fundamental data to insert.")
-        return
+        return 0
 
     # A fundamentals row with no resolved security is invalid and, worse,
     # pyodbc cannot bind pandas' nullable <NA> (raises HY105 / ProgrammingError).
@@ -699,15 +699,13 @@ def write_security_fundamentals(
         fundamental_data = fundamental_data[fundamental_data["security_id"].notna()].copy()
     if fundamental_data.empty:
         print("No fundamental data to insert after dropping unresolved security_id.")
-        return
+        return 0
 
     # Coerce security_id to a plain (nullable=False) int so it binds cleanly.
     fundamental_data["security_id"] = fundamental_data["security_id"].astype("int64").astype(int)
 
     # Normalise effective_date to a python date for exact key matching.
-    fundamental_data["effective_date"] = pd.to_datetime(
-        fundamental_data["effective_date"]
-    ).dt.date
+    fundamental_data["effective_date"] = pd.to_datetime(fundamental_data["effective_date"]).dt.date
 
     # Snapshot end_date as a date (or None) for insertion.
     fundamental_data["end_date"] = fundamental_data["end_date"].apply(
@@ -718,9 +716,7 @@ def write_security_fundamentals(
     # (The previous IN-list approach blew past pyodbc's parameter cap for
     # time-series, which carry hundreds of thousands of distinct dates.)
     # Only the incoming key set is touched; rows outside it are preserved.
-    df = fundamental_data[
-        ["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"]
-    ].copy()
+    df = fundamental_data[["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"]].copy()
 
     # De-duplicate the natural key so the MERGE source has exactly one row per
     # (security_id, metric_type, source_vendor, effective_date).
@@ -731,20 +727,24 @@ def write_security_fundamentals(
     n = len(df)
     print(f"Upserting {n} security_fundamentals rows (non-destructive MERGE)...")
     bind = orm_session.connection()  # share the SAME connection the temp table lives on
+    assert bind is not None
     try:
         # Fresh temp table.
         orm_session.execute(sql.text("IF OBJECT_ID('tempdb..#sf_stage') IS NOT NULL DROP TABLE #sf_stage"))
-        orm_session.execute(sql.text(
-            "CREATE TABLE #sf_stage ("
-            " security_id INT, metric_type VARCHAR(64), metric_value FLOAT, "
-            " source_vendor VARCHAR(64), effective_date DATE, end_date DATE)"
-        ))
+        orm_session.execute(
+            sql.text(
+                "CREATE TABLE #sf_stage ("
+                " security_id INT, metric_type VARCHAR(64), metric_value FLOAT, "
+                " source_vendor VARCHAR(64), effective_date DATE, end_date DATE)"
+            )
+        )
         # Stage via raw pyodbc fast_executemany (0.8ms/row vs SQLAlchemy's
         # ~9ms/row per-row round-trip). We use the SAME underlying connection
         # the session uses, so the #sf_stage temp table stays visible to the
         # MERGE below. (SQLAlchemy's executemany ignores fast_executemany and is
         # too slow for ~100k-row frames.)
         raw_conn = bind.connection.driver_connection  # pyodbc.Connection
+        assert raw_conn is not None
         cur = raw_conn.cursor()
         cur.fast_executemany = True
         cur.executemany(
@@ -763,19 +763,21 @@ def write_security_fundamentals(
             ],
         )
         cur.close()
-        orm_session.execute(sql.text(
-            "MERGE dbo.security_fundamentals AS tgt "
-            "USING #sf_stage AS src "
-            "  ON tgt.security_id    = src.security_id "
-            " AND tgt.metric_type    = src.metric_type "
-            " AND tgt.source_vendor  = src.source_vendor "
-            " AND tgt.effective_date = src.effective_date "
-            "WHEN MATCHED THEN "
-            "  UPDATE SET tgt.metric_value = src.metric_value, tgt.end_date = src.end_date "
-            "WHEN NOT MATCHED THEN "
-            "  INSERT (security_id, metric_type, metric_value, source_vendor, effective_date, end_date) "
-            "  VALUES (src.security_id, src.metric_type, src.metric_value, src.source_vendor, src.effective_date, src.end_date);"
-        ))
+        orm_session.execute(
+            sql.text(
+                "MERGE dbo.security_fundamentals AS tgt "
+                "USING #sf_stage AS src "
+                "  ON tgt.security_id    = src.security_id "
+                " AND tgt.metric_type    = src.metric_type "
+                " AND tgt.source_vendor  = src.source_vendor "
+                " AND tgt.effective_date = src.effective_date "
+                "WHEN MATCHED THEN "
+                "  UPDATE SET tgt.metric_value = src.metric_value, tgt.end_date = src.end_date "
+                "WHEN NOT MATCHED THEN "
+                "  INSERT (security_id, metric_type, metric_value, source_vendor, effective_date, end_date) "
+                "  VALUES (src.security_id, src.metric_type, src.metric_value, src.source_vendor, src.effective_date, src.end_date);"
+            )
+        )
         orm_session.execute(sql.text("DROP TABLE #sf_stage"))
         orm_session.commit()
         print(f"Security fundamentals data successfully written ({n} rows upserted).")
@@ -785,9 +787,8 @@ def write_security_fundamentals(
             bind.invalidate()
             orm_session.close()
             print("Transient SQL Server connection failure; retrying fundamentals upsert...")
-            time.sleep(2 ** _retry_attempt)
-            write_security_fundamentals(fundamental_data, orm_session, _retry_attempt + 1)
-            return
+            time.sleep(2**_retry_attempt)
+            return write_security_fundamentals(fundamental_data, orm_session, _retry_attempt + 1)
         print(f"Database error during security_fundamentals upsert: {e}")
         raise
     except Exception as e:
@@ -796,11 +797,11 @@ def write_security_fundamentals(
             bind.invalidate()
             orm_session.close()
             print("Transient SQL Server connection failure; retrying fundamentals upsert...")
-            time.sleep(2 ** _retry_attempt)
-            write_security_fundamentals(fundamental_data, orm_session, _retry_attempt + 1)
-            return
+            time.sleep(2**_retry_attempt)
+            return write_security_fundamentals(fundamental_data, orm_session, _retry_attempt + 1)
         print(f"Unexpected error during security_fundamentals upsert: {e}")
         raise
+    return n
 
 
 # ---------------------------------------------------------------------------
@@ -843,8 +844,10 @@ def get_portfolio_market_data(
         before = len(df_market_data)
         df_market_data = df_market_data.drop_duplicates(subset=["security_id", "as_of_date"], keep="last")
         if len(df_market_data) != before:
-            print(f"[get_portfolio_market_data] dropped {before - len(df_market_data)} "
-                  f"duplicate market_data row(s) on (security_id, as_of_date)")
+            print(
+                f"[get_portfolio_market_data] dropped {before - len(df_market_data)} "
+                f"duplicate market_data row(s) on (security_id, as_of_date)"
+            )
     df_portfolio = read_portfolio(orm_session, orm_engine, portfolio_short_names)
     df_holdings = read_portfolio_holdings(orm_session, orm_engine, start_date, end_date)
     df_fundamentals = read_security_fundamentals(orm_session, orm_engine, "shares_outstanding")
@@ -859,13 +862,13 @@ def get_portfolio_market_data(
     if "port_id" in df_portfolio.columns and "portfolio_short_name" in df_portfolio.columns:
         before = len(df_portfolio)
         df_portfolio = (
-            df_portfolio.sort_values("port_id")
-            .drop_duplicates(subset=["portfolio_short_name"], keep="first")
-            .reset_index(drop=True)
+            df_portfolio.sort_values("port_id").drop_duplicates(subset=["portfolio_short_name"], keep="first").reset_index(drop=True)
         )
         if len(df_portfolio) != before:
-            print(f"[get_portfolio_market_data] dropped {before - len(df_portfolio)} "
-                  f"duplicate portfolio row(s) (same short_name, multiple port_ids)")
+            print(
+                f"[get_portfolio_market_data] dropped {before - len(df_portfolio)} "
+                f"duplicate portfolio row(s) (same short_name, multiple port_ids)"
+            )
 
     # portfolio_holdings.as_of_date is stored as a string, while market_data.as_of_date
     # comes back as a datetime.date. The inner merge on ["security_id","as_of_date"]
@@ -933,10 +936,7 @@ def get_portfolio_market_data(
         # weight. Per-security only -- never cross security boundaries.
         if fundamental_cols:
             _fc = list(fundamental_cols)
-            df_merged[_fc] = (
-                df_merged.groupby("security_id")[_fc]
-                .transform(lambda s: s.ffill().bfill())
-            )
+            df_merged[_fc] = df_merged.groupby("security_id")[_fc].transform(lambda s: s.ffill().bfill())
 
         merged_rows.append(df_merged)
 
@@ -953,16 +953,14 @@ def get_portfolio_market_data(
 # ---------------------------------------------------------------------------
 
 from .schema_analytics import (  # noqa: E402  (import after module defs)
+    Attribution,
     FactorScores,
     PortfolioReturns,
-    Attribution,
-    create_analytics_tables,
 )
 from .schema_fx import (  # noqa: E402
+    FactorExposures,
     FxRates,
     RiskSnapshots,
-    FactorExposures,
-    create_fx_tables,
 )
 
 
@@ -978,7 +976,9 @@ def write_factor_scores(df: DataFrame, orm_session: Session) -> None:
 
     def _upsert(data_list: List[Dict[str, Any]]) -> None:
         _bulk_delete_insert(
-            orm_session, FactorScores, data_list,
+            orm_session,
+            FactorScores,
+            data_list,
             FactorScores.as_of_date.in_(as_of),
             FactorScores.security_id.in_(secs),
         )
@@ -986,11 +986,11 @@ def write_factor_scores(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(orm_session, _upsert, df.to_dict(orient="records"))
 
 
-def read_factor_scores(orm_session, orm_engine, as_of_date=None, factor_name=None) -> DataFrame:
+def read_factor_scores(orm_session: Session, orm_engine: Engine, as_of_date: Optional[date] = None, factor_name: Optional[str] = None) -> DataFrame:
     """Read factor scores, optionally filtered by date / factor."""
     q = orm_session.query(*FactorScores.__table__.columns)
     if as_of_date:
-        q = q.filter(FactorScores.as_of_date == _parse_date(as_of_date))
+        q = q.filter(FactorScores.as_of_date == as_of_date)
     if factor_name:
         q = q.filter(FactorScores.factor_name == factor_name)
     return pd.read_sql_query(q.statement, con=orm_engine)
@@ -1008,7 +1008,9 @@ def write_portfolio_returns(df: DataFrame, orm_session: Session) -> None:
 
     def _upsert(data_list: List[Dict[str, Any]]) -> None:
         _bulk_delete_insert(
-            orm_session, PortfolioReturns, data_list,
+            orm_session,
+            PortfolioReturns,
+            data_list,
             PortfolioReturns.as_of_date.in_(as_of),
             PortfolioReturns.port_id.in_(ports),
         )
@@ -1028,7 +1030,9 @@ def write_attribution(df: DataFrame, orm_session: Session) -> None:
 
     def _upsert(data_list: List[Dict[str, Any]]) -> None:
         _bulk_delete_insert(
-            orm_session, Attribution, data_list,
+            orm_session,
+            Attribution,
+            data_list,
             Attribution.as_of_date.in_(as_of),
             Attribution.port_id.in_(ports),
         )
@@ -1040,6 +1044,7 @@ def write_attribution(df: DataFrame, orm_session: Session) -> None:
 # FX / Risk / Factor-exposure helpers (schema_fx)
 # ---------------------------------------------------------------------------
 
+
 def write_fx_rates(df: DataFrame, orm_session: Session) -> None:
     """Upsert FX rates. One row per (from, to, date, vendor)."""
     if df.empty:
@@ -1050,7 +1055,9 @@ def write_fx_rates(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(
         orm_session,
         lambda data: _bulk_delete_insert(
-            orm_session, FxRates, data,
+            orm_session,
+            FxRates,
+            data,
             FxRates.as_of_date.in_(df["as_of_date"].unique().tolist()),
             FxRates.source_vendor.in_(df["source_vendor"].unique().tolist()),
         ),
@@ -1068,7 +1075,9 @@ def write_risk_snapshots(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(
         orm_session,
         lambda data: _bulk_delete_insert(
-            orm_session, RiskSnapshots, data,
+            orm_session,
+            RiskSnapshots,
+            data,
             RiskSnapshots.as_of_date.in_(df["as_of_date"].unique().tolist()),
             RiskSnapshots.port_id.in_(df["port_id"].unique().tolist()),
         ),
@@ -1086,7 +1095,9 @@ def write_factor_exposures(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(
         orm_session,
         lambda data: _bulk_delete_insert(
-            orm_session, FactorExposures, data,
+            orm_session,
+            FactorExposures,
+            data,
             FactorExposures.as_of_date.in_(df["as_of_date"].unique().tolist()),
             FactorExposures.port_id.in_(df["port_id"].unique().tolist()),
         ),
@@ -1094,8 +1105,7 @@ def write_factor_exposures(df: DataFrame, orm_session: Session) -> None:
     )
 
 
-def compute_and_store_factors(prices: DataFrame, factors: dict, universe: str,
-                              source_vendor: str, orm_session: Session) -> None:
+def compute_and_store_factors(prices: DataFrame, factors: dict[str, Any], universe: str, source_vendor: str, orm_session: Session) -> None:
     """Compute factor scores for a price panel and persist to factor_scores.
 
     Args:
@@ -1120,15 +1130,17 @@ def compute_and_store_factors(prices: DataFrame, factors: dict, universe: str,
             for sec, val in row.items():
                 if pd.isna(val):
                     continue
-                rows.append({
-                    "as_of_date": pd.to_datetime(dt).strftime("%Y-%m-%d"),
-                    "security_id": int(sec),
-                    "factor_name": name,
-                    "factor_value": float(val),
-                    "rank_pct": float(rank.loc[dt, sec]) if not pd.isna(rank.loc[dt, sec]) else None,
-                    "universe": universe,
-                    "source_vendor": source_vendor,
-                    "upsert_date": today,
-                })
+                rows.append(
+                    {
+                        "as_of_date": pd.to_datetime(dt).strftime("%Y-%m-%d"),
+                        "security_id": int(sec),
+                        "factor_name": name,
+                        "factor_value": float(val),
+                        "rank_pct": float(rank.loc[dt, sec]) if not pd.isna(rank.loc[dt, sec]) else None,
+                        "universe": universe,
+                        "source_vendor": source_vendor,
+                        "upsert_date": today,
+                    }
+                )
     if rows:
         write_factor_scores(pd.DataFrame(rows), orm_session)

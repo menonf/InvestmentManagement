@@ -6,14 +6,11 @@ Public API (unchanged):
 
 from __future__ import annotations
 
-import datetime
-from typing import Iterable
-
 import pandas as pd
 import requests
 from pandas import DataFrame
 
-from .base import PriceVendor, STANDARD_COLUMNS, NUMERIC_COLUMNS
+from .base import STANDARD_COLUMNS, PriceVendor
 
 _TIINGO_COLUMN_MAP = {
     "date": "as_of_date",
@@ -24,14 +21,28 @@ _TIINGO_COLUMN_MAP = {
 
 
 class TiingoVendor(PriceVendor):
+    """Tiingo end-of-day price vendor.
+
+    Fetches EOD bars from the Tiingo REST API using an API token.
+    """
+
     name = "tiingo"
     base_url = "https://api.tiingo.com/tiingo/daily"
 
     def __init__(self, token: str):
+        """Initialize the vendor with a Tiingo API token."""
         self.token = token
 
     @classmethod
-    def from_env(cls, env_var: str = "TIINGO_API_TOKEN"):
+    def from_env(cls, env_var: str = "TIINGO_API_TOKEN") -> TiingoVendor:
+        """Build a vendor instance from an environment variable.
+
+        Args:
+            env_var: Name of the environment variable holding the API token.
+
+        Returns:
+            A configured :class:`TiingoVendor`.
+        """
         import os
 
         tok = os.environ.get(env_var)
@@ -39,15 +50,12 @@ class TiingoVendor(PriceVendor):
             raise RuntimeError(f"{env_var} not set")
         return cls(tok)
 
-    def _fetch_raw(self, symbol_df, start_date, end_date, interval):
+    def _fetch_raw(self, symbol_df: DataFrame, start_date: str, end_date: str, interval: str) -> tuple[DataFrame, DataFrame]:
         headers = {"Content-Type": "application/json"}
         frames, missing = [], []
         for _, row in symbol_df.iterrows():
             symbol, sec = row["symbol"], row["security_id"]
-            url = (
-                f"{self.base_url}/{symbol}/prices"
-                f"?startDate={start_date}&endDate={end_date}&token={self.token}"
-            )
+            url = f"{self.base_url}/{symbol}/prices" f"?startDate={start_date}&endDate={end_date}&token={self.token}"
             try:
                 resp = requests.get(url, headers=headers, timeout=30)
                 resp.raise_for_status()
@@ -72,7 +80,7 @@ class TiingoVendor(PriceVendor):
         return df[out]
 
 
-def get_stock_price(symbol_df, token, start_date, end_date):
+def get_stock_price(symbol_df: DataFrame, token: str, start_date: str, end_date: str) -> DataFrame:
     """Fetch EOD prices from Tiingo (backward-compatible signature/return)."""
     vendor = TiingoVendor(token)
     data, no_data = vendor.fetch(symbol_df, start_date, end_date, interval="1d")

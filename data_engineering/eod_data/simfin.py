@@ -10,7 +10,9 @@ import requests  # type: ignore[import-untyped]
 try:  # config package may not be importable in all contexts
     from config.secrets import simfin_token
 except Exception:  # pragma: no cover - fallback path
+
     def simfin_token() -> Optional[str]:  # type: ignore
+        """Return the SimFin API token from the environment."""
         return os.environ.get("SIMFIN_API_TOKEN")
 
 

@@ -10,17 +10,17 @@ All public function names are re-exported here so legacy callers
 to work unchanged.
 """
 
+from .plots import (
+    plot_cumulative_returns,
+    plot_returns,
+)
 from .returns import (
     calculate_portfolio_constituent_returns,
     merge_returns_with_weights,
 )
 from .weights import (
-    calculate_portfolio_constituent_weights,
     calculate_held_shares,
-)
-from .plots import (
-    plot_cumulative_returns,
-    plot_returns,
+    calculate_portfolio_constituent_weights,
 )
 
 __all__ = [

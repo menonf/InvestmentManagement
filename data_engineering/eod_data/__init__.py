@@ -13,11 +13,13 @@ the engine can swap vendors without downstream changes.
 
 from __future__ import annotations
 
-from .base import PriceVendor, STANDARD_COLUMNS
-from .yahoo import YahooVendor
+from typing import Any
+
+from .base import STANDARD_COLUMNS, PriceVendor
+from .marketstack import MarketstackVendor
 from .refinitiv import RefinitivVendor
 from .tiingo import TiingoVendor
-from .marketstack import MarketstackVendor
+from .yahoo import YahooVendor
 
 _REGISTRY = {
     "yahoo": YahooVendor,
@@ -32,7 +34,7 @@ def register_vendor(key: str, vendor_cls: type[PriceVendor]) -> None:
     _REGISTRY[key.lower()] = vendor_cls
 
 
-def get_vendor(name: str, **kwargs) -> PriceVendor:
+def get_vendor(name: str, **kwargs: Any) -> PriceVendor:
     """Return a configured :class:`PriceVendor` instance for ``name``.
 
     For credentialed vendors (tiingo, marketstack) pass the token/key via

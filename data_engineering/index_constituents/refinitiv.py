@@ -12,6 +12,7 @@ All functionality remains equivalent to the original implementation.
 
 import lseg.data as ld
 import pandas as pd
+from typing import Any, Optional
 
 from data_engineering.database import database as database
 
@@ -257,7 +258,7 @@ def build_index_constituents(index: str, start: str, end: str) -> pd.DataFrame:
     return ic.get_historical_constituents(index=index, start=start, end=end)
 
 
-def _normalize_ric(ric: str) -> Optional[str]:
+def _normalize_ric(ric: Any) -> Optional[str]:
     """Strip a trailing Refinitiv share-class qualifier, keeping the exchange code.
 
     Refinitiv encodes the same security with RICs that differ only by a trailing
@@ -309,8 +310,28 @@ def _normalize_ric(ric: str) -> Optional[str]:
 # (they are the whole exchange code, not <exch><class>).  Single-letter exchange
 # codes (.O/.N/.Z/...) and unlisted multi-char suffixes are left as-is already.
 _KNOWN_EXCHANGE_SUFFIXES = {
-    "PA", "LN", "AX", "TO", "SW", "HK", "SS", "BR", "AS", "SG", "TW",
-    "KS", "TWO", "MI", "MX", "SA", "JP", "F", "SW", "VX", "TR", "ST",
+    "PA",
+    "LN",
+    "AX",
+    "TO",
+    "SW",
+    "HK",
+    "SS",
+    "BR",
+    "AS",
+    "SG",
+    "TW",
+    "KS",
+    "TWO",
+    "MI",
+    "MX",
+    "SA",
+    "JP",
+    "F",
+    "SW",
+    "VX",
+    "TR",
+    "ST",
 }
 
 
@@ -344,11 +365,13 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
     # map() to 520, collapsing hundreds of unrelated securities onto one id.
     # Strip/blank-coalesce identifiers so "" never becomes a map key.
     sm = database.read_security_master(session, engine)
-    def _id_map(col):
+
+    def _id_map(col: str) -> dict[str, str]:
         if col not in sm.columns:
             return {}
         s = sm[col].astype("string").str.strip().replace({"": pd.NA}).dropna()
         return s.map(sm["security_id"]).to_dict()
+
     isin_map = _id_map("isin")
     cusip_map = _id_map("cusip")
     figi_map = _id_map("figi")
@@ -366,7 +389,7 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
     # (e.g. ``DFS.N^E25`` = a pending index add/remove). The underlying security
     # is the plain RIC (``DFS.N``), so retry the exact + normalised tiers on the
     # suffix-stripped base before falling through to the identifier cascade.
-    def _strip_event_suffix(ric):
+    def _strip_event_suffix(ric: Any) -> Any:
         if ric is None or not isinstance(ric, str):
             return ric
         return ric.split("^", 1)[0]
@@ -420,9 +443,7 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
             # than re-querying security_master by name (which can match a
             # pre-existing or concurrently-inserted row and return the WRONG id,
             # collapsing many distinct RICs onto one security_id).
-            new_sm = database.SecurityMaster(**{
-                k: v for k, v in rec.items()
-            })
+            new_sm = database.SecurityMaster(**{k: v for k, v in rec.items()})
             session.add(new_sm)
             session.flush()  # assigns new_sm.security_id without committing
             new_sec_id = int(new_sm.security_id)
@@ -440,13 +461,12 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
 
         # Map every unresolved raw RIC to its normalized-RIC security_id.
         new_norm_to_sec = {nric: sid for nric, sid in created}
-        df.loc[unresolved_mask, "security_id"] = (
-            df.loc[unresolved_mask, "Constituent RIC"].map(_normalize_ric).map(new_norm_to_sec)
-        )
+        df.loc[unresolved_mask, "security_id"] = df.loc[unresolved_mask, "Constituent RIC"].map(_normalize_ric).map(new_norm_to_sec)
         # If attributes (ISIN/etc.) exist, backfill them into the new master rows.
         attr_cols = [c for c in ("ISIN", "SEDOL", "CUSOL", "CUSIP", "FIGI") if c in df.columns]
         if attr_cols and created:
             from data_engineering.database.database import SecurityMaster as _SM
+
             for nric, sid in created:
                 # Match on the NORMALIZED ric; df carries the raw RIC variants.
                 sub = df[df["Constituent RIC"].map(_normalize_ric) == nric]
@@ -459,7 +479,8 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
                         upd[c.lower()] = str(val.iloc[0])
                 if upd:
                     session.execute(
-                        __import__("sqlalchemy").update(_SM)
+                        __import__("sqlalchemy")
+                        .update(_SM)
                         .where(_SM.security_id == sid)
                         .values(**{k: v for k, v in upd.items() if k != "security_id"})
                     )
@@ -478,17 +499,12 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
     # so coalesce across all candidate columns instead of trusting a single one.
     # As a final fallback use the normalised RIC (exchange suffix stripped) so a
     # constituent is never blocked purely because its ticker field came back null.
-    ticker_sources = [
-        c for c in ("Exchange Ticker", "Exchange Ticker_x", "Exchange Ticker_y")
-        if c in df.columns
-    ]
+    ticker_sources = [c for c in ("Exchange Ticker", "Exchange Ticker_x", "Exchange Ticker_y") if c in df.columns]
     df["exchange_ticker"] = pd.NA
     for c in ticker_sources:
         df["exchange_ticker"] = df["exchange_ticker"].fillna(df[c])
     if df["exchange_ticker"].isna().any():
-        df["exchange_ticker"] = df["exchange_ticker"].fillna(
-            df["Constituent RIC"].map(_normalize_ric)
-        )
+        df["exchange_ticker"] = df["exchange_ticker"].fillna(df["Constituent RIC"].map(_normalize_ric))
     # Start/End Date appear in both the historical feed and the attribute fetch,
     # so after the merge they may be suffixed "_x"/"_y". Coalesce across all
     # variants instead of relying on a bare rename that silently no-ops.
@@ -520,20 +536,20 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
     ]
 
 
-def _ld_get_data_retry(universe, fields, parameters=None, max_retries=8, chunk_size=200):
+def _ld_get_data_retry(universe: Any, fields: Any, parameters: Optional[dict[str, Any]] = None, max_retries: int = 8, chunk_size: int = 200) -> Any:
     """Single-call wrapper around ld.get_data with chunking + retry.
 
     Used for one-shot fetches (e.g. the constituent attribute pull) that would
     otherwise issue one monolithic request and fail outright on a transient
     gateway timeout, silently dropping securities from the result.
     """
-    return _ld_get_data_chunked(
-        universe, fields, parameters or {}, chunk_size=chunk_size, max_retries=max_retries
-    )
+    return _ld_get_data_chunked(universe, fields, parameters or {}, chunk_size=chunk_size, max_retries=max_retries)
 
 
-def _ld_get_data_chunked(universe, fields, parameters, chunk_size=200, max_retries=8, inter_chunk_sleep=3.0):
-    """Fetch Refinitiv data in chunks to avoid gateway timeouts on large
+def _ld_get_data_chunked(universe: Any, fields: Any, parameters: Any, chunk_size: int = 200, max_retries: int = 8, inter_chunk_sleep: float = 3.0) -> Any:
+    """Fetch Refinitiv data in chunks with retry and backoff.
+
+    Fetch Refinitiv data in chunks to avoid gateway timeouts on large
     universes, retrying transient failures with backoff.
 
     Refinitiv's gateway intermittently times out even on small requests
@@ -545,6 +561,7 @@ def _ld_get_data_chunked(universe, fields, parameters, chunk_size=200, max_retri
     if all chunks fail).
     """
     import time as _time
+
     chunks = [universe[i : i + chunk_size] for i in range(0, len(universe), chunk_size)]
     frames = []
     total = len(chunks)
@@ -559,7 +576,9 @@ def _ld_get_data_chunked(universe, fields, parameters, chunk_size=200, max_retri
             except Exception as e:  # gateway/timeout/transport errors
                 last_err = e
                 wait = 15 * attempt
-                print(f"  [shares] chunk {ci}/{total} attempt {attempt} failed: {type(e).__name__}: {str(e)[:120]} -- retry in {wait}s")
+                print(
+                    f"  [shares] chunk {ci}/{total} attempt {attempt} failed: {type(e).__name__}: {str(e)[:120]} -- retry in {wait}s"
+                )
                 _time.sleep(wait)
         else:
             print(f"  [shares] chunk {ci}/{total} FAILED after {max_retries} attempts: {last_err}")
@@ -619,9 +638,7 @@ def build_float_adjusted_shares(
     )
     if shares.empty:
         print("[shares] WARNING: no shares outstanding returned; returning empty metrics frame.")
-        return pd.DataFrame(
-            columns=["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"]
-        )
+        return pd.DataFrame(columns=["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"])
 
     # Free-float is best-effort: Refinitiv fails the WHOLE request when any single
     # RIC lacks TR.FreeFloatPct, so retry only once and fall back to raw shares
@@ -661,20 +678,17 @@ def build_float_adjusted_shares(
     )
     joined = joined.ffill()
 
-    joined["Shares Outstanding"] = joined["Outstanding Shares"] * (
-        joined["Free Float (Percent)"].round(0).clip(0, 100) / 100
-    )
+    joined["Shares Outstanding"] = joined["Outstanding Shares"] * (joined["Free Float (Percent)"].round(0).clip(0, 100) / 100)
 
     metrics = joined.rename(columns={"Shares Outstanding": "metric_value", "Date": "effective_date"})
     metrics["metric_type"] = "shares_outstanding"
     metrics["source_vendor"] = "refinitiv"
     metrics["end_date"] = None
-    metrics = metrics[
-        ["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"]
-    ].dropna(subset=["security_id"])
+    metrics = metrics[["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"]].dropna(
+        subset=["security_id"]
+    )
     metrics = metrics.dropna(subset=["metric_value", "effective_date"])
     return metrics
-
 
 
 if __name__ == "__main__":
@@ -683,13 +697,13 @@ if __name__ == "__main__":
     # own contract says the caller must override it -- so we do that here.
     SPX_INDEX_ID = 2
 
-    start="2001-01-01"
-    end="2026-08-31"
+    start = "2001-01-01"
+    end = "2026-08-31"
 
     index = build_index_constituents(
         index=".SPX",
-        start= start,
-        end= end,
+        start=start,
+        end=end,
     )
 
     # Chunked + retried: a monolithic attribute pull over ~1200 RICs fails on a

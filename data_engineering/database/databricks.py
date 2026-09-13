@@ -11,17 +11,19 @@ Connection secrets expected in keyring under service_name:
     "schema"     → Default schema                 e.g. default
 """
 
+from __future__ import annotations
+
 import datetime
 import re
 import time
 from datetime import date
-from typing import List, Optional, Tuple, Type
+from typing import Any, Callable, List, Optional, Tuple, Type
 
 import keyring
 import pandas as pd
 import sqlalchemy as sql
 from pandas import DataFrame
-from sqlalchemy import Engine, Date, Float, Integer, String, delete, insert, update
+from sqlalchemy import Engine, String, delete, insert, update
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
@@ -161,7 +163,7 @@ def _parse_date(date_str: str, fmt: str = "%Y-%m-%d") -> str:
     return datetime.datetime.strptime(date_str, fmt).strftime(fmt)
 
 
-def _execute_with_session(orm_session: Session, operation, *args, **kwargs) -> None:
+def _execute_with_session(orm_session: Session, operation: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
     """
     Execute a database operation with standardised error handling.
 
@@ -180,13 +182,13 @@ def _execute_with_session(orm_session: Session, operation, *args, **kwargs) -> N
         orm_session.close()
 
 
-def _read_table(orm_session: Session, orm_engine: Engine, model: Type[Base]) -> DataFrame:
+def _read_table(orm_session: Session, orm_engine: Engine, model: Type[DeclarativeBase]) -> DataFrame:
     """Fetch all columns from an ORM-mapped table."""
     query = orm_session.query(*model.__table__.columns)
     return pd.read_sql_query(query.statement, con=orm_engine)
 
 
-def _bulk_insert(orm_session: Session, model: Type[Base], data_list: List[dict]) -> None:
+def _bulk_insert(orm_session: Session, model: Type[DeclarativeBase], data_list: List[dict[str, Any]]) -> None:
     """Bulk-insert records using SQLAlchemy 2.0-style execute+insert.
 
     Replaces the deprecated bulk_insert_mappings().
@@ -197,8 +199,8 @@ def _bulk_insert(orm_session: Session, model: Type[Base], data_list: List[dict])
 
 def _bulk_delete_insert(
     orm_session: Session,
-    model: Type[Base],
-    data_list: List[dict],
+    model: Type[DeclarativeBase],
+    data_list: List[dict[str, Any]],
     *filter_criteria,
 ) -> None:
     """Delete matching rows then bulk-insert new records."""
@@ -277,7 +279,7 @@ def read_security_master(orm_session: Session, orm_engine: Engine) -> DataFrame:
 def write_security_master(equities_df: DataFrame, orm_session: Session) -> None:
     """Insert records into security_master."""
 
-    def _insert(data):
+    def _insert(data: list[dict[str, Any]]) -> None:
         _bulk_insert(orm_session, SecurityMaster, data)
 
     _execute_with_session(orm_session, _insert, equities_df.to_dict(orient="records"))
@@ -316,7 +318,7 @@ def write_portfolio_holdings(df_holdings: DataFrame, orm_session: Session) -> No
     df_holdings["upsert_date"] = datetime.datetime.now()
     df_holdings["upsert_by"] = "daily_portfolio_load.py"
 
-    def _upsert(data_list):
+    def _upsert(data_list: list[dict[str, Any]]) -> None:
         _bulk_delete_insert(
             orm_session,
             PortfolioHoldings,
@@ -370,7 +372,7 @@ def write_market_data(market_data: DataFrame, orm_session: Session) -> None:
     as_of_dates = market_data["as_of_date"].unique().tolist()
     security_ids = market_data["security_id"].unique().tolist()
 
-    def _upsert(data_list):
+    def _upsert(data_list: list[dict[str, Any]]) -> None:
         _bulk_delete_insert(
             orm_session,
             MarketData,
@@ -403,7 +405,7 @@ def write_index_constituents(index_constituents: DataFrame, orm_session: Session
     """Upsert index_constituents (delete by index_id, then insert)."""
     index_ids = index_constituents["index_id"].unique().tolist()
 
-    def _upsert(data_list):
+    def _upsert(data_list: list[dict[str, Any]]) -> None:
         _bulk_delete_insert(
             orm_session,
             IndexConstituents,
@@ -474,7 +476,7 @@ def write_security_fundamentals(fundamental_data: DataFrame, orm_session: Sessio
     for record in data_list:
         record["end_date"] = None
 
-    def _write(data_list):
+    def _write(data_list: list[dict[str, Any]]) -> None:
         if existing_count == 0:
             print(f"No existing records found. Inserting {new_count} new records.")
             _bulk_insert(orm_session, SecurityFundamentals, data_list)
@@ -568,16 +570,14 @@ def get_portfolio_market_data(
 # ---------------------------------------------------------------------------
 
 from .schema_analytics import (  # noqa: E402
+    Attribution,
     FactorScores,
     PortfolioReturns,
-    Attribution,
-    create_analytics_tables,
 )
 from .schema_fx import (  # noqa: E402
+    FactorExposures,
     FxRates,
     RiskSnapshots,
-    FactorExposures,
-    create_fx_tables,
 )
 
 
@@ -591,9 +591,11 @@ def write_factor_scores(df: DataFrame, orm_session: Session) -> None:
     as_of = df["as_of_date"].unique().tolist()
     secs = df["security_id"].unique().tolist()
 
-    def _upsert(data_list):
+    def _upsert(data_list: list[dict[str, Any]]) -> None:
         _bulk_delete_insert(
-            orm_session, FactorScores, data_list,
+            orm_session,
+            FactorScores,
+            data_list,
             FactorScores.as_of_date.in_(as_of),
             FactorScores.security_id.in_(secs),
         )
@@ -601,7 +603,7 @@ def write_factor_scores(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(orm_session, _upsert, df.to_dict(orient="records"))
 
 
-def read_factor_scores(orm_session, orm_engine, as_of_date=None, factor_name=None) -> DataFrame:
+def read_factor_scores(orm_session: Session, orm_engine: Engine, as_of_date: Optional[date] = None, factor_name: Optional[str] = None) -> DataFrame:
     """Read factor scores, optionally filtered by date / factor."""
     q = orm_session.query(*FactorScores.__table__.columns)
     if as_of_date:
@@ -621,9 +623,11 @@ def write_portfolio_returns(df: DataFrame, orm_session: Session) -> None:
     as_of = df["as_of_date"].unique().tolist()
     ports = df["port_id"].unique().tolist()
 
-    def _upsert(data_list):
+    def _upsert(data_list: list[dict[str, Any]]) -> None:
         _bulk_delete_insert(
-            orm_session, PortfolioReturns, data_list,
+            orm_session,
+            PortfolioReturns,
+            data_list,
             PortfolioReturns.as_of_date.in_(as_of),
             PortfolioReturns.port_id.in_(ports),
         )
@@ -641,9 +645,11 @@ def write_attribution(df: DataFrame, orm_session: Session) -> None:
     as_of = df["as_of_date"].unique().tolist()
     ports = df["port_id"].unique().tolist()
 
-    def _upsert(data_list):
+    def _upsert(data_list: list[dict[str, Any]]) -> None:
         _bulk_delete_insert(
-            orm_session, Attribution, data_list,
+            orm_session,
+            Attribution,
+            data_list,
             Attribution.as_of_date.in_(as_of),
             Attribution.port_id.in_(ports),
         )
@@ -655,6 +661,7 @@ def write_attribution(df: DataFrame, orm_session: Session) -> None:
 # FX / Risk / Factor-exposure helpers (schema_fx)
 # ---------------------------------------------------------------------------
 
+
 def write_fx_rates(df: DataFrame, orm_session: Session) -> None:
     """Upsert FX rates. One row per (from, to, date, vendor)."""
     if df.empty:
@@ -665,7 +672,9 @@ def write_fx_rates(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(
         orm_session,
         lambda data: _bulk_delete_insert(
-            orm_session, FxRates, data,
+            orm_session,
+            FxRates,
+            data,
             FxRates.as_of_date.in_(df["as_of_date"].unique().tolist()),
             FxRates.source_vendor.in_(df["source_vendor"].unique().tolist()),
         ),
@@ -683,7 +692,9 @@ def write_risk_snapshots(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(
         orm_session,
         lambda data: _bulk_delete_insert(
-            orm_session, RiskSnapshots, data,
+            orm_session,
+            RiskSnapshots,
+            data,
             RiskSnapshots.as_of_date.in_(df["as_of_date"].unique().tolist()),
             RiskSnapshots.port_id.in_(df["port_id"].unique().tolist()),
         ),
@@ -701,7 +712,9 @@ def write_factor_exposures(df: DataFrame, orm_session: Session) -> None:
     _execute_with_session(
         orm_session,
         lambda data: _bulk_delete_insert(
-            orm_session, FactorExposures, data,
+            orm_session,
+            FactorExposures,
+            data,
             FactorExposures.as_of_date.in_(df["as_of_date"].unique().tolist()),
             FactorExposures.port_id.in_(df["port_id"].unique().tolist()),
         ),
@@ -709,8 +722,7 @@ def write_factor_exposures(df: DataFrame, orm_session: Session) -> None:
     )
 
 
-def compute_and_store_factors(prices: DataFrame, factors: dict, universe: str,
-                              source_vendor: str, orm_session: Session) -> None:
+def compute_and_store_factors(prices: DataFrame, factors: dict[str, Any], universe: str, source_vendor: str, orm_session: Session) -> None:
     """Compute factor scores for a price panel and persist to factor_scores."""
     from analytics.factors import Factor
 
@@ -725,15 +737,17 @@ def compute_and_store_factors(prices: DataFrame, factors: dict, universe: str,
             for sec, val in row.items():
                 if pd.isna(val):
                     continue
-                rows.append({
-                    "as_of_date": pd.to_datetime(dt).date(),
-                    "security_id": int(sec),
-                    "factor_name": name,
-                    "factor_value": float(val),
-                    "rank_pct": float(rank.loc[dt, sec]) if not pd.isna(rank.loc[dt, sec]) else None,
-                    "universe": universe,
-                    "source_vendor": source_vendor,
-                    "upsert_date": today,
-                })
+                rows.append(
+                    {
+                        "as_of_date": pd.to_datetime(dt).date(),
+                        "security_id": int(sec),
+                        "factor_name": name,
+                        "factor_value": float(val),
+                        "rank_pct": float(rank.loc[dt, sec]) if not pd.isna(rank.loc[dt, sec]) else None,
+                        "universe": universe,
+                        "source_vendor": source_vendor,
+                        "upsert_date": today,
+                    }
+                )
     if rows:
         write_factor_scores(pd.DataFrame(rows), orm_session)
