@@ -23,9 +23,9 @@ e = sys.argv[2] if len(sys.argv) > 2 else "2026-08-31"
 
 # security_id -> Refinitiv RIC used by the notebook's xref
 TARGETS = {
-    69: "BRKb",  # Berkshire B (in-kernel pull returns ~73x real price)
-    507: ".SPX",  # S&P 500 index level (in-kernel pull returns wrong start level)
-    506: "SPY.P",  # SPY ETF (in-kernel pull returns wrong start level)
+    83: "BRKb",  # Berkshire B (in-kernel pull returns ~73x real price)
+    638: ".SPX",  # S&P 500 index level (in-kernel pull returns wrong start level)
+    637: "SPY.P",  # SPY ETF (in-kernel pull returns wrong start level)
 }
 
 ld.open_session()

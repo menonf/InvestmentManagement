@@ -28,6 +28,7 @@ Yahoo / SimFin / Refinitiv without touching the factor or the models.
 
 from __future__ import annotations
 
+import time
 from abc import ABC, abstractmethod
 from typing import Any, Iterable, Optional
 
@@ -432,7 +433,10 @@ def _compute_refinitiv_ratios(raw: DataFrame) -> DataFrame:
         if name not in d.columns:
             return pd.Series(np.nan, index=d.index)
         # LSEG can return text (e.g. "NM", "-") for some fundamentals; coerce.
-        return pd.to_numeric(d[name], errors="coerce")
+        # Force plain float64 (not nullable Int64/Float64): the ratio math below
+        # mixes columns (e.g. mkt_cap.where(..., price*shares)) and pandas 3.x
+        # raises when assigning a float into a nullable-Int64 array.
+        return pd.to_numeric(d[name], errors="coerce").astype(float)
 
     price = col("price")
     mkt_cap = col("mkt_cap")
@@ -736,22 +740,49 @@ class RefinitivFundamentalsProvider(FundamentalsProvider):
         # Determine the history window from start_date -> today.
         sd = pd.Timestamp(start_date).strftime("%Y-%m-%d")
         ed = pd.Timestamp.today().strftime("%Y-%m-%d")
-        CHUNK = 50  # get_history is heavier; keep chunks modest.
+        # get_history hits the local UDF API (localhost:9005) and times out on
+        # large requests; keep chunks small and retry on transient timeouts
+        # instead of silently dropping the whole chunk's securities.
+        CHUNK = 15
+        MAX_RETRIES = 3
+        RETRY_SLEEP = 5  # seconds
         long_records = []
+        n_chunks = max(1, (len(rics) + CHUNK - 1) // CHUNK)
         sec_map = resolved.dropna(subset=["ric"]).set_index("ric")["security_id"].astype(int).to_dict()
-        for i in range(0, len(rics), CHUNK):
+        for n, i in enumerate(range(0, len(rics), CHUNK), start=1):
             chunk = rics[i : i + CHUNK]
-            try:
-                hist = ld.get_history(
-                    universe=chunk,
-                    fields=REFINITIV_REQUEST_FIELDS,
-                    parameters={"Frq": "Q", "SDate": sd, "EDate": ed},
-                )
-            except Exception as exc:  # noqa: BLE001
-                print(f"[refinitiv fundamentals] get_history failed for chunk {i}: {exc}")
-                continue
+            hist = None
+            for attempt in range(1, MAX_RETRIES + 1):
+                try:
+                    hist = ld.get_history(
+                        universe=chunk,
+                        fields=REFINITIV_REQUEST_FIELDS,
+                        parameters={"Frq": "Q", "SDate": sd, "EDate": ed},
+                    )
+                    break
+                except Exception as exc:  # noqa: BLE001
+                    if attempt < MAX_RETRIES:
+                        print(
+                            f"[refinitiv fundamentals] get_history chunk {i} "
+                            f"(RICs {n}/{n_chunks}) attempt {attempt}/{MAX_RETRIES} "
+                            f"failed ({type(exc).__name__}); retrying in {RETRY_SLEEP}s"
+                        )
+                        time.sleep(RETRY_SLEEP)
+                    else:
+                        print(
+                            f"[refinitiv fundamentals] get_history chunk {i} "
+                            f"(RICs {n}/{n_chunks}) FAILED after {MAX_RETRIES} attempts: {exc}"
+                        )
             if hist is None or not isinstance(hist, pd.DataFrame) or hist.empty:
+                print(
+                    f"[refinitiv fundamentals] chunk {i} (RICs {n}/{n_chunks}): "
+                    f"no data returned ({len(chunk)} RICs)"
+                )
                 continue
+            print(
+                f"[refinitiv fundamentals] chunk {i} (RICs {n}/{n_chunks}): "
+                f"OK, {len(hist)} rows x {hist.shape[1]} cols"
+            )
             # hist: DatetimeIndex (period-end) x MultiIndex columns (RIC, Metric).
             # Each RIC reports on its OWN fiscal-period dates (sparse), so we must
             # select per-RIC and keep only that RIC's real observation dates.
