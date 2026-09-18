@@ -28,8 +28,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest pre-commit
+        # Install the full dep set (runtime + dev/lint/test tools). The lint
+        # tools are console scripts; ensure their install dir is on PATH so the
+        # pre-commit local hooks can resolve isort/black/mypy/pydocstyle/pytest.
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        echo "$pythonLocation/bin" >> "$GITHUB_PATH"
 
     - name: Change to repository root
       run: cd $GITHUB_WORKSPACE
