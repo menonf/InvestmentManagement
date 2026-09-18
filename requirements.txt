@@ -17,3 +17,4 @@ mypy
 pydocstyle
 pytest
 pre-commit
+pydantic
