@@ -774,15 +774,9 @@ class RefinitivFundamentalsProvider(FundamentalsProvider):
                             f"(RICs {n}/{n_chunks}) FAILED after {MAX_RETRIES} attempts: {exc}"
                         )
             if hist is None or not isinstance(hist, pd.DataFrame) or hist.empty:
-                print(
-                    f"[refinitiv fundamentals] chunk {i} (RICs {n}/{n_chunks}): "
-                    f"no data returned ({len(chunk)} RICs)"
-                )
+                print(f"[refinitiv fundamentals] chunk {i} (RICs {n}/{n_chunks}): " f"no data returned ({len(chunk)} RICs)")
                 continue
-            print(
-                f"[refinitiv fundamentals] chunk {i} (RICs {n}/{n_chunks}): "
-                f"OK, {len(hist)} rows x {hist.shape[1]} cols"
-            )
+            print(f"[refinitiv fundamentals] chunk {i} (RICs {n}/{n_chunks}): " f"OK, {len(hist)} rows x {hist.shape[1]} cols")
             # hist: DatetimeIndex (period-end) x MultiIndex columns (RIC, Metric).
             # Each RIC reports on its OWN fiscal-period dates (sparse), so we must
             # select per-RIC and keep only that RIC's real observation dates.
