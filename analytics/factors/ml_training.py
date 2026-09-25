@@ -1,47 +1,48 @@
-"""Train and persist the ML-return factor pipelines from database history.
-
-Faithful port of ``Machine_Learning.ipynb`` with the one critical fix the
-notebook lacked: a **time-based** train/test split. The notebook used a random
-split, which leaks future fundamentals into the training set (look-ahead bias).
-Here every model is trained on fundamentals observed *before* the label date and
-validated on a forward window.
+"""Train and persist the ML value factor pipelines from database history.
 
 Pipeline
 --------
-1. Build a modelling table from the DB:
-     X = ratio panel from ``dbo.security_fundamentals`` (RATIO_COLUMNS)
-     y = forward 12-month total return from ``dbo.market_data``
-       (adjusted close at label_date+T minus close at label_date, / close).
-2. Label each row by its *fundamental snapshot date*; split on time so the
-   training set's snapshots all precede the test set's.
-3. Fit all 8 regressors (the exact sklearn pipelines from the notebook) inside a
-   PowerTransformer / scaler where the notebook did, with progress bars
-   (tqdm) so long runs are observable.
-4. Report per-model RMSE on the forward test window and the notebook's
-   top-10/bottom-10 "prediction ability" diagnostic.
-5. Persist each fitted pipeline to ``analytics/factors/models/<key>.joblib``.
+1. :func:`build_modelling_table` assembles ``(X, y)`` rows from the database:
+   ``X`` = point-in-time ratio panel at each monthly snapshot date, ``y`` =
+   forward ``forward_months`` total return from ``market_data``.
+2. :func:`time_based_split` cuts on snapshot *dates* (never rows or randomly),
+   so every training snapshot precedes every test snapshot - no look-ahead.
+3. :func:`train_models` fits the requested estimators, reports train/test MSE
+   and persists each pipeline as ``<model_dir>/<key>.joblib``.
 
-The persisted pipelines are then loaded by :class:`~analytics.factors.ml_factor
-.MLReturnFactor` for scoring. Because fundamentals are vendor-agnostic (loaded by
-a :class:`~analytics.factors.fundamentals.FundamentalsProvider`), the same
-trained models score Yahoo-, SimFin- or Refinitiv-sourced ratios identically.
+Options worth knowing:
+- ``demean_target=True`` subtracts the cross-sectional mean return at each
+  snapshot so the model learns *relative* (stock-selection) return rather than
+  the market's level, which is what a long/short factor actually trades.
+- ``embargo_months`` in :func:`time_based_split` drops the snapshots whose
+  forward window straddles the split date; with a 12-month label this stops
+  the last training labels from overlapping the first test period.
 """
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Any, Optional, Sequence
 
+import numpy as np
 import pandas as pd
 from pandas import DataFrame
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
-from tqdm import tqdm
 
-from .fundamentals import RATIO_COLUMNS, FundamentalsProvider, get_fundamentals_provider
-from .ml_factor import MODEL_KEYS, build_estimator
+from data_engineering.fundamentals import RATIO_COLUMNS, FundamentalsProvider, get_fundamentals_provider
 
-_MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
+from .ml_value import DEFAULT_ENSEMBLE, MODEL_KEYS, MODELS_DIR, build_estimator
+
+log = logging.getLogger(__name__)
+
+_MODELS_DIR = MODELS_DIR  # backward-compatible name
+
+
+def models_available(model_dir: str = MODELS_DIR, keys: Sequence[str] = DEFAULT_ENSEMBLE) -> bool:
+    """Return True when every ``<key>.joblib`` in ``keys`` is persisted under ``model_dir``."""
+    if not os.path.isdir(model_dir):
+        return False
+    return all(os.path.isfile(os.path.join(model_dir, f"{k}.joblib")) for k in keys)
 
 
 # ---------------------------------------------------------------------------
@@ -49,210 +50,279 @@ _MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 # ---------------------------------------------------------------------------
 
 
+def forward_return_labels(
+    prices: DataFrame, snapshot_dates: pd.DatetimeIndex, forward_months: int, min_history: int = 30
+) -> DataFrame:
+    """Forward total return per security from each snapshot date (pure pandas).
+
+    For each snapshot the actual last trading day on/before it is the start,
+    and the first trading day on/after ``start + forward_months`` is the end.
+    Returns a long frame ``[snapshot_date, security_id, y]`` where
+    ``snapshot_date`` is the *actual* trading day used (so it joins exactly
+    with the fundamentals panel pulled for that day).
+    """
+    px = prices.sort_index()
+    idx = pd.DatetimeIndex(px.index)
+    rows = []
+    for sd in snapshot_dates:
+        prior = idx[idx <= sd]
+        if len(prior) == 0:
+            continue
+        t0 = prior[-1]
+        future = idx[idx >= t0 + pd.DateOffset(months=forward_months)]
+        if len(future) == 0:
+            continue
+        window = px.loc[t0 : future[0]]
+        if window.shape[0] < min_history:
+            continue
+        ret = (window.iloc[-1] / window.iloc[0] - 1.0).dropna()
+        rows.append(DataFrame({"snapshot_date": t0, "security_id": ret.index, "y": ret.to_numpy()}))
+    return pd.concat(rows, ignore_index=True) if rows else DataFrame(columns=["snapshot_date", "security_id", "y"])
+
+
 def build_modelling_table(
-    orm_session: Session,
-    orm_engine: Engine,
+    orm_session: Any,
+    orm_engine: Any,
     start_date: str,
     end_date: str,
     forward_months: int = 12,
     min_history: int = 30,
     fundamentals_provider: Optional[FundamentalsProvider] = None,
+    demean_target: bool = False,
+    impute_median: bool = True,
 ) -> DataFrame:
-    """Assemble (X, y) from the DB for ML training.
+    """Assemble the ``(X, y)`` modelling table from the database.
 
     Args:
-        orm_session / orm_engine: DB handles.
-        start_date / end_date: label (snapshot) date window ``YYYY-MM-DD``.
-        forward_months: horizon over which to measure the return label.
-        min_history: minimum number of price observations required to trust the
-            forward return.
-        fundamentals_provider: optional provider to pull ratios; if omitted a
-            :class:`~analytics.factors.fundamentals.StaticFundamentalsProvider`
-            reading ``dbo.security_fundamentals`` is used.
+        start_date / end_date: snapshot window ``YYYY-MM-DD`` (monthly snapshots,
+            snapped to the last trading day of each month).
+        forward_months: label horizon.
+        min_history: minimum price observations in the forward window.
+        fundamentals_provider: source of point-in-time ratios (default: the
+            database provider over ``dbo.security_fundamentals``).
+        demean_target: subtract the cross-sectional mean of ``y`` per snapshot.
+        impute_median: fill missing ratios with the column median (else drop rows
+            with any missing ratio).
 
     Returns:
-        Long DataFrame with columns: security_id, snapshot_date, y (forward
-        return) and one column per ``RATIO_COLUMNS`` (X). Rows with any missing
-        X or y are dropped.
+        Long frame ``[security_id, snapshot_date, y, *RATIO_COLUMNS]``.
     """
     from data_engineering.database import database as db
 
-    if fundamentals_provider is None:
-        fundamentals_provider = get_fundamentals_provider("static", orm_session=orm_session, orm_engine=orm_engine)
+    provider = fundamentals_provider or get_fundamentals_provider("static", orm_session=orm_session, orm_engine=orm_engine)
 
-    # --- y: forward return from market_data (also defines snapshot dates) --
-    md = db.read_market_data(orm_session, orm_engine, start_date, end_date)
-    if md.empty:
+    market = db.read_market_data(orm_session, orm_engine, start_date, end_date)
+    if market.empty:
         raise RuntimeError("No market_data in the database for the date window.")
-    md = md.copy()
-    md["as_of_date"] = pd.to_datetime(md["as_of_date"])
-    px = md.pivot_table(index="as_of_date", columns="security_id", values="adj_close").sort_index()
+    market["as_of_date"] = pd.to_datetime(market["as_of_date"])
+    prices = market.pivot_table(index="as_of_date", columns="security_id", values="adj_close").sort_index()
 
-    # Snapshot dates: one per month, snapped to the *actual* last trading day
-    # of that month within the price window. Using the real trading date keeps
-    # the X (fundamentals) and Y (forward return) merge keys identical.
-    snap_dates = pd.to_datetime(pd.date_range(start_date, end_date, freq="ME"))
-    sec_master = db.read_security_master(orm_session, orm_engine)[["security_id", "name"]]
-
-    x_rows, y_rows = [], []
-    for sd in tqdm(snap_dates, desc="building modelling table", unit="month"):
-        prior = px.index[px.index <= sd]
-        if len(prior) == 0:
-            continue
-        t0 = prior[-1]  # actual trading day
-        t1 = t0 + pd.DateOffset(months=forward_months)
-        future = px.index[px.index >= t1]
-        if len(future) == 0:
-            continue
-        t1 = future[0]
-        window = px.loc[t0:t1]
-        has_label = window.shape[0] >= min_history
-        if has_label:
-            ret = (window.iloc[-1] / window.iloc[0] - 1.0).rename("y")
-            y_rows.append(pd.DataFrame({"snapshot_date": t0, "security_id": ret.index, "y": ret.values}))
-
-        # Fundamentals "on/before" t0 -- appended for EVERY snapshot that has a
-        # panel, independent of whether a forward-return label exists for it
-        # (rows without a label are dropped by the merge below).
-        panel = fundamentals_provider.get_panel(sec_master, t0.strftime("%Y-%m-%d"))
-        if panel is None or panel.empty:
-            continue
-        panel = panel.copy()
-        panel["snapshot_date"] = t0
-        x_rows.append(panel.reset_index())
-
-    if not x_rows:
-        raise RuntimeError("No fundamentals found in the database for the date window.")
-    if not y_rows:
+    snapshots = pd.date_range(start_date, end_date, freq="ME")
+    labels = forward_return_labels(prices, snapshots, forward_months, min_history)
+    if labels.empty:
         raise RuntimeError("Could not compute any forward-return labels.")
-    X = pd.concat(x_rows, ignore_index=True)
-    Y = pd.concat(y_rows, ignore_index=True)
-    # Align dtypes so the merge key matches exactly.
+
+    universe = db.read_security_master(orm_session, orm_engine)[["security_id", "name"]].rename(columns={"name": "symbol"})
+    panels = []
+    for t0 in sorted(labels["snapshot_date"].unique()):
+        panel = provider.get_panel(universe, pd.Timestamp(t0).strftime("%Y-%m-%d"))
+        if panel is None or panel.dropna(how="all").empty:
+            continue
+        panel = panel.dropna(how="all").reset_index()
+        panel["snapshot_date"] = pd.Timestamp(t0)
+        panels.append(panel)
+    if not panels:
+        raise RuntimeError("No fundamentals found in the database for the date window.")
+
+    X = pd.concat(panels, ignore_index=True)
     X["snapshot_date"] = pd.to_datetime(X["snapshot_date"])
-    Y["snapshot_date"] = pd.to_datetime(Y["snapshot_date"])
+    labels["snapshot_date"] = pd.to_datetime(labels["snapshot_date"])
+    table = X.merge(labels, on=["security_id", "snapshot_date"], how="inner").dropna(subset=["y"])
 
-    df = X.merge(Y, on=["security_id", "snapshot_date"], how="inner")
-    # Fundamentals are sparse (different vendors populate different ratios).
-    # Rather than dropping every row that has any missing ratio, impute the
-    # missing values with the column median (standard for this study) so we
-    # keep all labelled samples. Rows with no y are still dropped.
-    df = df.dropna(subset=["y"])
-    for col in RATIO_COLUMNS:
-        if col in df.columns and df[col].isna().any():
-            med = df[col].median()
-            df[col] = df[col].fillna(med if pd.notna(med) else 0.0)
-    return df
+    if demean_target:
+        table["y"] = table["y"] - table.groupby("snapshot_date")["y"].transform("mean")
+    if impute_median:
+        for col in RATIO_COLUMNS:
+            if col in table.columns and table[col].isna().any():
+                med = table[col].median()
+                table[col] = table[col].fillna(med if pd.notna(med) else 0.0)
+    else:
+        table = table.dropna(subset=list(RATIO_COLUMNS))
+    return table.sort_values(["snapshot_date", "security_id"]).reset_index(drop=True)
 
 
 # ---------------------------------------------------------------------------
-# Training
+# Splitting & training
 # ---------------------------------------------------------------------------
 
 
-def time_based_split(
-    df: DataFrame,
-    test_size: float = 0.2,
-) -> tuple[DataFrame, DataFrame, Any, Any, Any]:
-    """Split a modelling table on time (snapshot_date), not randomly.
+def time_based_split(df: DataFrame, test_size: float = 0.2, embargo_months: int = 0) -> tuple[DataFrame, DataFrame, Any, Any, Any]:
+    """Split on sorted unique ``snapshot_date`` so no date straddles the cut.
 
-    The cut is made on the *sorted unique snapshot dates* (not row count), so all
-    rows sharing a given snapshot date stay on the same side of the split. This
-    prevents train/test contamination when many securities share the same monthly
-    snapshot date (the normal case here). All training snapshots strictly precede
-    all test snapshots -> no look-ahead.
+    All training snapshots are strictly before ``split_date``; test snapshots
+    are on/after it. With ``embargo_months > 0`` the training snapshots within
+    that many months before the split are dropped so their forward-return
+    labels cannot overlap the test window.
 
-    Returns (X_train, X_test, y_train, y_test, split_date).
+    Returns ``(X_train, X_test, y_train, y_test, split_date)``.
     """
     df = df.sort_values("snapshot_date")
-    dates = df["snapshot_date"].sort_values().unique()
-    cut_idx = int(len(dates) * (1 - test_size))
-    cut_idx = max(1, min(cut_idx, len(dates) - 1))
-    split_date = dates[cut_idx]
+    dates = np.sort(df["snapshot_date"].unique())
+    cut = int(len(dates) * (1 - test_size))
+    cut = max(1, min(cut, len(dates) - 1))
+    split_date = dates[cut]
     train = df[df["snapshot_date"] < split_date]
+    if embargo_months:
+        train = train[train["snapshot_date"] < pd.Timestamp(split_date) - pd.DateOffset(months=embargo_months)]
     test = df[df["snapshot_date"] >= split_date]
-    feats = RATIO_COLUMNS
-    X_train, y_train = train[feats], train["y"]
-    X_test, y_test = test[feats], test["y"]
-    return X_train, X_test, y_train, y_test, split_date
+    feats = list(RATIO_COLUMNS)
+    return train[feats], test[feats], train["y"], test["y"], split_date
 
 
 def train_models(
     df: DataFrame,
     model_keys: Sequence[str] = MODEL_KEYS,
     test_size: float = 0.2,
-    model_dir: str = _MODELS_DIR,
+    model_dir: str = MODELS_DIR,
     verbose: bool = True,
+    embargo_months: int = 0,
 ) -> dict[str, Any]:
-    """Fit every requested model on a time-based split and persist to disk.
+    """Fit each requested model on the time-based split and persist it to ``model_dir``.
 
-    Returns a dict of metrics keyed by model key.
+    Returns ``{key: {"train_mse": ..., "test_mse": ...} | {"error": ...}}``.
     """
     import joblib
     from sklearn.metrics import mean_squared_error
 
     os.makedirs(model_dir, exist_ok=True)
-    X_train, X_test, y_train, y_test, split_date = time_based_split(df, test_size)
+    X_train, X_test, y_train, y_test, split_date = time_based_split(df, test_size, embargo_months)
     if verbose:
-        print(f"Training on {len(X_train)} rows, testing on {len(X_test)} rows " f"(split date {split_date}).")
+        log.info("training on %d rows, testing on %d rows (split %s)", len(X_train), len(X_test), pd.Timestamp(split_date).date())
 
+    # Fit on arrays so persisted pipelines carry no feature-name expectation.
+    Xtr, ytr = X_train.to_numpy(dtype=float), y_train.to_numpy(dtype=float)
+    Xte, yte = X_test.to_numpy(dtype=float), y_test.to_numpy(dtype=float)
     metrics: dict[str, Any] = {}
-    # Fit on numpy arrays so the persisted pipelines carry no feature-name
-    # expectation (predicting from a numpy panel in compute() then warns/strict-
-    # matches otherwise).
-    Xtr, ytr = X_train.to_numpy(), y_train.to_numpy()
-    Xte, yte = X_test.to_numpy(), y_test.to_numpy()
-    for key in tqdm(list(model_keys), desc="training models"):
+    for key in model_keys:
         est = build_estimator(key)
         try:
             est.fit(Xtr, ytr)
-        except Exception as exc:  # noqa: BLE001
-            print(f"[train] {key} fit failed: {exc}")
+        except Exception as exc:  # noqa: BLE001 - report and continue with the rest
+            log.warning("%s fit failed: %s", key, exc)
             metrics[key] = {"error": str(exc)}
             continue
-        y_pred = est.predict(Xte)
-        test_mse = mean_squared_error(yte, y_pred)
-        train_mse = mean_squared_error(ytr, est.predict(Xtr))
-        metrics[key] = {"train_mse": train_mse, "test_mse": test_mse}
+        metrics[key] = {
+            "train_mse": float(mean_squared_error(ytr, est.predict(Xtr))),
+            "test_mse": float(mean_squared_error(yte, est.predict(Xte))) if len(yte) else float("nan"),
+        }
         if verbose:
-            print(f"  {key:18s} train_mse={train_mse:.4f}  test_mse={test_mse:.4f}")
-        # Persist
-        path = os.path.join(model_dir, f"{key}.joblib")
-        joblib.dump(est, path)
-
+            log.info("  %-18s train_mse=%.4f  test_mse=%.4f", key, metrics[key]["train_mse"], metrics[key]["test_mse"])
+        joblib.dump(est, os.path.join(model_dir, f"{key}.joblib"))
     return metrics
 
 
 # ---------------------------------------------------------------------------
-# Faithful "prediction ability" diagnostic (top10 / bottom10), time-aware
+# Diagnostics
 # ---------------------------------------------------------------------------
 
 
-def observe_prediction_ability(
-    factor: Any,
-    fundamentals: DataFrame,
-    prices: pd.DataFrame,
-    n: int = 10,
-    runs: int = 5,
-) -> DataFrame:
-    """Replicate the notebook's top10/bottom10 diagnostic against live scoring.
+def observe_prediction_ability(factor: Any, fundamentals: DataFrame, prices: DataFrame, n: int = 10) -> DataFrame:
+    """Top-``n`` / bottom-``n`` predicted vs realised return on a held-out panel.
 
-    Because we train on a time split (not random), we evaluate the factor on a
-    *held-out* fundamentals panel rather than re-splitting. Returns a DataFrame
-    summarising predicted vs actual top/bottom-10 average returns across runs.
+    ``prices`` must cover the realisation window: realised return is
+    ``last / first - 1`` per security. Returns a one-row summary frame.
     """
-    results = []
-    for i in range(runs):
-        scores = factor.compute(prices, fundamentals).iloc[0]  # single-date broadcast
-        ranked = scores.sort_values(ascending=False)
-        top = ranked.iloc[:n]
-        bot = ranked.iloc[-n:]
-        results.append(
+    predicted = factor.score_panel(fundamentals).dropna().sort_values(ascending=False)
+    realised = (prices.iloc[-1] / prices.iloc[0] - 1.0).reindex(predicted.index)
+    top, bottom = predicted.index[:n], predicted.index[-n:]
+    return DataFrame(
+        [
             {
-                "run": i,
-                "top10_pred_ret": top.mean(),
-                "bot10_pred_ret": bot.mean(),
-                "top10_n": top.notna().sum(),
-                "bot10_n": bot.notna().sum(),
+                "top_n_predicted": float(predicted.loc[top].mean()),
+                "top_n_realised": float(realised.loc[top].mean()),
+                "bottom_n_predicted": float(predicted.loc[bottom].mean()),
+                "bottom_n_realised": float(realised.loc[bottom].mean()),
+                "spread_realised": float(realised.loc[top].mean() - realised.loc[bottom].mean()),
+                "n": int(n),
             }
-        )
-    return pd.DataFrame(results)
+        ]
+    )
+
+
+def build_modelling_table_from_panel(
+    prices: DataFrame,
+    provider: Any,
+    all_symbols: DataFrame,
+    start_date: str,
+    end_date: str,
+    forward_months: int = 12,
+    min_history: int = 30,
+    demean_target: bool = False,
+    impute_median: bool = True,
+) -> DataFrame:
+    """Panel-only twin of :func:`build_modelling_table` (no database session).
+
+    Walks monthly snapshots between ``start_date`` and ``end_date``, pulls the
+    point-in-time ratio panel from ``provider.get_panel`` for each, attaches the
+    forward return (via :func:`forward_return_labels`) and stacks the rows into
+    the same ``[security_id, snapshot_date, y, *RATIO_COLUMNS]`` frame.
+
+    ``provider`` may be any fundamentals provider exposing ``get_panel(symbols,
+    as_of_date)`` returning a ``security_id``-indexed ratio frame.
+    """
+    px = prices.sort_index()
+    snapshots = pd.date_range(start_date, end_date, freq="ME")
+    labels = forward_return_labels(px, snapshots, forward_months, min_history)
+    if labels.empty:
+        raise RuntimeError("Could not compute any forward-return labels.")
+
+    panels = []
+    for t0 in sorted(labels["snapshot_date"].unique()):
+        panel = provider.get_panel(all_symbols, pd.Timestamp(t0).strftime("%Y-%m-%d"))
+        if panel is None or panel.dropna(how="all").empty:
+            continue
+        panel = panel.dropna(how="all").reset_index()
+        if "security_id" not in panel.columns:
+            continue
+        panel["snapshot_date"] = pd.Timestamp(t0)
+        panels.append(panel)
+    if not panels:
+        raise RuntimeError("No fundamentals found for the date window.")
+
+    X = pd.concat(panels, ignore_index=True)
+    X["snapshot_date"] = pd.to_datetime(X["snapshot_date"])
+    labels["snapshot_date"] = pd.to_datetime(labels["snapshot_date"])
+    table = X.merge(labels, on=["security_id", "snapshot_date"], how="inner").dropna(subset=["y"])
+
+    if demean_target:
+        table["y"] = table["y"] - table.groupby("snapshot_date")["y"].transform("mean")
+    if impute_median:
+        for col in RATIO_COLUMNS:
+            if col in table.columns and table[col].isna().any():
+                med = table[col].median()
+                table[col] = table[col].fillna(med if pd.notna(med) else 0.0)
+    else:
+        table = table.dropna(subset=list(RATIO_COLUMNS))
+    return table.sort_values(["snapshot_date", "security_id"]).reset_index(drop=True)
+
+
+def save_training_metadata(model_dir: str, metadata: dict[str, Any]) -> None:
+    """Persist training run metadata as JSON beside the ``.joblib`` models."""
+    import json
+
+    os.makedirs(model_dir, exist_ok=True)
+    path = os.path.join(model_dir, "training_metadata.json")
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(metadata, fh, indent=2, default=str)
+
+
+def load_training_metadata(model_dir: str) -> Optional[dict[str, Any]]:
+    """Load metadata written by :func:`save_training_metadata`, or ``None``."""
+    import json
+
+    path = os.path.join(model_dir, "training_metadata.json")
+    if not os.path.isfile(path):
+        return None
+    with open(path, "r", encoding="utf-8") as fh:
+        data: dict[str, Any] = json.load(fh)
+    return data

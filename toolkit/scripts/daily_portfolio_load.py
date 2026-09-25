@@ -1,24 +1,19 @@
-import os
-import sys
+"""Load today's Interactive Brokers positions into portfolio_holdings.
 
-from brokers.interactive_broker import *
-from data_engineering.database import database as database
+Run from the project root after ``pip install -e .`` with IB Gateway running.
+"""
+
+import pandas as pd
+
+from brokers.interactive_broker import DateUtils, IBDataValidator, InteractiveBroker, SecurityMasterManager
+from data_engineering.database import database
 
 
 def main():
-    """Main execution function"""
-    print(f"=== Portfolio Data Loader Started ===")
+    """Main execution function."""
+    print("=== Portfolio Data Loader Started ===")
     print(f"Current trading day: {DateUtils.get_trading_day()}")
-    
-    current_dir = os.getcwd()
-    parent_dir = os.path.dirname(current_dir)
-    
-    if parent_dir not in sys.path:
-        sys.path.append(parent_dir)
-        
-    print(f"Current directory: {current_dir}")
-    print(f"Added to path: {parent_dir}")
-    
+
     ib = None
     
     try:
@@ -49,7 +44,7 @@ def main():
         # Clean the data
         ib_account_positions = IBDataValidator.clean_ib_data(ib_account_positions)
 
-        engine, connection, session = database.get_db_connection()
+        engine, connection, _conn_str, session = database.get_db_connection()
         security_master = database.read_security_master(session, engine)
 
         merged_securities = pd.merge(ib_account_positions,

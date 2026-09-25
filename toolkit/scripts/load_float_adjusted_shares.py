@@ -1,4 +1,7 @@
-"""Resumable, chunk-by-chunk float-adjusted-shares loader.
+"""Resumable, chunk-by-chunk float-adjusted-shares loader (Refinitiv).
+
+Run from the project root after ``pip install -e .``:
+    python toolkit/scripts/load_float_adjusted_shares.py
 
 Processes the constituent universe in small RIC chunks. For EACH chunk it pulls
 shares + free-float, merges with only that chunk's securities, builds the
@@ -13,8 +16,8 @@ import time
 import pandas as pd
 from sqlalchemy import text
 
-import data_engineering.index_constituents.refinitiv as r
-from data_engineering.database import database as database
+from data_engineering.database import database
+from data_engineering.refinitiv import get_data_chunked, normalize_ric
 
 
 def _pull_chunk_metrics(universe_chunk, securities_chunk, start, shares_end):
@@ -25,7 +28,7 @@ def _pull_chunk_metrics(universe_chunk, securities_chunk, start, shares_end):
     treated as unavailable and those securities fall back to raw shares
     outstanding (float factor 100%) rather than being dropped entirely.
     """
-    shares = r._ld_get_data_chunked(
+    shares = get_data_chunked(
         universe_chunk,
         fields=["TR.SharesOutstanding", "TR.SharesOutstanding.Date"],
         parameters={"SDate": start, "EDate": shares_end, "Frq": "D"},
@@ -40,7 +43,7 @@ def _pull_chunk_metrics(universe_chunk, securities_chunk, start, shares_end):
     # reaped before the raw-shares fallback can run.
     free_float = pd.DataFrame()
     try:
-        free_float = r._ld_get_data_chunked(
+        free_float = get_data_chunked(
             universe_chunk,
             fields=["TR.FreeFloatPct", "TR.FreeFloatPct.Date"],
             parameters={"SDate": start, "EDate": shares_end, "Frq": "M"},
@@ -96,7 +99,7 @@ def main(start="2001-01-01", end="2026-08-31", chunk_size=1):
     # ACTUAL Refinitiv pulls must use the QUALIFIED vendor_ticker (e.g. AAPL.OQ),
     # not the normalized bare ticker -- ld.get_data returns only sparse/latest
     # data for unqualified tickers.
-    const["ric_norm"] = const["ric"].map(r._normalize_ric)
+    const["ric_norm"] = const["ric"].map(normalize_ric)
     const = const.dropna(subset=["ric_norm"])
     const["security_id"] = const["security_id"].astype(int)
 

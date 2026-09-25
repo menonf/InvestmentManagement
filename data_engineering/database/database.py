@@ -1,185 +1,42 @@
-"""SQLAlchemy ORM module to connect to database objects."""
+"""Database access layer: read/write helpers for every table.
+
+Layout of this package
+----------------------
+- :mod:`.models`           ORM models for the core tables
+- :mod:`.connection`       ``get_db_connection`` (keyring-backed SQL Server engine)
+- :mod:`.schema_analytics` factor_scores / portfolio_returns / attribution models
+- :mod:`.schema_fx`        fx_rates / risk_snapshots / factor_exposures models
+- this module              ``read_*`` / ``write_*`` functions and composite queries
+
+Everything is re-exported here, so ``from data_engineering.database import
+database as db`` keeps working for all existing callers.
+"""
 
 from __future__ import annotations
 
 import re
 import time
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
-from urllib import parse
+from typing import Any, Callable, Dict, List, Optional, Type
 
-import keyring
 import pandas as pd
 import sqlalchemy as sql
 from pandas import DataFrame
-from sqlalchemy import Date, Engine, String
-from sqlalchemy.exc import OperationalError, SQLAlchemyError
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+from sqlalchemy import Engine
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import DeclarativeBase, Session
 
-# ---------------------------------------------------------------------------
-# ORM Base & Models
-# ---------------------------------------------------------------------------
-
-
-class Base(DeclarativeBase):
-    """SQLAlchemy base class."""
-
-    pass
-
-
-class SecurityMaster(Base):
-    """
-    Maps to dbo.security_master.
-
-    One row per canonical real-world security, identified by universal
-    identifiers (ISIN, CUSIP, FIGI).  Vendor-specific codes (RICs, Bloomberg
-    tickers, etc.) live in SecurityVendorXref.
-    """
-
-    __tablename__ = "security_master"
-    __table_args__ = {"schema": "dbo"}
-
-    security_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[Optional[str]] = mapped_column(nullable=True)
-    isin: Mapped[Optional[str]] = mapped_column(nullable=True)
-    sedol: Mapped[Optional[str]] = mapped_column(nullable=True)
-    cusip: Mapped[Optional[str]] = mapped_column(nullable=True)
-    figi: Mapped[Optional[str]] = mapped_column(nullable=True)
-    country: Mapped[Optional[str]] = mapped_column(nullable=True)
-    currency: Mapped[Optional[str]] = mapped_column(nullable=True)
-    sector: Mapped[Optional[str]] = mapped_column(nullable=True)
-    industry_group: Mapped[Optional[str]] = mapped_column(nullable=True)
-    industry: Mapped[Optional[str]] = mapped_column(nullable=True)
-    security_type: Mapped[str] = mapped_column()
-    asset_class: Mapped[str] = mapped_column()
-    region: Mapped[Optional[str]] = mapped_column(nullable=True)
-    exchange_mic: Mapped[Optional[str]] = mapped_column(nullable=True)
-    listing_country: Mapped[Optional[str]] = mapped_column(nullable=True)
-    is_active: Mapped[bool] = mapped_column()
-    upsert_date: Mapped[datetime] = mapped_column()
-    upsert_by: Mapped[Optional[str]] = mapped_column(nullable=True)
-
-
-class SecurityVendorXref(Base):
-    """
-    Maps to dbo.security_vendor_xref.
-
-    One row per vendor × security.  Stores each vendor's native instrument
-    code (RIC, Bloomberg ticker, Aladdin ID, etc.) alongside the canonical
-    security_id from SecurityMaster, so backtests can resolve the right code
-    for whichever vendor is in use.
-
-    Columns
-    -------
-    vendor               : Source system name, e.g. 'Refinitiv', 'Bloomberg', 'Aladdin'.
-    vendor_ticker        : The vendor's own instrument identifier, e.g. 'MSFT.O', 'MSFT US Equity'.
-    vendor_exchange_code : Exchange code in the vendor's notation.
-    vendor_currency      : Currency code in the vendor's notation (if it differs from ISO standard).
-    loanxid              : Aladdin loan identifier — NULL for non-Aladdin vendors.
-    is_primary           : 1 if this vendor is the golden source for this security, else 0.
-    is_active            : 1 if this mapping is current, else 0.
-    """
-
-    __tablename__ = "security_vendor_xref"
-    __table_args__ = {"schema": "dbo"}
-
-    xref_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    security_id: Mapped[int] = mapped_column()
-    vendor: Mapped[str] = mapped_column()
-    vendor_ticker: Mapped[Optional[str]] = mapped_column(nullable=True)
-    vendor_exchange_code: Mapped[Optional[str]] = mapped_column(nullable=True)
-    vendor_currency: Mapped[Optional[str]] = mapped_column(nullable=True)
-    loanxid: Mapped[Optional[str]] = mapped_column(nullable=True)
-    is_primary: Mapped[bool] = mapped_column()
-    is_active: Mapped[bool] = mapped_column()
-    upsert_date: Mapped[datetime] = mapped_column()
-    upsert_by: Mapped[Optional[str]] = mapped_column(nullable=True)
-
-
-class SecurityFundamentals(Base):
-    """Maps to dbo.security_fundamentals."""
-
-    __tablename__ = "security_fundamentals"
-    __table_args__ = {"schema": "dbo"}
-    __mapper_args__ = {"primary_key": ["security_id", "metric_type", "effective_date", "source_vendor"]}
-
-    security_id: Mapped[int] = mapped_column()
-    metric_type: Mapped[str] = mapped_column()
-    metric_value: Mapped[float] = mapped_column()
-    source_vendor: Mapped[str] = mapped_column()
-    effective_date: Mapped[date] = mapped_column()
-    end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
-
-
-class MarketData(Base):
-    """Maps to dbo.market_data."""
-
-    __tablename__ = "market_data"
-    __table_args__ = {"schema": "dbo"}
-
-    md_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    as_of_date: Mapped[date] = mapped_column(Date)
-    security_id: Mapped[int] = mapped_column()
-    open: Mapped[float] = mapped_column()
-    high: Mapped[float] = mapped_column()
-    low: Mapped[float] = mapped_column()
-    close: Mapped[float] = mapped_column()
-    adj_close: Mapped[float] = mapped_column()
-    volume: Mapped[int] = mapped_column()
-    dividends: Mapped[float] = mapped_column()
-    stock_splits: Mapped[float] = mapped_column()
-    interval: Mapped[str] = mapped_column()
-    dataload_date: Mapped[str] = mapped_column()
-    price_currency: Mapped[str] = mapped_column(String(8), default="USD")
-    source_vendor: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
-
-
-class Portfolio(Base):
-    """Maps to dbo.portfolio."""
-
-    __tablename__ = "portfolio"
-    __table_args__ = {"schema": "dbo"}
-
-    port_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    portfolio_short_name: Mapped[str] = mapped_column()
-    portfolio_name: Mapped[str] = mapped_column()
-    portfolio_type: Mapped[str] = mapped_column()
-    is_active: Mapped[str] = mapped_column()
-    reporting_currency: Mapped[str] = mapped_column(String(8), default="USD")
-    base_currency: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
-
-
-class PortfolioHoldings(Base):
-    """Maps to dbo.portfolio_holdings."""
-
-    __tablename__ = "portfolio_holdings"
-    __table_args__ = {"schema": "dbo"}
-
-    ph_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    as_of_date: Mapped[str] = mapped_column()
-    port_id: Mapped[int] = mapped_column()
-    security_id: Mapped[int] = mapped_column()
-    held_shares: Mapped[float] = mapped_column()
-    upsert_date: Mapped[str] = mapped_column()
-    upsert_by: Mapped[str] = mapped_column()
-
-
-class IndexConstituents(Base):
-    """Maps to reference.index_constituents."""
-
-    __tablename__ = "index_constituents"
-    __table_args__ = {"schema": "reference"}
-
-    constituent_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    index_id: Mapped[int] = mapped_column()
-    security_id: Mapped[int] = mapped_column()
-    exchange_ticker: Mapped[str] = mapped_column()
-    start_date: Mapped[str] = mapped_column()
-    end_date: Mapped[Optional[str]] = mapped_column(nullable=True)
-    source_vendor: Mapped[str] = mapped_column()
-    upsert_date: Mapped[str] = mapped_column()
-    upsert_by: Mapped[str] = mapped_column()
-
+from .connection import get_db_connection  # noqa: F401  (re-export)
+from .models import (  # noqa: F401  (re-export)
+    Base,
+    IndexConstituents,
+    MarketData,
+    Portfolio,
+    PortfolioHoldings,
+    SecurityFundamentals,
+    SecurityMaster,
+    SecurityVendorXref,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -237,82 +94,31 @@ def _camel_to_snake(name: str) -> str:
     return re.sub("([A-Z])", r"_\1", name).lower().lstrip("_")
 
 
+def table_has_rows(orm_engine: Engine, table: str, schema: str = "dbo") -> bool:
+    """Return ``True`` if ``schema.table`` exists and holds at least one row (SQL Server)."""
+    with orm_engine.connect() as conn:
+        exists = conn.execute(sql.text(f"SELECT OBJECT_ID('[{schema}].[{table}]')")).scalar()
+        if exists is None:
+            return False
+        return conn.execute(sql.text(f"SELECT TOP 1 1 FROM [{schema}].[{table}]")).scalar() is not None
+
+
+def truncate_tables(orm_engine: Engine, tables: List[str]) -> List[str]:
+    """``TRUNCATE`` each ``schema.table`` that exists; return the ones truncated."""
+    done = []
+    with orm_engine.begin() as conn:
+        for name in tables:
+            schema, table = name.split(".")
+            if conn.execute(sql.text(f"SELECT OBJECT_ID('[{schema}].[{table}]')")).scalar() is not None:
+                conn.execute(sql.text(f"TRUNCATE TABLE [{schema}].[{table}]"))
+                done.append(name)
+    return done
+
+
 def _is_transient_connection_error(error: Exception) -> bool:
     """Return whether an error indicates a dropped SQL Server connection."""
     message = str(error)
     return any(code in message for code in ("08S01", "08006", "10054"))
-
-
-# ---------------------------------------------------------------------------
-# Connection
-# ---------------------------------------------------------------------------
-
-
-def get_db_connection(
-    service_name: str = "ihub_sql_connection",
-    server: str = "ops-store-server.database.windows.net",
-    driver: str = "ODBC Driver 18 for SQL Server",
-    max_retries: int = 3,
-    retry_interval_minutes: int = 2,
-) -> Tuple[sql.Engine, sql.Connection, str, Session]:
-    """
-    Establish a connection to SQL Server with retry logic.
-
-    Returns
-    -------
-    Tuple of (engine, connection, connection_string, session).
-    """
-    db = keyring.get_password(service_name, "db")
-    db_user = keyring.get_password(service_name, "uid")
-    db_password = keyring.get_password(service_name, "pwd")
-
-    # Local-instance override: if keyring stores a `server` entry plus a
-    # `trusted=1` flag, build a Windows-auth (Trusted_Connection) connection
-    # string for a local SQL Server (e.g. MENONPC\SQLEXPRESS). This lets the
-    # whole app switch from the Azure host to a local instance without editing
-    # any caller. Setting `trusted=0` (or removing it) reverts to Azure.
-    local_server = keyring.get_password(service_name, "server")
-    trusted = keyring.get_password(service_name, "trusted") == "1"
-
-    if local_server and trusted:
-        # Use a normal SQLAlchemy URL (server + database in the authority) so
-        # both the ORM engine AND the ipython-sql `%sql` magic resolve the same
-        # database. The bare `mssql+pyodbc:///?odbc_connect=...` form makes
-        # ipython-sql fall back to a default DB (master), so INSERTs via the
-        # magic silently land in the wrong place / don't persist.
-        connection_string = (
-            f"mssql+pyodbc://{local_server}/{db}"
-            f"?trusted_connection=yes&driver={parse.quote_plus(driver)}"
-            f"&TrustServerCertificate=yes&Encrypt=no&autocommit=true"
-        )
-    else:
-        connection_string = (
-            f"mssql+pyodbc://{db_user}:{db_password}"
-            f"@{server}:1433/{db}"
-            f"?driver={parse.quote_plus(driver)}&Encrypt=yes&TrustServerCertificate=no&autocommit=true"
-        )
-
-    for attempt in range(1, max_retries + 1):
-        try:
-            engine = sql.create_engine(
-                connection_string,
-                pool_pre_ping=True,
-                pool_recycle=1800,
-            )
-            connection = engine.connect()
-            session = Session(engine)
-            print("Database connection successful.")
-            return engine, connection, connection_string, session
-        except OperationalError as e:
-            print(f"Attempt {attempt} failed with error:\n{e}")
-            if attempt < max_retries:
-                print(f"Retrying in {retry_interval_minutes} minutes...")
-                time.sleep(retry_interval_minutes * 60)
-            else:
-                print("All retry attempts failed. Exiting.")
-                raise
-
-    raise RuntimeError("Database connection failed: maximum retries exceeded")
 
 
 # ---------------------------------------------------------------------------

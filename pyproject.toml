@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "investment-management"
+version = "0.2.0"
+description = "Multi-vendor factor research and backtesting platform (momentum + ML value) with persistent analytics storage"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.1",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "scikit-learn>=1.3",
+    "joblib",
+    "matplotlib",
+    "sqlalchemy>=2.0",
+    "pyodbc",
+    "keyring",
+    "requests",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+refinitiv = ["lseg.data"]
+yahoo = ["yfinance"]
+databricks = ["databricks-sqlalchemy", "databricks-sql-connector"]
+broker = ["ib_insync"]
+dev = ["pytest", "black", "isort", "flake8", "mypy", "pydocstyle", "pre-commit", "pydantic", "jupyter", "nbconvert"]
+
+[tool.setuptools.packages.find]
+include = ["analytics*", "data_engineering*", "config*", "brokers*"]
+
+[tool.black]
+line-length = 135
+
+[tool.isort]
+profile = "black"
+line_length = 135
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit_tests"]
+python_files = ["test_*.py"]
