@@ -13,7 +13,7 @@ peeks one day ahead on every rebalance date.
 
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -87,7 +87,7 @@ def reconstruction_backtest(constituent_returns: DataFrame, constituent_weights:
 
 
 def prices_to_returns(prices: DataFrame) -> DataFrame:
-    """Simple daily returns from a wide price panel (first row NaN)."""
+    """Return simple daily returns from a wide price panel (first row NaN)."""
     return prices.sort_index().pct_change(fill_method=None)
 
 

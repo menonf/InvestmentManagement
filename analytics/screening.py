@@ -233,7 +233,7 @@ def add_quality_flags(screen: DataFrame, stale_days: int = 200) -> DataFrame:
 
 
 def summarize_screen(screen: DataFrame) -> dict[str, Any]:
-    """Counts and exposures of the book described by ``screen``."""
+    """Return counts and exposures of the book described by ``screen``."""
     w = screen["weight"].astype(float) if "weight" in screen.columns else Series(dtype=float)
     summary: dict[str, Any] = {
         "as_of": screen.attrs.get("as_of"),

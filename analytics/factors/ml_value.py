@@ -19,7 +19,6 @@ import os
 from typing import Any, Optional, Sequence
 
 import numpy as np
-import pandas as pd
 from pandas import DataFrame, Series
 
 from data_engineering.fundamentals.ratios import RATIO_COLUMNS
@@ -92,7 +91,8 @@ def load_estimator(key: str, model_dir: str = MODELS_DIR) -> Any:
     path = os.path.join(model_dir, f"{key}.joblib")
     if not os.path.exists(path):
         raise FileNotFoundError(
-            f"No persisted model '{key}' at {path}. Train it with analytics.factors.ml_training.train_models, pass a fitted estimator, or fix model_dir."
+            f"No persisted model '{key}' at {path}. Train it with "
+            f"analytics.factors.ml_training.train_models, pass a fitted estimator, or fix model_dir."
         )
     return joblib.load(path)
 

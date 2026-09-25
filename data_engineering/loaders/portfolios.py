@@ -167,7 +167,8 @@ def portfolio_member_ids(engine: Any, portfolio_short_name: str) -> list[int]:
     import sqlalchemy as sa
 
     q = sa.text(
-        "SELECT DISTINCT ph.security_id FROM dbo.portfolio_holdings ph JOIN dbo.portfolio p ON p.port_id = ph.port_id WHERE p.portfolio_short_name = :name"
+        "SELECT DISTINCT ph.security_id FROM dbo.portfolio_holdings ph "
+        "JOIN dbo.portfolio p ON p.port_id = ph.port_id WHERE p.portfolio_short_name = :name"
     )
     return [int(x) for x in pd.read_sql_query(q, engine, params={"name": portfolio_short_name})["security_id"].dropna()]
 
@@ -177,7 +178,8 @@ def portfolio_members_on(engine: Any, portfolio_short_name: str) -> Optional[pd.
     import sqlalchemy as sa
 
     q = sa.text(
-        "SELECT ph.as_of_date, ph.security_id FROM dbo.portfolio_holdings ph JOIN dbo.portfolio p ON p.port_id = ph.port_id WHERE p.portfolio_short_name = :name"
+        "SELECT ph.as_of_date, ph.security_id FROM dbo.portfolio_holdings ph "
+        "JOIN dbo.portfolio p ON p.port_id = ph.port_id WHERE p.portfolio_short_name = :name"
     )
     h = pd.read_sql_query(q, engine, params={"name": portfolio_short_name})
     if h.empty:

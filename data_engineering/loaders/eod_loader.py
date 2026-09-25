@@ -329,14 +329,16 @@ def prune_low_coverage_holdings(
         "JOIN dbo.portfolio p ON p.port_id = ph.port_id AND p.portfolio_short_name IN :names "
         "LEFT JOIN dbo.market_data md ON md.security_id = ph.security_id AND md.as_of_date = ph.as_of_date "
         "WHERE ph.as_of_date >= :s AND ph.as_of_date <= :e GROUP BY ph.as_of_date "
-        "HAVING COUNT(DISTINCT CASE WHEN md.security_id IS NOT NULL THEN ph.security_id END) * 1.0 / COUNT(DISTINCT ph.security_id) < :cov"
+        "HAVING COUNT(DISTINCT CASE WHEN md.security_id IS NOT NULL THEN ph.security_id END) "
+        "* 1.0 / COUNT(DISTINCT ph.security_id) < :cov"
     ).bindparams(sa.bindparam("names", expanding=True))
     dates = pd.read_sql_query(q, engine, params={"names": list(names), "s": start_date, "e": end_date, "cov": min_coverage})[
         "as_of_date"
     ].tolist()
     if dates:
         delete = sa.text(
-            "DELETE FROM dbo.portfolio_holdings WHERE as_of_date = :d AND port_id IN (SELECT port_id FROM dbo.portfolio WHERE portfolio_short_name IN :names)"
+            "DELETE FROM dbo.portfolio_holdings WHERE as_of_date = :d "
+            "AND port_id IN (SELECT port_id FROM dbo.portfolio WHERE portfolio_short_name IN :names)"
         ).bindparams(sa.bindparam("names", expanding=True))
         with engine.begin() as conn:
             for d in dates:

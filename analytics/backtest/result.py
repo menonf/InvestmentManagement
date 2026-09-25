@@ -41,7 +41,7 @@ class BacktestResult:
         return DataFrame({name: turnover(w) for name, w in self.weights.items()})
 
     def summary(self, benchmark: Optional[str] = None) -> DataFrame:
-        """Performance statistics table (see :func:`~analytics.backtest.metrics.summary_table`)."""
+        """Return performance statistics table (see :func:`~analytics.backtest.metrics.summary_table`)."""
         table = summary_table(self.returns, benchmark=benchmark)
         if self.weights:
             to = self.turnover()

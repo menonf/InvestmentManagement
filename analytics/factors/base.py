@@ -39,6 +39,7 @@ class Factor(ABC):
         return scores.rank(axis=axis, pct=True)
 
     def __repr__(self) -> str:  # pragma: no cover - cosmetic
+        """Return a concise ``Class(k=v, ...)`` representation of the factor."""
         params = ", ".join(f"{k}={v!r}" for k, v in vars(self).items() if not k.startswith("_"))
         return f"{type(self).__name__}({params})"
 

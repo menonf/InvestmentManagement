@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 from pandas import DataFrame
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 def fundamentals_coverage(
     session: Any, engine: Any, security_ids: list[int], from_date: str, to_date: str, source_vendor: str = "refinitiv"
 ) -> DataFrame:
-    """Stored ratio rows for ``security_ids`` with ``effective_date`` inside the window."""
+    """Return stored ratio rows for ``security_ids`` with ``effective_date`` inside the window."""
     rows = db.read_security_fundamentals(session, engine, metric_type=None)
     rows = rows[
         (rows["source_vendor"] == source_vendor) & rows["security_id"].isin(security_ids) & rows["metric_type"].isin(RATIO_COLUMNS)
