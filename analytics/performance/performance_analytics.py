@@ -1,27 +1,18 @@
-"""Investment performance analytics.
+"""Performance analytics facade.
 
-This module is a thin facade over the focused submodules:
-    - returns.py  : constituent return calculations
-    - weights.py  : constituent weight calculations
-    - plots.py    : matplotlib plotting helpers
+Kept so existing callers can continue to write::
 
-All public function names are re-exported here so legacy callers
-(``from analytics.performance import performance_analytics as perf``) continue
-to work unchanged.
+    from analytics.performance import performance_analytics as perf
+    perf.calculate_portfolio_constituent_returns(...)
+
+The implementations now live in :mod:`analytics.portfolio` (weights, returns)
+and :mod:`analytics.performance.plots`.
 """
 
-from .plots import (
-    plot_cumulative_returns,
-    plot_returns,
-)
-from .returns import (
-    calculate_portfolio_constituent_returns,
-    merge_returns_with_weights,
-)
-from .weights import (
-    calculate_held_shares,
-    calculate_portfolio_constituent_weights,
-)
+from analytics.portfolio.returns import calculate_portfolio_constituent_returns, merge_returns_with_weights
+from analytics.portfolio.weights import calculate_held_shares, calculate_portfolio_constituent_weights
+
+from .plots import plot_cumulative_returns, plot_returns
 
 __all__ = [
     "calculate_portfolio_constituent_returns",

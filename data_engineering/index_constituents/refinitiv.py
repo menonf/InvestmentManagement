@@ -1,23 +1,53 @@
 """
-Refinitiv-based index constituent reconstruction and metric generation.
+Refinitiv-based index constituent reconstruction and float-adjusted shares.
 
-This module performs the following:
+This module:
 
-1. Reconstructs historical index membership using joiner/leaver events.
-2. Enriches constituents with internal security master identifiers.
-3. Builds float-adjusted shares outstanding metrics.
+1. Reconstructs historical index membership from a start-date snapshot plus
+   joiner/leaver events (:class:`IndexConstituents`, :func:`build_index_constituents`).
+2. Maps constituents onto internal ``security_id``s, creating security-master
+   rows for names that are not yet known (:func:`enrich_with_security_master`).
+3. Builds float-adjusted shares outstanding, the input for market-cap
+   weighting (:func:`build_float_adjusted_shares`).
 
-All functionality remains equivalent to the original implementation.
+LSEG plumbing (session, RIC normalisation, chunked/retried requests) comes from
+:mod:`data_engineering.refinitiv`; nothing here opens a session at import time,
+so the module is importable without LSEG Workspace.
 """
 
+from __future__ import annotations
+
+import logging
 from typing import Any, Optional
 
-import lseg.data as ld
 import pandas as pd
 
-from data_engineering.database import database as database
+from data_engineering.database import database
+from data_engineering.refinitiv import ensure_session, get_data_chunked, normalize_ric, strip_event_suffix
 
-ld.open_session()
+log = logging.getLogger(__name__)
+
+# Re-exported for callers that imported the private helper from here.
+_normalize_ric = normalize_ric
+
+INDEX_ATTRIBUTE_FIELDS = [
+    "TR.CommonName",
+    "TR.ISIN",
+    "TR.SEDOL",
+    "TR.CUSIP",
+    "TR.ExchangeCountryCode",
+    "TR.Currency",
+    "TR.GICSSector",
+    "TR.GICSIndustryGroup",
+    "TR.GICSIndustry",
+    "TR.ExchangeTicker",
+    "TR.ExchangeCode",
+]
+
+
+def fetch_constituent_attributes(rics: list[str]) -> pd.DataFrame:
+    """Pull identifiers / GICS / ticker attributes for constituent RICs (chunked + retried)."""
+    return get_data_chunked(rics, INDEX_ATTRIBUTE_FIELDS, chunk_size=200, max_retries=8)
 
 
 class IndexConstituents:
@@ -75,6 +105,9 @@ class IndexConstituents:
             Constituents active on the given date with initial start and end placeholders.
 
         """
+        ensure_session()
+        import lseg.data as ld
+
         universe = [f"0#{ric}({date.replace('-', '')})"]
 
         df = ld.get_data(
@@ -117,6 +150,9 @@ class IndexConstituents:
             - Change type
 
         """
+        ensure_session()
+        import lseg.data as ld
+
         const_changes = ld.get_data(
             universe=[ric],
             fields=[
@@ -259,84 +295,12 @@ def build_index_constituents(index: str, start: str, end: str) -> pd.DataFrame:
     return ic.get_historical_constituents(index=index, start=start, end=end)
 
 
-def _normalize_ric(ric: Any) -> Optional[str]:
-    """Strip a trailing Refinitiv share-class qualifier, keeping the exchange code.
-
-    Refinitiv encodes the same security with RICs that differ only by a trailing
-    qualifier, e.g. ``ALIGN.OQ`` (ordinary + class/``Q``) vs ``ALIGN.O``.  The
-    index-constituent feed returns the qualified form while the security-master
-    loader stores the bare form, so an exact-string join misses them.  Dropping
-    the qualifier (``OQ`` -> ``O``) makes the two match.
-
-    Rule: when the trailing segment is exactly two letters of the form
-    ``<exch><class>`` (e.g. ``OQ``), drop the last letter so the exchange code
-    (``O``) remains.  Genuine two-letter exchange mnemonics such as Paris ``PA``,
-    London ``LN``, ASX ``AX`` are protected via ``_KNOWN_EXCHANGE_SUFFIXES`` so
-    they are left intact (``V.PA`` stays ``V.PA``).  A single-letter tail is
-    already the exchange code (``.O``, ``.N``, ``.Z``) and is left untouched,
-    as are unrecognised multi-char suffixes.
-
-    Returns ``None`` for blank input so it propagates as a no-match rather than
-    raising.
-    """
-    if ric is None or (isinstance(ric, float) and pd.isna(ric)):
-        return None
-    text = str(ric).strip()
-    # Refinitiv forward-event RICs carry a "^<event>" suffix (e.g.
-    # ``CTLT.N^L24`` = a pending index add/remove). Strip it FIRST so the
-    # underlying security (``CTLT.N``) is what we normalise/match on -- otherwise
-    # the event-suffixed form falls through to its own (wrong) security_id and
-    # pollutes the resolver.
-    if "^" in text:
-        text = text.split("^", 1)[0]
-    if not text or "." not in text:
-        return text or None
-    head, _, tail = text.rpartition(".")
-    # Single-letter tail = the exchange code (.O/.N/.Z/...): drop it so the bare
-    # ticker remains. This lets a feed RIC like ``JPM.N`` match an xref row stored
-    # under the bare ticker ``JPM`` (and vice versa).  Exact-RIC matching (P1) is
-    # tried first in the resolver, so this never overrides a true exact hit.
-    if len(tail) == 1 and tail.isalpha():
-        return head
-    # Two-letter trailing segment shaped like <exch><class> (e.g. ``OQ``): drop
-    # the whole segment so the bare ticker remains.  This keeps the transformation
-    # SYMMETRIC -- both ``CRWD.O`` (stored) and ``CRWD.OQ`` (feed) normalise to the
-    # same bare ``CRWD``, so the resolver's normalised-RIC tier can join them.
-    if len(tail) == 2 and tail.isalpha() and tail not in _KNOWN_EXCHANGE_SUFFIXES:
-        return head
-    return text
-
-
-# Two-letter exchange mnemonics that must NOT be mangled by the qualifier stripper
-# (they are the whole exchange code, not <exch><class>).  Single-letter exchange
-# codes (.O/.N/.Z/...) and unlisted multi-char suffixes are left as-is already.
-_KNOWN_EXCHANGE_SUFFIXES = {
-    "PA",
-    "LN",
-    "AX",
-    "TO",
-    "SW",
-    "HK",
-    "SS",
-    "BR",
-    "AS",
-    "SG",
-    "TW",
-    "KS",
-    "TWO",
-    "MI",
-    "MX",
-    "SA",
-    "JP",
-    "F",
-    "SW",
-    "VX",
-    "TR",
-    "ST",
-}
-
-
-def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
+def enrich_with_security_master(
+    df: pd.DataFrame,
+    session: Optional[Any] = None,
+    engine: Optional[Any] = None,
+    index_id: int = 1,
+) -> pd.DataFrame:
     """Map index constituents to internal security identifiers.
 
     Cascading resolution that mirrors the security-master loader's own
@@ -346,8 +310,16 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
 
     The input frame is expected to carry ``Constituent RIC`` plus, when present,
     ``ISIN``/``SEDOL``/``CUSIP`` (the Refinitiv attribute fetch returns these).
+
+    Args:
+        df: constituent frame from :func:`build_index_constituents` merged with
+            :func:`fetch_constituent_attributes`.
+        session / engine: DB handles. A connection is opened when omitted.
+        index_id: value written to the ``index_id`` column (2 = S&P 500 in the
+            demo pipeline).
     """
-    engine, connection, conn_str, session = database.get_db_connection()
+    if session is None or engine is None:
+        engine, _connection, _conn_str, session = database.get_db_connection()
 
     # RIC tiers come from the vendor xref (vendor_ticker).
     xref = database.read_security_vendor_xref(session, engine, "Refinitiv")
@@ -390,14 +362,9 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
     # (e.g. ``DFS.N^E25`` = a pending index add/remove). The underlying security
     # is the plain RIC (``DFS.N``), so retry the exact + normalised tiers on the
     # suffix-stripped base before falling through to the identifier cascade.
-    def _strip_event_suffix(ric: Any) -> Any:
-        if ric is None or not isinstance(ric, str):
-            return ric
-        return ric.split("^", 1)[0]
-
     missing = df["security_id"].isna()
     if missing.any():
-        base = df.loc[missing, "Constituent RIC"].map(_strip_event_suffix)
+        base = df.loc[missing, "Constituent RIC"].map(strip_event_suffix)
         df.loc[missing, "security_id"] = base.map(ric_map)
         still = df["security_id"].isna()
         if still.any():
@@ -427,13 +394,28 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
         # keep resolving to it on every subsequent run.
         norm_rics = df.loc[unresolved_mask, "Constituent RIC"].map(_normalize_ric)
         new_norm_rics = sorted({r for r in norm_rics.dropna().unique() if r})
-        print(f"[constituents] creating {len(new_norm_rics)} new security_master rows for unresolved normalized RICs")
+        # Map each normalized RIC to a representative qualified RIC (Refinitiv's
+        # exchange-qualified spelling, event suffix stripped). The xref row is
+        # stored under this form (e.g. ``AVB.N``) rather than the bare ticker
+        # (``AVB``) so downstream ``qualify_tickers`` never has to ask LSEG
+        # ``symbol_conversion`` and risk mis-resolving to a different instrument
+        # (observed in the wild: AVB -> AVB.TR Turkish fund, BFb -> BAMFDc1
+        # future, HOLX -> HOLX.B^J07 delisted share). Grouping/collapse still
+        # uses the normalized key, so Refinitiv variants (ABC.O / ABC.OQ) keep
+        # resolving to one security_id.
+        repr_ric: dict[str, str] = {}
+        for raw in df.loc[unresolved_mask, "Constituent RIC"]:
+            n = _normalize_ric(raw)
+            if n and n not in repr_ric:
+                repr_ric[n] = str(strip_event_suffix(raw))
+        log.info("creating %d new security_master rows for unresolved normalized RICs", len(new_norm_rics))
         created = []
         for nric in new_norm_rics:
+            qric = repr_ric.get(nric, nric)
             now = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
             # Insert master row; let the DB assign security_id.
             rec = {
-                "name": str(nric),
+                "name": qric,
                 "security_type": "EQUITY",
                 "asset_class": "EQUITY",
                 "is_active": True,
@@ -452,7 +434,7 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
             xref_rec = {
                 "security_id": new_sec_id,
                 "vendor": "Refinitiv",
-                "vendor_ticker": str(nric),
+                "vendor_ticker": qric,
                 "is_primary": True,
                 "is_active": True,
                 "upsert_date": now,
@@ -479,16 +461,17 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
                     if not val.empty:
                         upd[c.lower()] = str(val.iloc[0])
                 if upd:
+                    import sqlalchemy
+
                     session.execute(
-                        __import__("sqlalchemy")
-                        .update(_SM)
+                        sqlalchemy.update(_SM)
                         .where(_SM.security_id == sid)
                         .values(**{k: v for k, v in upd.items() if k != "security_id"})
                     )
             session.commit()
 
     df["security_id"] = df["security_id"].astype("Int64")
-    df["index_id"] = 1  # the caller overrides this with the real index_id (e.g. 2)
+    df["index_id"] = index_id
     df["source_vendor"] = "refinitiv"
     df["upsert_date"] = pd.Timestamp.now().floor("s")
     df["upsert_by"] = "data_engineering.index_constituents.refinitiv.py"
@@ -540,59 +523,17 @@ def enrich_with_security_master(df: pd.DataFrame) -> pd.DataFrame:
 def _ld_get_data_retry(
     universe: Any, fields: Any, parameters: Optional[dict[str, Any]] = None, max_retries: int = 8, chunk_size: int = 200
 ) -> Any:
-    """Single-call wrapper around ld.get_data with chunking + retry.
-
-    Used for one-shot fetches (e.g. the constituent attribute pull) that would
-    otherwise issue one monolithic request and fail outright on a transient
-    gateway timeout, silently dropping securities from the result.
-    """
-    return _ld_get_data_chunked(universe, fields, parameters or {}, chunk_size=chunk_size, max_retries=max_retries)
+    """Compatibility wrapper around :func:`data_engineering.refinitiv.get_data_chunked`."""
+    return get_data_chunked(universe, fields, parameters or {}, chunk_size=chunk_size, max_retries=max_retries)
 
 
 def _ld_get_data_chunked(
     universe: Any, fields: Any, parameters: Any, chunk_size: int = 200, max_retries: int = 8, inter_chunk_sleep: float = 3.0
 ) -> Any:
-    """Fetch Refinitiv data in chunks with retry and backoff.
-
-    Fetch Refinitiv data in chunks to avoid gateway timeouts on large
-    universes, retrying transient failures with backoff.
-
-    Refinitiv's gateway intermittently times out even on small requests
-    (``LDError: UDF Core request failed. Gateway Time-out``), especially after a
-    long preceding session, and will throttle a session that fires requests
-    back-to-back. Splitting the universe into chunks keeps each request small,
-    every chunk is retried with exponential backoff, and a short pause between
-    chunks avoids tripping the throttle. Returns a concatenated DataFrame (empty
-    if all chunks fail).
-    """
-    import time as _time
-
-    chunks = [universe[i : i + chunk_size] for i in range(0, len(universe), chunk_size)]
-    frames = []
-    total = len(chunks)
-    for ci, chunk in enumerate(chunks, 1):
-        last_err = None
-        for attempt in range(1, max_retries + 1):
-            try:
-                df = ld.get_data(universe=chunk, fields=fields, parameters=parameters)
-                if df is not None and len(df):
-                    frames.append(df)
-                break
-            except Exception as e:  # gateway/timeout/transport errors
-                last_err = e
-                wait = 15 * attempt
-                print(
-                    f"  [shares] chunk {ci}/{total} attempt {attempt} failed: {type(e).__name__}: {str(e)[:120]} -- retry in {wait}s"
-                )
-                _time.sleep(wait)
-        else:
-            print(f"  [shares] chunk {ci}/{total} FAILED after {max_retries} attempts: {last_err}")
-        if ci % 10 == 0 or ci == total:
-            print(f"  [shares] progress {ci}/{total} chunks done ({len(frames)} returned data)")
-        # Pause between chunks so we don't hammer a throttled gateway.
-        if ci < total:
-            _time.sleep(inter_chunk_sleep)
-    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+    """Compatibility wrapper around :func:`data_engineering.refinitiv.get_data_chunked`."""
+    return get_data_chunked(
+        universe, fields, parameters, chunk_size=chunk_size, max_retries=max_retries, inter_chunk_sleep=inter_chunk_sleep
+    )
 
 
 def build_float_adjusted_shares(
@@ -629,8 +570,7 @@ def build_float_adjusted_shares(
     bad points can never roll back an entire chunk's insert.
     """
     universe = df_constituents["Constituent RIC"].drop_duplicates().tolist()
-    n = len(universe)
-    print(f"[shares] pulling float-adjusted shares for {n} instruments over {start}..{end} in chunks of {chunk_size}")
+    log.info("pulling float-adjusted shares for %d instruments over %s..%s in chunks of %d", len(universe), start, end, chunk_size)
 
     # Pull shares up to a few days past ``end`` so the final snapshot has data.
     shares_end = (pd.to_datetime(end) + pd.Timedelta(days=7)).strftime("%Y-%m-%d")
@@ -642,7 +582,7 @@ def build_float_adjusted_shares(
         chunk_size=chunk_size,
     )
     if shares.empty:
-        print("[shares] WARNING: no shares outstanding returned; returning empty metrics frame.")
+        log.warning("no shares outstanding returned; returning empty metrics frame")
         return pd.DataFrame(columns=["security_id", "metric_type", "metric_value", "source_vendor", "effective_date", "end_date"])
 
     # Free-float is best-effort: Refinitiv fails the WHOLE request when any single
@@ -658,7 +598,7 @@ def build_float_adjusted_shares(
             max_retries=1,
         )
     except Exception as e:
-        print(f"[shares] free-float pull failed ({type(e).__name__}); falling back to raw shares: {str(e)[:120]}")
+        log.warning("free-float pull failed (%s); falling back to raw shares: %s", type(e).__name__, str(e)[:120])
 
     if not free_float.empty:
         ff = (
@@ -696,57 +636,55 @@ def build_float_adjusted_shares(
     return metrics
 
 
+#: Futures / volatility tickers that the ``.SPX`` constituent feed occasionally
+#: returns as members. They carry real prices and would inflate a cap-weighted
+#: reconstruction, so they are dropped by default.
+NON_EQUITY_TICKERS = frozenset({"ES", "NQ", "VIX", "YM", "RTY"})
+
+
+def load_index_constituents_and_shares(
+    index_ric: str,
+    start: str,
+    end: str,
+    index_id: int,
+    session: Any,
+    engine: Any,
+    exclude_tickers: frozenset[str] = NON_EQUITY_TICKERS,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """End-to-end reference-data load for one index: membership + float shares.
+
+    Returns ``(constituents, shares_metrics)`` *after* writing both to the DB.
+    Writes happen only once both pulls have succeeded so a late gateway timeout
+    cannot leave ``reference.index_constituents`` half-written.
+    """
+    membership = build_index_constituents(index=index_ric, start=start, end=end)
+    attributes = fetch_constituent_attributes(membership["Constituent RIC"].drop_duplicates().tolist())
+    joined = membership.merge(attributes, left_on="Constituent RIC", right_on="Instrument", how="left")
+    constituents = enrich_with_security_master(joined, session=session, engine=engine, index_id=index_id)
+    if exclude_tickers:
+        bad = constituents["exchange_ticker"].astype(str).str.upper().isin(exclude_tickers)
+        if bad.any():
+            log.info(
+                "dropping %d non-equity ticker(s) from %s constituents: %s",
+                int(bad.sum()),
+                index_ric,
+                sorted(constituents.loc[bad, "exchange_ticker"].unique()),
+            )
+            constituents = constituents[~bad]
+    unresolved = int(constituents["security_id"].isna().sum())
+    log.info("RIC->security_id coverage: %d/%d (%d unresolved)", len(constituents) - unresolved, len(constituents), unresolved)
+    shares = build_float_adjusted_shares(constituents, start=start, end=end)
+    database.write_index_constituents(constituents, session)
+    database.write_security_fundamentals(shares, session)
+    log.info("wrote %d constituent rows (index_id=%d) and %d shares rows", len(constituents), index_id, len(shares))
+    return constituents, shares
+
+
 if __name__ == "__main__":
-    # index_id under which to persist .SPX membership. The demo / full pipeline
-    # use 2 for the S&P 500; enrich_with_security_master hardcodes 1 but its
-    # own contract says the caller must override it -- so we do that here.
     SPX_INDEX_ID = 2
-
-    start = "2001-01-01"
-    end = "2026-08-31"
-
-    index = build_index_constituents(
-        index=".SPX",
-        start=start,
-        end=end,
-    )
-
-    # Chunked + retried: a monolithic attribute pull over ~1200 RICs fails on a
-    # transient gateway timeout and silently drops securities from the result.
-    asset_attributes = _ld_get_data_retry(
-        index["Constituent RIC"].unique().tolist(),
-        fields=[
-            "TR.CommonName",
-            "TR.ISIN",
-            "TR.SEDOL",
-            "TR.CUSIP",
-            "TR.ExchangeCountryCode",
-            "TR.Currency",
-            "TR.GICSSector",
-            "TR.GICSIndustry",
-            "TR.GICSSubIndustry",
-            "TR.ExchangeTicker",
-            "TR.ExchangeCode",
-        ],
-    )
-
-    Joined = index.merge(asset_attributes, left_on="Constituent RIC", right_on="Instrument", how="left")
-
-    df_to_write = enrich_with_security_master(Joined)
-    df_to_write = df_to_write.copy()
-    df_to_write["index_id"] = SPX_INDEX_ID
-
-    metrics_df = build_float_adjusted_shares(df_to_write, start=start, end=end)
-
-    # Persist only after BOTH the reconstruction and the shares pull have
-    # completed successfully, so a late gateway timeout can't leave the
-    # reference.index_constituents table half-written / partially deleted.
-    engine, connection, _conn_str, session = database.get_db_connection()
+    _engine, _connection, _conn_str, _session = database.get_db_connection()
     try:
-        database.write_index_constituents(df_to_write, session)
-        print(f"Wrote {len(df_to_write)} rows to reference.index_constituents (index_id={SPX_INDEX_ID}).")
-        database.write_security_fundamentals(metrics_df, session)
-        print(f"Wrote {len(metrics_df)} float-adjusted-share rows to security_fundamentals.")
+        load_index_constituents_and_shares(".SPX", "2001-01-01", "2026-08-31", SPX_INDEX_ID, _session, _engine)
     finally:
-        session.close()
-        connection.close()
+        _session.close()
+        _connection.close()

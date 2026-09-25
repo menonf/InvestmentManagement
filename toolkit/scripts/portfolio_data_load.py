@@ -1,24 +1,38 @@
+"""Minimal example: backtest stored portfolios and print a performance summary.
 
-import pandas as pd
+Usage:
+    python toolkit/scripts/portfolio_data_load.py --portfolios SP500 SPY --start 2025-01-01 --end 2025-06-30
+"""
 
-from analytics.performance import performance_analytics as perf
-from analytics.risk import risk_analytics as risk
-from data_engineering.database import database as database
+from __future__ import annotations
 
-engine, connection, conn_str, session = database.get_db_connection()
+import argparse
 
-start_date = "2025-01-01"
-end_date = "2025-06-06"
+from analytics.backtest import reconstruction_backtest
+from analytics.portfolio import calculate_portfolio_constituent_returns, calculate_portfolio_constituent_weights
+from data_engineering.database import database
 
-# Calculate Portfolio Performance
-portfolio_short_names = ["Nasdaq100","QQQ"]
-portfolio_market_data = database.get_portfolio_market_data(session, engine, start_date, end_date, portfolio_short_names)
-portfolio_asset_returns = perf.calculate_portfolio_constituent_returns(portfolio_market_data, "adj_close")["returns"]
-portfolio_asset_weights = perf.calculate_portfolio_constituent_weights(portfolio_market_data, "adj_close", "market_weighted")
-portfolio_return = (portfolio_asset_returns * portfolio_asset_weights).T.groupby(level=0).sum().T
 
-portfolio_total_return = portfolio_asset_returns * portfolio_asset_weights
-perf.plot_cumulative_returns(portfolio_total_return.T.groupby(level=0).sum().T)
+def main(argv: list[str] | None = None) -> None:
+    """Command-line entry point."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--portfolios", nargs="+", default=["SP500", "SPY"])
+    parser.add_argument("--start", default="2025-01-01")
+    parser.add_argument("--end", default="2025-06-30")
+    parser.add_argument("--weighting", default="market_weighted", choices=["market_weighted", "equal_weighted", "price_weighted"])
+    args = parser.parse_args(argv)
 
-# Calculate Portfolio Risk
-max_date_index = portfolio_asset_weights.index.max()
+    engine, connection, _conn_str, session = database.get_db_connection()
+    try:
+        market_data = database.get_portfolio_market_data(session, engine, args.start, args.end, args.portfolios)
+    finally:
+        session.close()
+        connection.close()
+    returns = calculate_portfolio_constituent_returns(market_data, "adj_close")["returns"]
+    weights = calculate_portfolio_constituent_weights(market_data, "adj_close", args.weighting)
+    result = reconstruction_backtest(returns, weights)
+    print(result.summary().round(4).to_string())
+
+
+if __name__ == "__main__":
+    main()

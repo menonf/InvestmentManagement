@@ -1,1 +1,1 @@
-"""This package provides tests for CI/CD purpose."""
+"""Unit test suite for InvestmentManagement."""

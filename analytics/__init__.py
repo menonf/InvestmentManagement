@@ -1,10 +1,10 @@
-"""
-Package initialization for investment analytics.
+"""Analytics: factors, portfolio construction, backtesting, performance and risk.
 
-This package provides functions to compute various financial analytics needed for investment management.
-
-Key modules:
-- performance_analytics
-- risk_analytics
-
+Sub-packages:
+    factors      MomentumFactor, ValueFactor, MLReturnFactor, CompositeFactor, transforms
+    portfolio    constituent weights/returns, rebalance schedules, quantile long/short weights
+    backtest     run_backtest, BacktestResult, performance and signal-quality metrics
+    performance  plotting helpers (+ the legacy ``performance_analytics`` facade)
+    risk         PortfolioVaR
+    data_quality price-panel cleaning helpers
 """

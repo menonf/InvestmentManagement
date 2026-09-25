@@ -113,7 +113,11 @@ class PriceVendor(abc.ABC):
             return pd.DataFrame(columns=STANDARD_COLUMNS), no_data
 
         df = self._standardize(raw_df, symbol_df, interval)
-        no_data = self._build_no_data(symbol_df, set(df["symbol"]) if "symbol" in df else set())
+        # Report missing symbols by security_id: the standardized frame no longer
+        # carries a ``symbol`` column, so keying on it would flag every symbol.
+        returned_ids = set(df["security_id"].dropna().tolist()) if "security_id" in df else set()
+        returned_symbols = {s for s, sid in zip(symbol_df["symbol"], symbol_df["security_id"]) if sid in returned_ids}
+        no_data = self._build_no_data(symbol_df, returned_symbols)
         return df, no_data
 
     # -- vendor hooks -----------------------------------------------------

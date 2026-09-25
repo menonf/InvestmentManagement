@@ -1,0 +1,35 @@
+{
+  "trained_on": "2026-09-20 21:35",
+  "as_of": "2026-08-31",
+  "universe": "SP500",
+  "rows": 40910,
+  "securities": 601,
+  "snapshot_range": [
+    "2020-08-31",
+    "2026-05-29"
+  ],
+  "forward_months": 3,
+  "availability_lag_days": 45,
+  "demean_target": true,
+  "test_size": 0.2,
+  "embargo_months": 3,
+  "models": [
+    "random_forest",
+    "extra_trees",
+    "gradient_boosting"
+  ],
+  "metrics": {
+    "random_forest": {
+      "train_mse": 0.023227257858432236,
+      "test_mse": 0.053762212412128925
+    },
+    "extra_trees": {
+      "train_mse": 0.023751899230656216,
+      "test_mse": 0.052506969546970296
+    },
+    "gradient_boosting": {
+      "train_mse": 0.018875085032432924,
+      "test_mse": 0.0549308528942889
+    }
+  }
+}

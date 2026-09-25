@@ -1,100 +1,158 @@
-"""Plotting helpers for performance analytics (matplotlib-based)."""
+"""Matplotlib plotting helpers for performance reporting."""
 
 from __future__ import annotations
 
+from typing import Optional
+
+import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
-from pandas import DataFrame
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+from pandas import DataFrame, Series
 
 
-def plot_cumulative_returns(asset_returns: DataFrame, start_at_zero: bool = True) -> "plt.Figure":
-    """Plot cumulative returns for each column.
+def _ensure_datetime_index(frame: DataFrame) -> DataFrame:
+    if isinstance(frame.index, pd.DatetimeIndex):
+        return frame
+    out = frame.copy()
+    out.index = pd.to_datetime(out.index)
+    return out
 
-    Accepts EITHER a daily-return matrix (each column a per-period simple return)
-    OR an already-cumulative level series. Daily returns are compounded properly
-    as ``(1 + r).cumprod() - 1`` -- NOT ``exp(cumsum(r)) - 1``, which understates
-    the true cumulative return (it omits the ``+1`` offset inside the product). The
-    earlier exp-based formula made a correctly-built reconstruction plot ~1-2% below
-    the ETF it was tracking, even when the underlying returns matched.
 
-    Returns the matplotlib Figure so it can be displayed inline in a notebook
-    (e.g. assign the result to a variable and let it be the cell's last
-    expression, or pass it to IPython.display.display). A PNG is also written
-    for headless execution.
+def plot_cumulative_returns(
+    asset_returns: DataFrame,
+    start_at_zero: bool = True,
+    title: str = "Cumulative Returns Over Time",
+    save_path: Optional[str] = None,
+    ax: Optional[Axes] = None,
+) -> Figure:
+    """Plot compounded cumulative returns (%) for each column.
+
+    Accepts a per-period simple-return frame (compounded as ``(1 + r).cumprod()
+    - 1``) or an already-cumulative level series (detected when the largest
+    absolute value exceeds 0.5, i.e. far beyond a single period's return).
+
+    Returns the Figure (display it with ``display(fig)`` in a notebook). Pass
+    ``save_path`` to also write a PNG; nothing is written by default.
     """
-    import matplotlib.dates as mdates
-
-    if not isinstance(asset_returns.index, pd.DatetimeIndex):
-        asset_returns = asset_returns.copy()
-        asset_returns.index = pd.to_datetime(asset_returns.index)
-
-    # Detect whether the input is already cumulative (last value far from a single
-    # period's return) vs a daily-return stream, so callers can pass either form.
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for column in asset_returns.columns:
-        series = asset_returns[column].astype(float)
-        # A per-period return series has typical abs values << 1; a cumulative level
-        # series ends well above that. Treat |max| > 0.5 as already cumulative.
-        if series.abs().max() > 0.5:
-            cumulative_returns = series
-        else:
-            cumulative_returns = (1.0 + series).cumprod() - 1.0
+    frame = _ensure_datetime_index(asset_returns)
+    if ax is not None:
+        fig = plt.gcf()
+        axis = ax
+    else:
+        fig = plt.figure(figsize=(10, 6))
+        axis = fig.add_subplot(111)
+    for column in frame.columns:
+        series = frame[column].astype(float)
+        cumulative = series if series.abs().max() > 0.5 else (1.0 + series.fillna(0.0)).cumprod() - 1.0
         if start_at_zero:
-            cumulative_returns = cumulative_returns - cumulative_returns.iloc[0]
-        cumulative_returns *= 100
-        ax.plot(asset_returns.index, cumulative_returns, label=str(column), linewidth=2)
+            cumulative = cumulative - cumulative.iloc[0]
+        axis.plot(frame.index, cumulative * 100, label=str(column), linewidth=2)
 
-    ax.set_title("Cumulative Returns Over Time", fontsize=14)
-    ax.set_xlabel("")
-    ax.set_ylabel("Cumulative Returns (%)", fontsize=12)
-    ax.axhline(y=0, color="black", linestyle="--", linewidth=1)
-    ax.legend(loc="upper left", fontsize=9)
-    ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
-    ax.xaxis.set_major_locator(mdates.MonthLocator())
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
-    ax.tick_params(axis="x", which="major", labelrotation=45, labelsize=9)
-    ax.xaxis.set_minor_locator(mdates.WeekdayLocator(byweekday=mdates.MO))
+    axis.set_title(title, fontsize=14)
+    axis.set_ylabel("Cumulative Returns (%)", fontsize=12)
+    axis.axhline(y=0, color="black", linestyle="--", linewidth=1)
+    axis.legend(loc="upper left", fontsize=9)
+    axis.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+    axis.xaxis.set_major_locator(mdates.AutoDateLocator())
+    axis.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+    axis.tick_params(axis="x", labelrotation=45, labelsize=9)
     fig.tight_layout()
-    fig.autofmt_xdate()
-
-    # Headless-safe: save to PNG instead of blocking on plt.show()/mplcursors.
-    # Guard the write so a cwd/permission failure never breaks the inline figure
-    # (the returned fig still renders). Fall back to a temp path if the relative
-    # write fails.
-    try:
-        fig.savefig("cumulative_returns.png", dpi=120)
-    except OSError:
-        try:
-            import os
-            import tempfile
-
-            fig.savefig(os.path.join(tempfile.gettempdir(), "cumulative_returns.png"), dpi=120)
-        except Exception:
-            pass
+    if save_path:
+        fig.savefig(save_path, dpi=120)
     plt.close(fig)
     return fig
 
 
-def plot_returns(asset_returns: DataFrame) -> None:
-    """Plot periodic (non-cumulative) returns for each column."""
-    if not isinstance(asset_returns.index, pd.DatetimeIndex):
-        asset_returns = asset_returns.copy()
-        asset_returns.index = pd.to_datetime(asset_returns.index)
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for column in asset_returns.columns:
-        returns_pct = asset_returns[column] * 100
-        ax.plot(asset_returns.index, returns_pct, label=str(column), linewidth=1.5)
-
-    ax.set_title("Periodic Returns Over Time", fontsize=14)
-    ax.set_xlabel("")
-    ax.set_ylabel("Returns (%)", fontsize=12)
-    ax.axhline(y=0, color="black", linestyle="--", linewidth=1)
-    ax.legend(loc="upper left", fontsize=9)
-    ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
-    ax.xaxis.set_visible(False)
+def plot_returns(asset_returns: DataFrame, title: str = "Periodic Returns Over Time", save_path: Optional[str] = None) -> Figure:
+    """Plot periodic (non-cumulative) returns (%) for each column."""
+    frame = _ensure_datetime_index(asset_returns)
+    fig = plt.figure(figsize=(10, 6))
+    axis = fig.add_subplot(111)
+    for column in frame.columns:
+        axis.plot(frame.index, frame[column] * 100, label=str(column), linewidth=1.5)
+    axis.set_title(title, fontsize=14)
+    axis.set_ylabel("Returns (%)", fontsize=12)
+    axis.axhline(y=0, color="black", linestyle="--", linewidth=1)
+    axis.legend(loc="upper left", fontsize=9)
+    axis.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
     fig.tight_layout()
-
-    # Headless-safe: save to PNG instead of blocking on plt.show()/mplcursors.
-    fig.savefig("periodic_returns.png", dpi=120)
+    if save_path:
+        fig.savefig(save_path, dpi=120)
     plt.close(fig)
+    return fig
+
+
+def plot_drawdowns(returns: DataFrame, title: str = "Drawdown", save_path: Optional[str] = None) -> Figure:
+    """Plot the drawdown path (%) of each column's compounded returns."""
+    frame = _ensure_datetime_index(returns)
+    wealth = (1.0 + frame.fillna(0.0)).cumprod()
+    drawdown = wealth / wealth.cummax() - 1.0
+    fig = plt.figure(figsize=(10, 4))
+    axis = fig.add_subplot(111)
+    for column in drawdown.columns:
+        axis.plot(drawdown.index, drawdown[column] * 100, label=str(column), linewidth=1.5)
+    axis.set_title(title, fontsize=14)
+    axis.set_ylabel("Drawdown (%)", fontsize=12)
+    axis.legend(loc="lower left", fontsize=9)
+    axis.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+    fig.tight_layout()
+    if save_path:
+        fig.savefig(save_path, dpi=120)
+    plt.close(fig)
+    return fig
+
+
+def plot_score_distribution(screen: DataFrame, title: str = "Composite score distribution") -> Figure:
+    """Histogram of the blended ``composite`` score, coloured by leg (LONG / SHORT)."""
+    if "composite" not in screen.columns:
+        raise KeyError("screen needs a 'composite' column to plot")
+    fig = plt.figure(figsize=(9, 4.5))
+    axis = fig.add_subplot(111)
+    side = (
+        screen.get("side", Series([""] * len(screen), index=screen.index))
+        if "side" in screen.columns
+        else Series([""] * len(screen), index=screen.index)
+    )
+    colors = {"LONG": "#2ca02c", "SHORT": "#d62728", "": "#888888"}
+    for label, color in colors.items():
+        mask = side == label
+        if mask.any():
+            axis.hist(screen.loc[mask, "composite"].dropna(), bins=30, alpha=0.6, color=color, label=label or "unselected")
+    axis.axvline(0.0, color="black", linewidth=0.8, linestyle="--")
+    axis.set_title(title, fontsize=14)
+    axis.set_xlabel("composite score", fontsize=12)
+    axis.set_ylabel("count", fontsize=12)
+    axis.legend(fontsize=9)
+    axis.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+    fig.tight_layout()
+    return fig
+
+
+def plot_screen_scatter(screen: DataFrame, x: str, y: str, title: str = "Signal scatter") -> Figure:
+    """Scatter of two cross-sectional z-scores, coloured by leg, annotated by ticker."""
+    if x not in screen.columns or y not in screen.columns:
+        raise KeyError(f"screen needs '{x}' and '{y}' columns to plot")
+    fig = plt.figure(figsize=(8, 8))
+    axis = fig.add_subplot(111)
+    side = screen["side"] if "side" in screen.columns else Series([""] * len(screen), index=screen.index)
+    colors = {"LONG": "#2ca02c", "SHORT": "#d62728", "": "#888888"}
+    for label, color in colors.items():
+        mask = side == label
+        if mask.any():
+            axis.scatter(screen.loc[mask, x], screen.loc[mask, y], s=28, alpha=0.7, color=color, label=label or "unselected")
+    ticks = screen.get("ticker")
+    if ticks is not None:
+        for idx in screen.index:
+            if pd.notna(ticks.loc[idx]):
+                axis.annotate(str(ticks.loc[idx]), (screen.loc[idx, x], screen.loc[idx, y]), fontsize=6, alpha=0.6)
+    axis.axhline(0.0, color="black", linewidth=0.6, linestyle="--")
+    axis.axvline(0.0, color="black", linewidth=0.6, linestyle="--")
+    axis.set_xlabel(x, fontsize=12)
+    axis.set_ylabel(y, fontsize=12)
+    axis.set_title(title, fontsize=14)
+    axis.legend(fontsize=9, loc="upper left")
+    axis.grid(True, linestyle="--", linewidth=0.5, alpha=0.7)
+    fig.tight_layout()
+    return fig

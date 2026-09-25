@@ -1,15 +1,17 @@
-"""Package initialization for database package.
+"""Database package: ORM models, connection factory and read/write helpers.
 
-This package contains ORM Module to map database tables to Python objects.
+Usage::
 
-Key modules:
-- db_functions: Module to map Azure SQL database to python objects.
+    from data_engineering.database import database as db
 
-Usage:
-- Import modules as needed:
-    from database import db_functions as db_func
+    engine, connection, conn_str, session = db.get_db_connection()
+    prices = db.read_market_data(session, engine, "2025-01-01", "2025-12-31")
 
-- Access functions and classes within modules:
-    db_func.read_security_master(orm_session=session, orm_engine=engine)
-
+Modules:
+    models            ORM models for the core ``dbo`` / ``reference`` tables
+    connection        keyring-backed SQL Server connection factory
+    database          read_* / write_* helpers and composite queries (facade)
+    schema_analytics  analytics-layer models (factor_scores, portfolio_returns, attribution)
+    schema_fx         fx_rates / risk_snapshots / factor_exposures models
+    databricks        alternative Databricks backend with the same function names
 """
